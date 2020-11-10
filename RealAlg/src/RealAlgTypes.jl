@@ -2,5 +2,5 @@ mutable struct Cell
     Lneg
     Lpos
     Lsep
-    Ttotal
+    Ltot
     end

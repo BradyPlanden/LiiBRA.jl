@@ -5,7 +5,12 @@ module RealAlg
 using SparseArrays
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export Cell C_e
+export Cell, C_e 
+
+
+function C_e(CellData)
+
+end
 
 include("RealAlgTypes.jl")
 include("Functions/C_e.jl")

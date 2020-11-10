@@ -10,4 +10,6 @@ Lneg = CellData.Lneg
 Lsep = CellData.Lsep
 Ltot = CellData.Ltot
 
+return Ltot
+
 end
