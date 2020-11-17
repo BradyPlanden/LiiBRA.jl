@@ -5,7 +5,7 @@ module RealAlg
 using SparseArrays
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export Cell, C_e 
+export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator 
 
 
 function C_e(CellData)
