@@ -41,13 +41,14 @@ D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
 
 
+
 #Defining SOC
-θ_neg = 1 - (cs_max_neg-cs)/cs_max_neg
+θ_neg = CellData.Const.Init_SOC * (cs_max_neg-cs_min_neg) + cs_max_neg # Change to θ_min and θ_max
+θ_pos = CellData.Const.Init_SOC * (cs_max_pos-cs_min_pos) + cs_max_pos # Change to θ_min and θ_max
 
 #Beta's 
 βn = Rs_Neg*(s*Ds_Neg)^(1/2)
 βp = Rs_Pos*(s*Ds_Pos)^(1/2)
-
 
 
 #Concentrations
