@@ -41,40 +41,51 @@ D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
 
 
-
 #Defining SOC
-θ_neg = CellData.Const.Init_SOC * (cs_max_neg-cs_min_neg) + cs_max_neg # Change to θ_min and θ_max
-θ_pos = CellData.Const.Init_SOC * (cs_max_pos-cs_min_pos) + cs_max_pos # Change to θ_min and θ_max
+θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_max-CellData.Neg.θ_min) + CellData.Neg.θ_min 
+θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_max-CellData.Pos.θ_min) + CellData.Pos.θ_min 
 
-#Beta's 
+#Beta's
 βn = Rs_Neg*(s*Ds_Neg)^(1/2)
 βp = Rs_Pos*(s*Ds_Pos)^(1/2)
 
 
-#Concentrations
+#Prepare for j0
+ce0 = CellData.Const.ce0
+cs_max_neg = CellData.Neg.cs_max
+cs0_neg = cs_max_neg * θ_neg
 
+cs_max_pos = CellData.Pos.cs_max
+cs0_pos = cs_max_pos * θ_pos
+
+α_neg = CellData.Neg.α
+α_pos = CellData.Pos.α
 
 #Current Flux Density
-j0_neg = κ_Neg*(ce0*cs_max_neg*cs0_neg)^(1-α)*cs0_neg^α
-j0_pos = κ_pos*(ce0*cs_max_pos*cs0_pos)^(1-α)*cs0_pos^α
+j0_neg = CellData.Neg.k_norm*(ce0*cs_max_neg*cs0_neg)^(1-α_neg)*cs0_neg^α_neg
+j0_pos = CellData.Neg.k_norm*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
 #Resistances
 Rct_neg = R*T/(j0_neg*F)^2
-Rtot_neg = Rct_neg + Rfilm_neg
+Rtot_neg = Rct_neg + CellData.Const.Rfilm_neg
 
 Rct_pos = R*T/(j0_pos*F)^2
-Rtot_pos = Rct_pos + Rfilm_pos
+Rtot_pos = Rct_pos + CellData.Const.Rfilm_pos
+
+
+∂Uocp_neg = UOCP(θ_neg)
+∂Uocp_pos = UOCP(θ_pos)
+
 
 #Condensing Variable
-ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_Cse*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
-ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_Cse*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
+ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
+ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
 
 
 Lneg⋆ = Lneg * (ϵ1 * λ_k / Ds_Neg)^1/2
 Lpos⋆ = Lpos * (ϵ3 * λ_k / Ds_Pos)^1/2
 L⋆ = Ltot * (ϵ3 * λ_k / Ds_Pos)^1/2
 Lnm⋆ = (Lneg+Lsep) * (ϵ3 * λ_k / Ds_Pos)^1/2
-
 
 
 j_Neg = κ1*ζ*Lneg⋆*sin(Lneg⋆)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg⋆^2+ν_n^2*sinh(ν_n)))
@@ -93,7 +104,6 @@ j_Pos6 = (κ6*ζ*σ_eff_Pos*sin(Lnm⋆)*κ_eff_Pos*sin(L⋆)*ν_p^2)/(CC_A*Hlp1*
 
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
-
 
 
 C_e = (1/(s+λ_k))* (j_Neg + j_Pos)
