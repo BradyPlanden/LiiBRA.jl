@@ -77,6 +77,19 @@ Rtot_pos = Rct_pos + CellData.Const.Rfilm_pos
 ∂Uocp_pos = UOCP(θ_pos)
 
 
+#Create all k's
+in1 = sqrt(λ*ϵ1/D1)
+in2 = sqrt(λ*ϵ2/D2)
+in3 = sqrt(λ*ϵ3/D3)
+
+Bound_Neg_1 = Lneg * in1
+Bound_Sep_0 = Lneg * in2
+Bound_Sep_1 = (Lneg+Lsep) * in2
+Bound_Pos_0 = (Lneg+Lsep) * in3
+Bound_Pos_1 = Ltot * in3
+
+
+
 #Condensing Variable
 ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
 ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
@@ -88,19 +101,18 @@ L⋆ = Ltot * (ϵ3 * λ_k / Ds_Pos)^1/2
 Lnm⋆ = (Lneg+Lsep) * (ϵ3 * λ_k / Ds_Pos)^1/2
 
 
-j_Neg = κ1*ζ*Lneg⋆*sin(Lneg⋆)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg⋆^2+ν_n^2*sinh(ν_n)))
+j_Neg = k1*ζ*Lneg⋆*sin(Lneg⋆)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg⋆^2+ν_n^2*sinh(ν_n)))
 
 Hlp1 = σ_eff_Pos+κ_eff_Pos
 Hlp2 = (Hlp1*cosh(ν_p)*ν_p)
 Hlp3 = (Lpos⋆^2 + ν_p^2)*sinh(ν_p)
 
-
-j_Pos1 = (κ6*ζ*Lpos⋆*cos(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos2 = (κ5*ζ*Lpos⋆*sin(Lpos⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos3 = (κ6*ζ*Lpos⋆*cos(Lnm⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos4 = (κ5*ζ*Lpos⋆*sin(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos5 = (κ5*ζ*σ_eff_Pos*cos(Lnm⋆)*κ_eff_Pos*cos(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
-j_Pos6 = (κ6*ζ*σ_eff_Pos*sin(Lnm⋆)*κ_eff_Pos*sin(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
+j_Pos1 = (k6*ζ*Lpos⋆*cos(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos2 = (k5*ζ*Lpos⋆*sin(Lpos⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos3 = (k6*ζ*Lpos⋆*cos(Lnm⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos4 = (k5*ζ*Lpos⋆*sin(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos5 = (k5*ζ*σ_eff_Pos*cos(Lnm⋆)*κ_eff_Pos*cos(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
+j_Pos6 = (k6*ζ*σ_eff_Pos*sin(Lnm⋆)*κ_eff_Pos*sin(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
 
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
@@ -111,3 +123,4 @@ C_e = (1/(s+λ_k))* (j_Neg + j_Pos)
 return Ltot
 
 end
+

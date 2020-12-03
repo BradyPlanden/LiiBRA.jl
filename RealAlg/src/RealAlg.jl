@@ -2,7 +2,7 @@ __precompile__()
 
 module RealAlg
 
-using SparseArrays
+using SparseArrays, Roots
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
 export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator 
