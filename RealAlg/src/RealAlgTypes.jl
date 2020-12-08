@@ -1,9 +1,10 @@
 struct Constants
-    F
-    R
     T
     t_plus
     De
+    κ
+    Init_SOC
+    ce0
 end
 
 struct Geometry
@@ -17,27 +18,45 @@ end
 struct Negative
     Rs::Int64
     Ds
-    eps_s
-    eps_e
-    brug_De
+    ϵ_s
+    ϵ_e
+    De_brug
+    κ_brug
+    σ
+    σ_brug
+    θ_max
+    θ_min
+    cs_max
+    α
+    k_norm
+    RFilm
 end
 
 struct Positive
     Rs::Int64
     Ds
-    eps_s
-    eps_e
-    brug_De
+    ϵ_s
+    ϵ_e
+    De_brug
+    κ_brug
+    σ
+    σ_brug
+    θ_max
+    θ_min
+    cs_max
+    α
+    k_norm
+    RFilm
 end
 
 struct Seperator
-    eps_e
-    brug_De
+    ϵ_e
+    De_brug
 end
 
 struct Cell
-    Geo::Geometry
     Const::Constants
+    Geo::Geometry
     Neg::Negative
     Pos::Positive
     Sep::Seperator

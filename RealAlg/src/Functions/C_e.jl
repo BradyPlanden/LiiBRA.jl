@@ -1,4 +1,4 @@
-function C_e(CellData::Cell)
+function C_e(CellData::Cell,s)
 """ 
 Electrolyte Concentration Transfer Function
 # Add License
@@ -12,8 +12,8 @@ Lsep = CellData.Geo.Lsep
 Ltot = CellData.Geo.Ltot
 
 
-F = CellData.Const.F      # Faraday Constant
-R = CellData.Const.R       # Universal Gas Constant
+F = faraday(Metric)      # Faraday Constant
+R = universal(SI2019)       # Universal Gas Constant
 T = CellData.Const.T      # Temperature
 t_plus = CellData.Const.t_plus  # Transference Number
 ζ = (1-t_plus)/F    #Simplifying Variable
@@ -46,8 +46,8 @@ D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
 θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_max-CellData.Pos.θ_min) + CellData.Pos.θ_min 
 
 #Beta's
-βn = Rs_Neg*(s*Ds_Neg)^(1/2)
-βp = Rs_Pos*(s*Ds_Pos)^(1/2)
+βn = Rs_Neg.*sqrt.(s./Ds_Neg)
+βp = Rs_Pos.*sqrt.(s./Ds_Pos)
 
 
 #Prepare for j0
@@ -62,20 +62,24 @@ cs0_pos = cs_max_pos * θ_pos
 α_pos = CellData.Pos.α
 
 #Current Flux Density
-j0_neg = CellData.Neg.k_norm*(ce0*cs_max_neg*cs0_neg)^(1-α_neg)*cs0_neg^α_neg
-j0_pos = CellData.Neg.k_norm*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
+j0_neg = CellData.Neg.k_norm*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
+j0_pos = CellData.Pos.k_norm*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
 #Resistances
 Rct_neg = R*T/(j0_neg*F)^2
-Rtot_neg = Rct_neg + CellData.Const.Rfilm_neg
+Rtot_neg = Rct_neg + CellData.Neg.RFilm
 
 Rct_pos = R*T/(j0_pos*F)^2
-Rtot_pos = Rct_pos + CellData.Const.Rfilm_pos
+Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 
 ∂Uocp_neg = UOCP(θ_neg)
 ∂Uocp_pos = UOCP(θ_pos)
 
+
+#Condensing Variable
+ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
+ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
 
 #Create all k's
 in1 = sqrt(λ*ϵ1/D1)
@@ -89,30 +93,24 @@ Bound_Pos_0 = (Lneg+Lsep) * in3
 Bound_Pos_1 = Ltot * in3
 
 
-
-#Condensing Variable
-ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
-ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
-
-
-Lneg⋆ = Lneg * (ϵ1 * λ_k / Ds_Neg)^1/2
-Lpos⋆ = Lpos * (ϵ3 * λ_k / Ds_Pos)^1/2
-L⋆ = Ltot * (ϵ3 * λ_k / Ds_Pos)^1/2
-Lnm⋆ = (Lneg+Lsep) * (ϵ3 * λ_k / Ds_Pos)^1/2
+Lneg_star = Lneg * (ϵ1 * λ_k / Ds_Neg)^1/2
+Lpos_star = Lpos * (ϵ3 * λ_k / Ds_Pos)^1/2
+L_star = Ltot * (ϵ3 * λ_k / Ds_Pos)^1/2
+Lnm_star = (Lneg+Lsep) * (ϵ3 * λ_k / Ds_Pos)^1/2
 
 
-j_Neg = k1*ζ*Lneg⋆*sin(Lneg⋆)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg⋆^2+ν_n^2*sinh(ν_n)))
+j_Neg = k1*ζ*Lneg_star*sin(Lneg_star)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg_star^2+ν_n^2*sinh(ν_n)))
 
 Hlp1 = σ_eff_Pos+κ_eff_Pos
 Hlp2 = (Hlp1*cosh(ν_p)*ν_p)
-Hlp3 = (Lpos⋆^2 + ν_p^2)*sinh(ν_p)
+Hlp3 = (Lpos_star^2 + ν_p^2)*sinh(ν_p)
 
-j_Pos1 = (k6*ζ*Lpos⋆*cos(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos2 = (k5*ζ*Lpos⋆*sin(Lpos⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos3 = (k6*ζ*Lpos⋆*cos(Lnm⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos4 = (k5*ζ*Lpos⋆*sin(L⋆)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos5 = (k5*ζ*σ_eff_Pos*cos(Lnm⋆)*κ_eff_Pos*cos(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
-j_Pos6 = (k6*ζ*σ_eff_Pos*sin(Lnm⋆)*κ_eff_Pos*sin(L⋆)*ν_p^2)/(CC_A*Hlp1*(Lpos⋆^2 + ν_p^2))
+j_Pos1 = (k6*ζ*Lpos_star*cos(L_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos2 = (k5*ζ*Lpos_star*sin(Lpos_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos3 = (k6*ζ*Lpos_star*cos(Lnm_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos4 = (k5*ζ*Lpos_star*sin(L_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos5 = (k5*ζ*σ_eff_Pos*cos(Lnm_star)*κ_eff_Pos*cos(L_star)*ν_p^2)/(CC_A*Hlp1*(Lpos_star^2 + ν_p^2))
+j_Pos6 = (k6*ζ*σ_eff_Pos*sin(Lnm_star)*κ_eff_Pos*sin(L_star)*ν_p^2)/(CC_A*Hlp1*(Lpos_star^2 + ν_p^2))
 
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
