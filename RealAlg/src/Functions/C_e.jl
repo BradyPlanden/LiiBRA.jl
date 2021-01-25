@@ -1,4 +1,4 @@
-function C_e(CellData::Cell,s)
+function C_e(CellData::Cell,s,M)
 """ 
 Electrolyte Concentration Transfer Function
 # Add License
@@ -6,11 +6,6 @@ Electrolyte Concentration Transfer Function
     # Locations to be computed
     # Sampling Frequency
 """
-Lpos = CellData.Geo.Lpos
-Lneg = CellData.Geo.Lneg
-Lsep = CellData.Geo.Lsep
-Ltot = CellData.Geo.Ltot
-
 
 F = faraday(Metric)      # Faraday Constant
 R = universal(SI2019)       # Universal Gas Constant
@@ -26,12 +21,6 @@ Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 as_neg = 3*CellData.Neg.ϵ_s/Rs_Neg # Specific interfacial surf. area
 as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
-ϵ1 = CellData.Neg.ϵ_e      # Porosity of negative electrode
-ϵ2 = CellData.Sep.ϵ_e      # Porosity of separator
-ϵ3 = CellData.Pos.ϵ_e      # Porosity of positive electrode
-D1 = CellData.Const.De * ϵ1^CellData.Neg.De_brug # Effective ...
-D2 = CellData.Const.De * ϵ2^CellData.Sep.De_brug # diffusivities ...
-D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
 
 
 κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
@@ -73,52 +62,112 @@ Rct_pos = R*T/(j0_pos*F)^2
 Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 
-∂Uocp_neg = UOCP(θ_neg)
-∂Uocp_pos = UOCP(θ_pos)
+#∂Uocp_neg = UOCP(θ_neg)
+∂Uocp_neg = (-20000*exp(-2000*θ_neg) - 3.96*exp(-3*θ_neg))
+#∂Uocp_pos = UOCP(θ_pos)
+∂Uocp_pos = (-32.4096*exp(-40*(-0.133875 + θ_pos)) - 0.0135664./((0.998432 - θ_pos).^1.49247)+ 0.0595559*exp(-0.04738*θ_pos.^8).*θ_pos.^7 - 0.823297*(sech(8.60942 - 14.5546*θ_pos)).^2)
 
 
 #Condensing Variable
-ν_n = Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn)))
-ν_p = Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp)))
+ν_n = @. Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg.+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg)).*(tanh.(βn)./(tanh.(βn)-βn)))
+ν_p = @. Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos.+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos)).*(tanh.(βp)./(tanh.(βp)-βp)))
+
+
+λ = roots(M+1)'
 
 #Create all k's
-in1 = sqrt(λ*ϵ1/D1)
-in2 = sqrt(λ*ϵ2/D2)
-in3 = sqrt(λ*ϵ3/D3)
+in1 = sqrt.(λ.*ϵ1./D1)
+in2 = sqrt.(λ*ϵ2./D2)
+in3 = sqrt.(λ*ϵ3./D3)
 
 Bound_Neg_1 = Lneg * in1
 Bound_Sep_0 = Lneg * in2
 Bound_Sep_1 = (Lneg+Lsep) * in2
 Bound_Pos_0 = (Lneg+Lsep) * in3
 Bound_Pos_1 = Ltot * in3
+Bound_Pos_2 = Lpos * in3
 
+#Scaled coefficients
+k3_s = cos.(Bound_Neg_1).*cos.(Bound_Sep_0)+D1*in1.*sin.(Bound_Neg_1).*sin.(Bound_Sep_0)./(D2*in2)
+k4_s = cos.(Bound_Neg_1).*sin.(Bound_Sep_0) - D1*in1.*cos.(Bound_Sep_0).*sin.(Bound_Neg_1)./(D2*in2);
+k5_s = k3_s.*(cos.(Bound_Sep_1).*cos.(Bound_Pos_1)+D2*in2.*sin.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*cos.(Bound_Pos_1)-D2*in2.*cos.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3));
+k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_1)-D2*in2.*sin.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*sin.(Bound_Pos_1)+D2*in2.*cos.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3));
 
-Lneg_star = Lneg * (ϵ1 * λ_k / Ds_Neg)^1/2
-Lpos_star = Lpos * (ϵ3 * λ_k / Ds_Pos)^1/2
-L_star = Ltot * (ϵ3 * λ_k / Ds_Pos)^1/2
-Lnm_star = (Lneg+Lsep) * (ϵ3 * λ_k / Ds_Pos)^1/2
+# println("ν_n:",length(ν_n))
+# println("λ:",λ)
+# println("in1:",in1)
+# println("in2:",in2)
+# println("Bound_Neg_1:",Bound_Neg_1)
+# println("k3_s:",k3_s)
+# println("βn:",length(βn))
 
+#Solving for k1:
+Int_ψ1 = ϵ1*(2*Bound_Neg_1+sin.(2*Bound_Neg_1)./(4*in1))
+Int_ψ2 = ϵ2./(4*in2) .* (2 .* (k3_s.^2 .+ k4_s.^2) .* Lsep .* in2 + 2*k3_s .* k4_s .* cos.(2 .* Bound_Sep_0) .- 2 .* k3_s .* k4_s .* cos.(2 .* Bound_Sep_1) .- (k3_s .- k4_s) .* (k3_s .+ k4_s) .* (sin.(2 .* Bound_Sep_0) .- sin.(2 .* Bound_Sep_1)))
+Int_ψ3 = ϵ3./(4*in3) .* (2 .* (k5_s.^2+k6_s.^2) .* Lpos .* in3 + 2*k5_s .* k6_s .* cos.(2 .* Bound_Pos_0) .- 2 .* k5_s .* k6_s .* cos.(2 .* Bound_Pos_1) .- (k5_s .- k6_s) .* (k5_s .+ k6_s) .* (sin.(2 .* Bound_Pos_0) .- sin.(2 .* Bound_Pos_1)))
 
-j_Neg = k1*ζ*Lneg_star*sin(Lneg_star)*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n)*ν_s)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Lneg_star^2+ν_n^2*sinh(ν_n)))
+# println("Int_ψ1:",Int_ψ1)
+# println("Int_ψ2:",Int_ψ2)
+# println("Int_ψ3:",Int_ψ3)
+
+k1 = 1 ./ (sqrt.(Int_ψ1 .+ Int_ψ2 .+ Int_ψ3))
+k3 = k1 .* k3_s
+k4 = k1 .* k4_s
+k5 = k1 .* k5_s
+k6 = k1 .* k6_s
+
+# println("k1:",k1)
+# println("ζ:", ζ)
+
+j_Neg = ((κ_eff_Neg .+ σ_eff_Neg) .* cosh.(ν_n) .* ν_n) .* (k1 .* ζ .* Bound_Neg_1 .* sin.(Bound_Neg_1)) ./ (ν_n.^2 .* sinh.(ν_n) .+ CC_A .* (κ_eff_Neg .+ σ_eff_Neg) .* ((Bound_Neg_1.^2)))
+
+# println("j_Neg:", length(j_Neg))
 
 Hlp1 = σ_eff_Pos+κ_eff_Pos
-Hlp2 = (Hlp1*cosh(ν_p)*ν_p)
-Hlp3 = (Lpos_star^2 + ν_p^2)*sinh(ν_p)
+Hlp2 = @. (Hlp1*cosh(ν_p)*ν_p)
+Hlp3 = @. (Bound_Pos_2^2) + ν_p^2 * sinh(ν_p)
 
-j_Pos1 = (k6*ζ*Lpos_star*cos(L_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos2 = (k5*ζ*Lpos_star*sin(Lpos_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos3 = (k6*ζ*Lpos_star*cos(Lnm_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos4 = (k5*ζ*Lpos_star*sin(L_star)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos5 = (k5*ζ*σ_eff_Pos*cos(Lnm_star)*κ_eff_Pos*cos(L_star)*ν_p^2)/(CC_A*Hlp1*(Lpos_star^2 + ν_p^2))
-j_Pos6 = (k6*ζ*σ_eff_Pos*sin(Lnm_star)*κ_eff_Pos*sin(L_star)*ν_p^2)/(CC_A*Hlp1*(Lpos_star^2 + ν_p^2))
+j_Pos1 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_1)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos2 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_2)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos3 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_0)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos4 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_1)*Hlp2)/(CC_A*Hlp1*Hlp3)
+j_Pos5 = @. (k5*ζ*σ_eff_Pos*cos(Bound_Pos_0)*κ_eff_Pos*cos(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
+j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
 
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
 
 
-C_e = (1/(s+λ_k))* (j_Neg + j_Pos)
+C_e = @. ((j_Neg + j_Pos)/(s+λ))
 
-return Ltot
+#Start Here and look at ce_n in Matlab code, what are the next steps?
+#Need to determine if tf_test.jl is runnable 
 
 end
 
+function roots(roots_n)
+    root = Any[0]
+    i = 0.00001
+    ∇ = 0.00001
+    if(roots_n > 1)
+        while length(root) <= roots_n-1
+            if flambda(i-∇)*flambda(i)<0
+            push!(root, find_zero(flambda,(i-∇,i)))
+            end
+        i = i+∇
+        end
+    end
+    return root
+end
+
+function flambda(λ)
+    k1 = 1
+    sle1 = sqrt(λ*ϵ1/D1)
+    sle2 = sqrt(λ*ϵ2/D2)
+    sle3 = sqrt(λ*ϵ3/D3)
+    k3 = k1*(cos(sle1*Lneg).*cos(sle2*Lneg) + D1*sle1.*sin(sle1*Lneg).*sin(sle2*Lneg)./(D2*sle2))
+    k4 = k1*(cos(sle1*Lneg).*sin(sle2*Lneg) - D1*sle1.*cos(sle2*Lneg).*sin(sle1*Lneg)./(D2*sle2))
+    k5 = k3*(cos(sle2*Lnegsep).*cos(sle3*Lnegsep) + D2*sle2.*sin(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*cos(sle3*Lnegsep) - D2*sle2.*cos(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))
+    k6 = k3*(cos(sle2*Lnegsep).*sin(sle3*Lnegsep) - D2*sle2.*sin(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*sin(sle3*Lnegsep) + D2*sle2.*cos(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))
+    Psiprime = -k5.*sle3.*sin(sle3*Ltot) + k6.*sle3.*cos(sle3*Ltot)
+  end

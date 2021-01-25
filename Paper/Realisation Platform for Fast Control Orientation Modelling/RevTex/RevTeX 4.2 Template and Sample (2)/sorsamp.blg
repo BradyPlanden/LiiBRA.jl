@@ -1,0 +1,79 @@
+This is BibTeX, Version 0.99d (TeX Live 2020)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: sorsamp.aux
+The style file: aipauth4-2.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: sorsampNotes.bib
+Database file #2: sorsamp.bib
+control{REVTEX42Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{N/A}, control.pages{N/A}, control.year{N/A}, control.eprint{N/A}, 
+control{sor41Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{0}, control.pages{1}, control.year{N/A}, control.eprint{N/A}, 
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
+aipnauth4-2.bst 2018-12-27 (MD) hand-edited version of apsauth4-1.bst
+Control: key (0) 
+Control: author (9) reversed initials
+Control: editor formatted (0) differently from author
+Control: production of article title (0) allowed
+Control: page (1) range
+Control: year (1) truncated
+Control: production of eprint (0) enabled
+Warning--empty chapter and pages in ballagh2000
+Warning--empty title in Fields2005
+Warning--empty institution in Fields2005
+Warning--empty title in Nelson1999
+Warning--empty institution in Nelson1999
+Warning--empty year in Magnetism
+Warning--can't use both volume and number fields in Smith2007
+Warning--empty chapter and pages in Smith80
+Warning--empty year in SmithDA01
+Warning--empty year in Smith2010a
+Warning--empty year in Smith2010
+You've used 46 entries,
+            6055 wiz_defined-function locations,
+            1901 strings with 19754 characters,
+and the built_in function-call counts, 41755 in all, are:
+= -- 2985
+> -- 1093
+< -- 102
++ -- 350
+- -- 306
+* -- 6374
+:= -- 4656
+add.period$ -- 65
+call.type$ -- 46
+change.case$ -- 324
+chr.to.int$ -- 63
+cite$ -- 57
+duplicate$ -- 3746
+empty$ -- 2919
+format.name$ -- 455
+if$ -- 8032
+int.to.chr$ -- 7
+int.to.str$ -- 8
+missing$ -- 496
+newline$ -- 185
+num.names$ -- 187
+pop$ -- 1497
+preamble$ -- 2
+purify$ -- 284
+quote$ -- 0
+skip$ -- 1451
+stack$ -- 0
+substring$ -- 947
+swap$ -- 3717
+text.length$ -- 42
+text.prefix$ -- 0
+top$ -- 10
+type$ -- 682
+warning$ -- 11
+while$ -- 223
+width$ -- 0
+write$ -- 433
+(There were 11 warnings)

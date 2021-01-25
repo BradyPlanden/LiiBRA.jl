@@ -1,0 +1,80 @@
+This is BibTeX, Version 0.99d (TeX Live 2020)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: aipsamp.aux
+The style file: aipnum4-2.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: aipsampNotes.bib
+Database file #2: aipsamp.bib
+control{REVTEX42Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{N/A}, control.pages{N/A}, control.year{N/A}, control.eprint{N/A}, 
+control{aip41Control}, control.key{N/A}, control.author{N/A}, control.editor{N/A}, control.title{0}, control.pages{1}, control.year{N/A}, control.eprint{N/A}, 
+Warning--jnrlst (dependency: not reversed) set 1
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
+aipnum4-2.bst 2019-01-14 (MD) hand-edited version of apsrev4-1.bst
+Control: key (0) 
+Control: author (8) initials jnrlst
+Control: editor formatted (1) identically to author
+Control: production of article title (0) allowed
+Control: page (1) range
+Control: year (1) truncated
+Control: production of eprint (0) enabled
+Warning--empty year in Smith2010
+Warning--empty year in Smith2010a
+Warning--can't use both volume and number fields in Smith2007
+Warning--empty year in SmithDA01
+Warning--empty title in Nelson1999
+Warning--empty institution in Nelson1999
+Warning--empty title in Fields2005
+Warning--empty institution in Fields2005
+Warning--empty chapter and pages in ballagh2000
+Warning--empty year in Magnetism
+Warning--empty chapter and pages in Smith80
+You've used 47 entries,
+            6039 wiz_defined-function locations,
+            1904 strings with 19871 characters,
+and the built_in function-call counts, 40334 in all, are:
+= -- 2861
+> -- 931
+< -- 170
++ -- 327
+- -- 238
+* -- 6034
+:= -- 4346
+add.period$ -- 66
+call.type$ -- 47
+change.case$ -- 261
+chr.to.int$ -- 64
+cite$ -- 58
+duplicate$ -- 3919
+empty$ -- 2960
+format.name$ -- 455
+if$ -- 7671
+int.to.chr$ -- 7
+int.to.str$ -- 54
+missing$ -- 497
+newline$ -- 188
+num.names$ -- 143
+pop$ -- 1586
+preamble$ -- 2
+purify$ -- 220
+quote$ -- 0
+skip$ -- 1305
+stack$ -- 0
+substring$ -- 961
+swap$ -- 3629
+text.length$ -- 110
+text.prefix$ -- 0
+top$ -- 10
+type$ -- 586
+warning$ -- 12
+while$ -- 179
+width$ -- 0
+write$ -- 437
+(There were 12 warnings)
