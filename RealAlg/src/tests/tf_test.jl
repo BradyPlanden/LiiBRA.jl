@@ -17,7 +17,15 @@ Nfft = 2^(ceil(log2(Fs*Tlen)))
 f = 0:Nfft-1
 s = (2im.*Fs)*tan.(pi.*f./Nfft)
 
+loc = Any[0,1]
+#loc = (0, 128e-6, 204e-6, 394e-6)
+Def = "Neg"
+
 test_ce = C_e(CellData,s,M)
+println("Ce:",length(test_ce))
+test_j = j(CellData,s,loc,Def)
+println("j:",typeof(test_j))
+test_cse = cse(CellData,s,loc,Def)
 
 # c = Cell_Df[:,2]
 # c = dropmissing(Cell_Df)
