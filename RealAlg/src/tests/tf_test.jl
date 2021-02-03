@@ -25,7 +25,10 @@ test_ce = C_e(CellData,s,M)
 println("Ce:",length(test_ce))
 test_j = j(CellData,s,loc,Def)
 println("j:",typeof(test_j))
-test_cse = cse(CellData,s,loc,Def)
+test_cse = C_se(CellData,s,loc,Def)
+println("Cse:",typeof(test_cse))
+test_ϕ = Phi_s(CellData,s,loc,Def)
+println("ϕ:",typeof(test_ϕ))
 
 # c = Cell_Df[:,2]
 # c = dropmissing(Cell_Df)

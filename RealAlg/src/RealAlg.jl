@@ -5,14 +5,17 @@ module RealAlg
 using Roots, UnitSystems, DataFrames, CSV, Parameters
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator 
+export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s
 
 include("RealAlgTypes.jl")
 include("Functions/C_e.jl")
+include("Functions/C_se.jl")
+include("Functions/Flux.jl")
+include("Functions/Phi_s.jl")
 
 CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator())
-const Lpos = CellData.Geo.Lpos
-const Lneg = CellData.Geo.Lneg
+const Lpos = CellData.Pos.L
+const Lneg = CellData.Neg.L
 const Lsep = CellData.Geo.Lsep
 const Ltot = CellData.Geo.Ltot
 const Lnegsep = Lneg+Lsep
@@ -23,5 +26,15 @@ const ϵ3 = CellData.Pos.ϵ_e      # Porosity of positive electrode
 const D1 = CellData.Const.De * ϵ1^CellData.Neg.De_brug # Effective ...
 const D2 = CellData.Const.De * ϵ2^CellData.Sep.De_brug # diffusivities ...
 const D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
+const F = faraday(Metric)      # Faraday Constant
+const R = universal(SI2019)       # Universal Gas Constant
+
+function ∂Uocp(Electrode,θ)
+    if Electrode == "Neg"
+    ∂Uocp = (-20000*exp(-2000*θ) - 3.96*exp(-3*θ))
+    else
+    ∂Uocp = (-32.4096*exp(-40*(-0.133875 + θ)) - 0.0135664./((0.998432 - θ).^1.49247)+ 0.0595559*exp(-0.04738*θ.^8).*θ.^7 - 0.823297*(sech(8.60942 - 14.5546*θ)).^2)
+    end
+end
 
 end # module

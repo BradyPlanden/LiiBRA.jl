@@ -7,13 +7,9 @@ Electrolyte Concentration Transfer Function
     # Sampling Frequency
 """
 
-F = faraday(Metric)      # Faraday Constant
-R = universal(SI2019)       # Universal Gas Constant
 T = CellData.Const.T      # Temperature
 t_plus = CellData.Const.t_plus  # Transference Number
 ζ = (1-t_plus)/F    #Simplifying Variable
-
-
 Rs_Neg = CellData.Neg.Rs       # Particle radius [m]
 Rs_Pos = CellData.Pos.Rs       # Particle radius [m]
 Ds_Neg = CellData.Neg.Ds       # Solid diffusivity [m^2/s]
@@ -21,14 +17,10 @@ Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 as_neg = 3*CellData.Neg.ϵ_s/Rs_Neg # Specific interfacial surf. area
 as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
-
-
 κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
 κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
-
 σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
-
 
 #Defining SOC
 θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_max-CellData.Neg.θ_min) + CellData.Neg.θ_min 
@@ -37,7 +29,6 @@ as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
 #Beta's
 βn = Rs_Neg.*sqrt.(s./Ds_Neg)
 βp = Rs_Pos.*sqrt.(s./Ds_Pos)
-
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -61,17 +52,14 @@ Rtot_neg = Rct_neg + CellData.Neg.RFilm
 Rct_pos = R*T/(j0_pos*F)^2
 Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
-
 #∂Uocp_neg = UOCP(θ_neg)
 ∂Uocp_neg = (-20000*exp(-2000*θ_neg) - 3.96*exp(-3*θ_neg))
 #∂Uocp_pos = UOCP(θ_pos)
 ∂Uocp_pos = (-32.4096*exp(-40*(-0.133875 + θ_pos)) - 0.0135664./((0.998432 - θ_pos).^1.49247)+ 0.0595559*exp(-0.04738*θ_pos.^8).*θ_pos.^7 - 0.823297*(sech(8.60942 - 14.5546*θ_pos)).^2)
 
-
 #Condensing Variable
-ν_n = @. Lneg*(as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)^(1/2)/(Rtot_neg.+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg)).*(tanh.(βn)./(tanh.(βn)-βn)))
-ν_p = @. Lpos*(as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)^(1/2)/(Rtot_pos.+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos)).*(tanh.(βp)./(tanh.(βp)-βp)))
-
+ν_n = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn))))
+ν_p = @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp))))
 
 λ = roots(M+1)'
 
@@ -134,15 +122,10 @@ j_Pos4 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_1)*Hlp2)/(CC_A*Hlp1*Hlp3)
 j_Pos5 = @. (k5*ζ*σ_eff_Pos*cos(Bound_Pos_0)*κ_eff_Pos*cos(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
 j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
 
-
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
-
-
 C_e = @. ((j_Neg + j_Pos)/(s+λ))
 
-#Start Here and look at ce_n in Matlab code, what are the next steps?
-#Need to determine if tf_test.jl is runnable 
-
+return C_e
 end
 
 function roots(roots_n)

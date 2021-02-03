@@ -10,14 +10,13 @@ using Parameters
 end
 
 @with_kw struct Geometry
-    Lneg::Float64 = 0.000128
-    Lpos::Float64 = 0.00019
     Lsep::Float64 = 7.6e-5
     Ltot::Float64 = 0.000394
     CC_A::Float64 = 1.0
 end
 
 @with_kw struct Negative
+    L::Float64 = 0.000128
     Rs::Float64 = 1.25e-5
     Ds::Float64 = 3.9e-14
     ϵ_s::Float64 = 0.471
@@ -33,9 +32,11 @@ end
     k_norm::Float64 = 2.21e-5
     RFilm::Float64 = 0.0
     k_ref::Float64 = 2.16e-11
+
 end
 
 @with_kw struct Positive
+    L::Float64 = 0.00019
     Rs::Float64 = 1.25e-5
     Ds::Float64 = 1.0e-13
     ϵ_s::Float64 = 0.471
@@ -50,6 +51,7 @@ end
     α::Float64 = 0.5
     k_norm::Float64 = 2.28e-05
     RFilm::Float64 = 1.94e-11
+    
 end
 
 @with_kw struct Seperator
