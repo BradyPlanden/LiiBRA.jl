@@ -1,6 +1,6 @@
 function Phi_s(CellData::Cell,s,z,Def)
     """ 
-    Flux Transfer Function
+    Solid Potential Transfer Function
     # Add License
     # Add Ins and Outs
         # Cell Data 
