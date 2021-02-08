@@ -10,13 +10,9 @@ Electrolyte Concentration Transfer Function
 T = CellData.Const.T      # Temperature
 t_plus = CellData.Const.t_plus  # Transference Number
 ζ = (1-t_plus)/F    #Simplifying Variable
-Rs_Neg = CellData.Neg.Rs       # Particle radius [m]
-Rs_Pos = CellData.Pos.Rs       # Particle radius [m]
 Ds_Neg = CellData.Neg.Ds       # Solid diffusivity [m^2/s]
 Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
-as_neg = 3*CellData.Neg.ϵ_s/Rs_Neg # Specific interfacial surf. area
-as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
 κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
 κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
@@ -34,7 +30,6 @@ as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
 ce0 = CellData.Const.ce0
 cs_max_neg = CellData.Neg.cs_max
 cs0_neg = cs_max_neg * θ_neg
-
 cs_max_pos = CellData.Pos.cs_max
 cs0_pos = cs_max_pos * θ_pos
 

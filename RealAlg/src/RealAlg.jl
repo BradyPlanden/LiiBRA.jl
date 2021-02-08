@@ -29,6 +29,10 @@ const D2 = CellData.Const.De * ϵ2^CellData.Sep.De_brug # diffusivities ...
 const D3 = CellData.Const.De * ϵ3^CellData.Pos.De_brug # of cell regions
 const F = faraday(Metric)      # Faraday Constant
 const R = universal(SI2019)       # Universal Gas Constant
+const Rs_Neg = CellData.Neg.Rs       # Particle radius [m]
+const Rs_Pos = CellData.Pos.Rs       # Particle radius [m]
+const as_neg = 3*CellData.Neg.ϵ_s/Rs_Neg # Specific interfacial surf. area
+const as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
 
 function ∂Uocp(Electrode,θ)
     if Electrode == "Neg"

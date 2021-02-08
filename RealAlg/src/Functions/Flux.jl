@@ -23,7 +23,7 @@ t_plus = CellData.Const.t_plus  # Transference Number
 Rs = Electrode.Rs       # Particle radius [m]
 Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
-As = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
+as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 κ_eff = CellData.Const.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
@@ -50,12 +50,12 @@ Rtot = Rct + Electrode.RFilm
 ∂Uocp_elc = ∂Uocp(Def,θ)
 
 #Condensing Variable
-ν = @. L*sqrt((As/σ_eff+As/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β))))
-ν_∞ = @. L*sqrt(As*((1/κ_eff)+(1/σ_eff))/(Rtot))
+ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β))))
+ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function
-j_tf = @. ν*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(As*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
-D_term = @. ν_∞*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(As*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+j_tf = @. ν*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+D_term = @. ν_∞*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
 
 if Def == "Pos" #Double check this implementation
     j_tf = -j_tf

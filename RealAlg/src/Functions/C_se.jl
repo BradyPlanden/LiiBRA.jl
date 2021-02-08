@@ -23,7 +23,7 @@ t_plus = CellData.Const.t_plus  # Transference Number
 Rs = Electrode.Rs       # Particle radius [m]
 Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
-As = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
+as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 κ_eff = CellData.Const.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
@@ -49,12 +49,12 @@ Rtot = Rct + Electrode.RFilm
 #∂Uocp_Def = UOCP(θ_Def)
 ∂Uocp_elc = ∂Uocp(Def,θ)
 
-cse_res = -3/(As*F*L*CC_A*Ds) #Residual Variable for Pole Removal - eq. 4.45
-ν = @. L*sqrt((As/σ_eff+As/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
-cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(As*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)) #Transfer Function - eq. 4.17
+cse_res = -3/(as*F*L*CC_A*Ds) #Residual Variable for Pole Removal - eq. 4.45
+ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
+cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)) #Transfer Function - eq. 4.17
 cse_tf = @. cse_tf-cse_res #Pole removal - eq. 4.43
 println("cse_tf:",typeof(cse_tf))
-zero_tf = @. (5*As*Ds*F*L^2*((2-6z+3z^2)+(3z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*As*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
+zero_tf = @. (5*as*Ds*F*L^2*((2-6z+3z^2)+(3z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
 println("zero_tf:",zero_tf)
 println("s==0",cse_tf[findall(s.==0)])
 println("s==0",cse_tf[1,:])
