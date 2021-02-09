@@ -17,8 +17,8 @@ Nfft = 2^(ceil(log2(Fs*Tlen)))
 f = 0:Nfft-1
 s = (2im.*Fs)*tan.(pi.*f./Nfft)
 
-loc = Any[0,1]
-#loc = (0, 128e-6, 204e-6, 394e-6)
+# loc = Any[0,1]
+loc = Any[0, 128e-6, 204e-6, 394e-6]
 Def = "Neg"
 
 test_ce = C_e(CellData,s,M)
@@ -28,7 +28,9 @@ println("j:",typeof(test_j))
 test_cse = C_se(CellData,s,loc,Def)
 println("Cse:",typeof(test_cse))
 test_ϕ = Phi_s(CellData,s,loc,Def)
-println("ϕ:",typeof(test_ϕ))
+println("ϕ:",length(test_ϕ))
+test_ϕ_e = Phi_e(CellData,s,loc,Def)
+println("ϕ:",length(test_ϕ_e))
 
 # c = Cell_Df[:,2]
 # c = dropmissing(Cell_Df)
