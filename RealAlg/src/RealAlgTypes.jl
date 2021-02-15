@@ -7,6 +7,7 @@ using Parameters
     κ::Int = 1
     Init_SOC::Float64 = 0.5
     ce0::Float64 = 2000
+    dln::Float64 = 3.0
 end
 
 @with_kw struct Geometry
@@ -57,6 +58,7 @@ end
 @with_kw struct Seperator
     ϵ_e::Float64 = 0.724
     De_brug::Float64 = 1.5
+    κ_brug::Float64 = 1.5
 end
 
 @with_kw struct Cell

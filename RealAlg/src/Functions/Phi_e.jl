@@ -18,11 +18,12 @@ Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
 κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
+κ_eff_Sep = CellData.Const.κ*ϵ2^CellData.Sep.κ_brug
 κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
-dln = 3  #Electrolyte activity coefficient term (Rod. 17)
-κ_D_eff = (2*R*T/F)*κ_eff_Neg*(1-t_plus)(1+dln) #Diffision Effective Electrolyte Conductivity
+dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
+κ_D_eff = (2*R*T/F)*κ_eff_Neg*(1-t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
 
 #Defining SOC
 θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_max-CellData.Neg.θ_min) + CellData.Neg.θ_min 
@@ -46,17 +47,20 @@ j0_neg = CellData.Neg.k_norm*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_ne
 j0_pos = CellData.Pos.k_norm*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
 #Resistances
-Rct = R*T/(j0*F)^2
-Rtot = Rct + Electrode.RFilm
+Rct_neg = R*T/(j0_neg*F)^2
+Rtot_neg = Rct_neg + CellData.Neg.RFilm
+
+Rct_pos = R*T/(j0_pos*F)^2
+Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 #OCP derivative
-∂Uocp_pos = ∂Uocp(Pos,θ_pos)
-∂Uocp_neg = ∂Uocp(Neg,θ_neg)
+∂Uocp_pos = ∂Uocp("Pos",θ_pos)
+∂Uocp_neg = ∂Uocp("Neg",θ_neg)
 
-ν_neg = @. Lneg*sqrt((as_neg/σ_eff+as_neg/κ_eff)/(Rtot.+∂Uocp_elc*(Rs_Neg/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
-ν_neg_∞ = @. Lneg*sqrt(as_neg*((1/κ_eff)+(1/σ_eff))/(Rtot))
-ν_pos = @. Lpos*sqrt((as_pos/σ_eff+as_pos/κ_eff)/(Rtot.+∂Uocp_elc*(Rs_Pos/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
-ν_pos_∞ = @. Lpos*sqrt(as_pos*((1/κ_eff)+(1/σ_eff))/(Rtot))
+ν_neg = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg.+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg)).*(tanh.(βn)./(tanh.(βn)-βn)))) #Condensing Variable - eq. 4.13
+ν_neg_∞ = @. Lneg*sqrt(as_neg*((1/κ_eff_Neg)+(1/σ_eff_Neg))/(Rtot_neg))
+ν_pos = @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos.+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos)).*(tanh.(βp)./(tanh.(βp)-βp)))) #Condensing Variable - eq. 4.13
+ν_pos_∞ = @. Lpos*sqrt(as_pos*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
 
 
 # if tf = Rod17 #Consider splitting into different function calls.
@@ -90,27 +94,33 @@ Rtot = Rct + Electrode.RFilm
 #          #D_term  = @.  
 #    end
 
+ϕ_tf = fill(0.0,(length(z),length(s)))
+ϕ_tf = convert(Array{Complex{Float64}},ϕ_tf)
+
+D_term = fill(0.0,(length(z),length(s)))
+D_term = convert(Array{Complex{Float64}},ϕ_tf)
+
 # else
    for i = 1:length(z)
       pt = z[i]
    
          if pt <= Lneg
-            ϕ_tf[i,:] = @. (Lneg*(σ_eff/κ_eff)(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
+            ϕ_tf[i,:] = @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*Lneg)
-            D_term  =  @. (Lneg*(σ_eff/κ_eff)(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)))
-            ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
+            D_term[i,:]  =  @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg)))
+            ϕ_tf[findall(s.==0),:] .= zero_tf
    
          elseif pt <= Lneg + Lsep
-            ϕ_tf[i,:] = @. (Lneg - pt)/(CC_A*κ_eff_sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
-            zero_tf = @. (2*κ_eff_Neg*Lneg-κ_eff_sep*Lneg-2*κ_eff_Neg*pt)/(2*CC_A*κ_eff_Neg*κ_eff_sep)
-            D_term  =@. (Lneg - pt)/(CC_A*κ_eff_sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
-            ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
+            ϕ_tf[i,:] = @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
+            zero_tf = @. (2*κ_eff_Neg*Lneg-κ_eff_Sep*Lneg-2*κ_eff_Neg*pt)/(2*CC_A*κ_eff_Neg*κ_eff_Sep)
+            D_term[i,:] .= @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
+            ϕ_tf[findall(s.==0),:] .= zero_tf
    
          else
-            ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
-            zero_tf = @. -(κ_eff_sep*κ_eff_Pos*Lneg*Lpos)/(2*CC_A*κ_eff_Neg*κ_eff_sep*κ_eff_Pos*Lpos) + (κ_eff_Neg*(-2*κ_eff_Pos*Lpos*Lsep+κ_eff_sep*(Lneg+Lsep-pt)*(Lneg+2*Lpos+Lsep-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_sep*κ_eff_Pos*Lpos)
-            D_term  = @.  (Lsep/(CC_A*κ_eff_sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
-            ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
+            ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
+            zero_tf = @. -(κ_eff_Sep*κ_eff_Pos*Lneg*Lpos)/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos) + (κ_eff_Neg*(-2*κ_eff_Pos*Lpos*Lsep+κ_eff_Sep*(Lneg+Lsep-pt)*(Lneg+2*Lpos+Lsep-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos)
+            D_term[i,:]  .= @.  (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
+            ϕ_tf[findall(s.==0),:] .= zero_tf
       end
  end
 
