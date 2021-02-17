@@ -61,10 +61,17 @@ end
     κ_brug::Float64 = 1.5
 end
 
+@with_kw struct RealisationAlgorthim
+    Ts::Float64 = 0.5
+    M::Float64 = 4
+    Tlen::Float64 = 1.5
+end
+
 @with_kw struct Cell
     Const::Constants
     Geo::Geometry
     Neg::Negative
     Pos::Positive
     Sep::Seperator
+    RA::RealisationAlgorthim
 end

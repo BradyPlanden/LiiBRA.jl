@@ -5,7 +5,7 @@ module RealAlg
 using Roots, UnitSystems, DataFrames, CSV, Parameters
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se
+export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim
 
 include("RealAlgTypes.jl")
 include("Functions/C_e.jl")
@@ -14,8 +14,9 @@ include("Functions/Flux.jl")
 include("Functions/Phi_s.jl")
 include("Functions/Phi_e.jl")
 include("Functions/Phi_se.jl")
+include("Methods/DRA.jl")
 
-CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator())
+CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
 const Lpos = CellData.Pos.L
 const Lneg = CellData.Neg.L
 const Lsep = CellData.Geo.Lsep

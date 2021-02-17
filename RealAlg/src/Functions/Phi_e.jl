@@ -1,4 +1,4 @@
-function Phi_e(CellData::Cell,s,z,Def)
+function Phi_e(CellData::Cell,s,z)
    """ 
    Electrolyte Potential Transfer Function
    # Add License
