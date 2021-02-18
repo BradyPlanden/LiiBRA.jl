@@ -30,18 +30,19 @@ tfs = [
     Phi_s(CellData,s,1,"Neg"),
     Phi_se(CellData,s,Any[0,1],"Pos"),
     Phi_se(CellData,s,Any[0,1],"Neg"),
-    Flux(CellData,s,Any[0,1],"Pos"),
-    Flux(CellData,s,Any[0,1],"Neg")
+    j(CellData,s,Any[0,1],"Pos"),
+    j(CellData,s,Any[0,1],"Neg")
 ]
 
 # Call Transfer Functions
 Numtf = 9 # Number of Transfer functions
-tfft = @. Ts*(f)
+tfft = @. CellData.RA.Ts*f
 i = 1
+tf = fill(0.0,21,length(s))
 for run in tfs
-      tf[i] = run
+      tf[:] = run
       i = i+1
-
+      println("tf:",tf[i])
 end
 
 

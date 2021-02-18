@@ -32,6 +32,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 
 #Beta's
 β = @. Rs*sqrt(s/Ds)
+β = permutedims(β)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -51,13 +52,13 @@ Rtot = Rct + Electrode.RFilm
 
 cse_res = -3/(as*F*L*CC_A*Ds) #Residual Variable for Pole Removal - eq. 4.45
 ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
-cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)) #Transfer Function - eq. 4.17
+cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)) #Transfer Function - eq. 4.17
 cse_tf = @. cse_tf-cse_res #Pole removal - eq. 4.43
-println("cse_tf:",typeof(cse_tf))
+println("cse_tf:",size(cse_tf))
 zero_tf = @. (5*as*Ds*F*L^2*((2-6z+3z^2)+(3z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
-println("zero_tf:",zero_tf)
+println("zero_tf:",size(zero_tf))
 println("s==0",cse_tf[findall(s.==0)])
-println("s==0",cse_tf[1,:])
+#println("s==0",cse_tf[1,:])
 cse_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
 
 if Def == "Pos" #Double check this implementation

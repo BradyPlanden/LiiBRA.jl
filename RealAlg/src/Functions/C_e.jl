@@ -84,7 +84,7 @@ k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_1)-D2*in2.*sin.(Bound_Sep_1).*co
 
  println("ν_p:",size(ν_p))
  println("λ:",size(λ))
-println("in1:",size(in1))
+ println("in1:",size(in1))
 # println("in2:",in2)
  println("Bound_Neg_1:",size(Bound_Neg_1))
 # println("k3_s:",k3_s)
@@ -126,16 +126,11 @@ j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
 println("j_Pos:",size(j_Pos))
 
-tu = (λ.+s)
-println("tu:",size(tu))
 C_e =  @. ((j_Neg + j_Pos)/(s+λ))
 
 i=1
 ψ = fill(0.0,1,length(z))
-println("Ce:",size(C_e))
 println("ψ:",size(ψ))
-println("in1:",size(in1))
-println("k1:",size(k1))
 for x in z
     if x < Lneg
        ψ[i] = k1[i]*cos(in1[i]*x) #negative electrode
@@ -146,7 +141,9 @@ for x in z
     end
 i = i+1
 end
-C_e =  ψ*C_e
+ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
+println("ψ_dims:",size(ψ_dims))
+C_e = ψ_dims*C_e
 println("Ce:",size(C_e))
 return C_e
 end
