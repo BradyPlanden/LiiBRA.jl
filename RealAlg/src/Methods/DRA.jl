@@ -1,4 +1,4 @@
-function DRA(CellData::Cell)
+function DRA(CellData::Cell,L::Tuple{Array{Any,1},Array{Any,1},Array{Any,1},Int64})
     """ 
     Discrete Realiastion Algorithm 
     # Add License
@@ -22,27 +22,28 @@ println("s:",size(s))
 
 #Transfer functions to call
 tfs = [
-    C_e(CellData,s,Any[0, 128e-6, 204e-6, 394e-6],M),
-    C_se(CellData,s,Any[0,1],"Pos"),
-    C_se(CellData,s,Any[0,1],"Neg"),
-    Phi_e(CellData,s,Any[128e-6, 204e-6, 394e-6]),
-    Phi_s(CellData,s,1,"Pos"),
-    Phi_s(CellData,s,1,"Neg"),
-    Phi_se(CellData,s,Any[0,1],"Pos"),
-    Phi_se(CellData,s,Any[0,1],"Neg"),
-    j(CellData,s,Any[0,1],"Pos"),
-    j(CellData,s,Any[0,1],"Neg")
+    C_e(CellData,s,L[1],M),
+    C_se(CellData,s,L[3],"Pos"),
+    C_se(CellData,s,L[3],"Neg"),
+    Phi_e(CellData,s,L[2]),
+    Phi_s(CellData,s,L[4],"Pos"),
+    Phi_s(CellData,s,L[4],"Neg"),
+    Phi_se(CellData,s,L[3],"Pos"),
+    Phi_se(CellData,s,L[3],"Neg"),
+    j(CellData,s,L[3],"Pos"),
+    j(CellData,s,L[3],"Neg")
 ]
 
 # Call Transfer Functions
 Numtf = 9 # Number of Transfer functions
 tfft = @. CellData.RA.Ts*f
 i = 1
-tf = fill(0.0,21,length(s))
 for run in tfs
-      tf[:] = run
+      tf = fill(0.0,size(L[i]))
+      tf = fill(tf,length(s))
+      tf = run
       i = i+1
-      println("tf:",tf[i])
+      println("i:",i)
 end
 
 
