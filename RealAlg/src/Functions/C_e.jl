@@ -1,4 +1,4 @@
-function C_e(CellData::Cell,s,z,M)
+@inline function C_e(CellData::Cell,s,z)
 """ 
 Electrolyte Concentration Transfer Function
 # Add License
@@ -27,7 +27,6 @@ CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 βn = permutedims(βn)
 βp = @. Rs_Pos*sqrt(s/Ds_Pos)
 βp = permutedims(βp)
-println("β:",size(βn))
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -60,8 +59,7 @@ s = permutedims(s)
 ν_n =  @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn))))
 ν_p =  @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp))))
 
-λ = roots(M+1)
-println("λ:",size(λ))
+λ = roots(CellData.RA.M+1)
 λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
 
 #Create all k's
@@ -82,22 +80,12 @@ k4_s = cos.(Bound_Neg_1).*sin.(Bound_Sep_0) - D1*in1.*cos.(Bound_Sep_0).*sin.(Bo
 k5_s = k3_s.*(cos.(Bound_Sep_1).*cos.(Bound_Pos_1)+D2*in2.*sin.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*cos.(Bound_Pos_1)-D2*in2.*cos.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3));
 k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_1)-D2*in2.*sin.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*sin.(Bound_Pos_1)+D2*in2.*cos.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3));
 
- println("ν_p:",size(ν_p))
- println("λ:",size(λ))
- println("in1:",size(in1))
-# println("in2:",in2)
- println("Bound_Neg_1:",size(Bound_Neg_1))
-# println("k3_s:",k3_s)
-# println("βn:",length(βn))
 
 #Solving for k1:
 Int_ψ1 = ϵ1*(2*Bound_Neg_1+sin.(2*Bound_Neg_1)./(4*in1))
 Int_ψ2 = ϵ2./(4*in2) .* (2 .* (k3_s.^2 .+ k4_s.^2) .* Lsep .* in2 + 2*k3_s .* k4_s .* cos.(2 .* Bound_Sep_0) .- 2 .* k3_s .* k4_s .* cos.(2 .* Bound_Sep_1) .- (k3_s .- k4_s) .* (k3_s .+ k4_s) .* (sin.(2 .* Bound_Sep_0) .- sin.(2 .* Bound_Sep_1)))
 Int_ψ3 = ϵ3./(4*in3) .* (2 .* (k5_s.^2+k6_s.^2) .* Lpos .* in3 + 2*k5_s .* k6_s .* cos.(2 .* Bound_Pos_0) .- 2 .* k5_s .* k6_s .* cos.(2 .* Bound_Pos_1) .- (k5_s .- k6_s) .* (k5_s .+ k6_s) .* (sin.(2 .* Bound_Pos_0) .- sin.(2 .* Bound_Pos_1)))
 
-# println("Int_ψ1:",Int_ψ1)
-# println("Int_ψ2:",Int_ψ2)
-# println("Int_ψ3:",Int_ψ3)
 
 k1 = @. 1/(sqrt(Int_ψ1+Int_ψ2+Int_ψ3))
 k3 = @. k1*k3_s
@@ -105,13 +93,9 @@ k4 = @. k1*k4_s
 k5 = @. k1*k5_s
 k6 = @. k1*k6_s
 
- println("k1:",size(k1))
-# println("ζ:", ζ)
 
 j_Neg = @. ((κ_eff_Neg+σ_eff_Neg)*cosh(ν_n)*ν_n)*(k1*ζ*Bound_Neg_1*sin(Bound_Neg_1))/(ν_n^2*sinh(ν_n)+CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2)))
 
-# println("j_Neg:", length(j_Neg))
-println("Bound_Pos_2:", size(Bound_Pos_2))
 Hlp1 = σ_eff_Pos+κ_eff_Pos
 Hlp2 = @. (Hlp1*cosh(ν_p)*ν_p)
 Hlp3 = @. (Bound_Pos_2^2)+ν_p^2*sinh(ν_p)
@@ -124,13 +108,11 @@ j_Pos5 = @. (k5*ζ*σ_eff_Pos*cos(Bound_Pos_0)*κ_eff_Pos*cos(Bound_Pos_1)*ν_p^
 j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
-println("j_Pos:",size(j_Pos))
 
 C_e =  @. ((j_Neg + j_Pos)/(s+λ))
 
 i=1
 ψ = fill(0.0,1,length(z))
-println("ψ:",size(ψ))
 for x in z
     if x < Lneg
        ψ[i] = k1[i]*cos(in1[i]*x) #negative electrode
@@ -142,14 +124,13 @@ for x in z
 i = i+1
 end
 ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
-println("ψ_dims:",size(ψ_dims))
 C_e = ψ_dims*C_e
-println("Ce:",size(C_e))
-return C_e
+D_term = zeros(length(z))
+return C_e, D_term
 end
 
 function roots(roots_n)
-    root = Any[0]
+    root = Number[0]
     i = 0.00001
     ∇ = 0.00001
     if(roots_n > 1)

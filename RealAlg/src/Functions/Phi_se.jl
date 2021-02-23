@@ -1,4 +1,4 @@
-function Phi_se(CellData::Cell,s,z,Def)
+@inline function Phi_se(CellData::Cell,s,z,Def)
     """ 
     Solid Potential Transfer Function
     # Add License
@@ -55,9 +55,6 @@ res0 = -3*(∂Uocp_elc)/(as*F*L*CC_A*Rs) # residual for pole removal
 ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
-println("ν:",size(ν))
-println("res0:",res0)
-println("∂Uocp_elc:",∂Uocp_elc)
 
 ϕ_tf = @. L/(CC_A*ν*sinh(ν)*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))))-res0  #Transfer Function - eq. 4.14
 zero_tf = @. (6*κ_eff*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*κ_eff*σ_eff) + 5*as*Ds*F*L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)/(30*CC_A*as*Ds*F*κ_eff*L*σ_eff))

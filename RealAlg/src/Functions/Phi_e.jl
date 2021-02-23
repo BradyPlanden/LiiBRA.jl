@@ -1,4 +1,4 @@
-function Phi_e(CellData::Cell,s,z)
+@inline function Phi_e(CellData::Cell,s,z)
    """ 
    Electrolyte Potential Transfer Function
    # Add License
@@ -94,11 +94,11 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 #          #D_term  = @.  
 #    end
 
-ϕ_tf = fill(0.0,(length(z),length(s)))
-ϕ_tf = convert(Array{Complex{Float64}},ϕ_tf)
+ϕ_tf = fill(0.0 + im,(length(z),length(s)))
+#ϕ_tf = convert(Complex{Float64},ϕ_tf)
 
-D_term = fill(0.0,(length(z),length(s)))
-D_term = convert(Array{Complex{Float64}},ϕ_tf)
+D_term = fill(0.0 + im,(length(z),length(s)))
+#D_term = convert(Complex{Float64},ϕ_tf)
 
 # else
    for i = 1:length(z)
@@ -119,11 +119,11 @@ D_term = convert(Array{Complex{Float64}},ϕ_tf)
          else
             ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
             zero_tf = @. -(κ_eff_Sep*κ_eff_Pos*Lneg*Lpos)/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos) + (κ_eff_Neg*(-2*κ_eff_Pos*Lpos*Lsep+κ_eff_Sep*(Lneg+Lsep-pt)*(Lneg+2*Lpos+Lsep-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos)
-            D_term[i,:]  .= @.  (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
+            D_term[i,:]  .= @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
             ϕ_tf[findall(s.==0),:] .= zero_tf
       end
  end
-
+#println("D_term",size(D_term))
 return ϕ_tf, D_term
 
 end

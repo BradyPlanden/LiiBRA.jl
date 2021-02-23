@@ -1,4 +1,4 @@
-function j(CellData::Cell,s,z,Def)
+@inline function j(CellData::Cell,s,z,Def)
     """ 
     Flux Transfer Function
     # Add License
@@ -32,6 +32,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 
 #Beta's
 β = @. Rs*sqrt(s/Ds)
+β = permutedims(β)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -50,18 +51,18 @@ Rtot = Rct + Electrode.RFilm
 ∂Uocp_elc = ∂Uocp(Def,θ)
 
 #Condensing Variable
-ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β))))
+ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β))))
 ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function
-j_tf = @. ν*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
-D_term = @. ν_∞*(σ_eff*cosh(ν*z')+κ_eff*cosh(ν*(z'-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+D_term = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
 
 if Def == "Pos" #Double check this implementation
     j_tf = -j_tf
     D_term = -D_term
 end
-
+#println("D_term:",D_term)
 return j_tf, D_term
 
 end

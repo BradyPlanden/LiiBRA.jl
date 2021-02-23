@@ -1,10 +1,10 @@
 using Parameters
 
 @with_kw struct Constants
-    T::Int = 25
+    T::Int64 = 25
     t_plus::Float64 = 0.363
     De::Float64 = 7.5e-11
-    κ::Int = 1
+    κ::Int64 = 1
     Init_SOC::Float64 = 0.5
     ce0::Float64 = 2000
     dln::Float64 = 3.0
@@ -63,7 +63,7 @@ end
 
 @with_kw struct RealisationAlgorthim
     Ts::Float64 = 0.5
-    M::Float64 = 4
+    M::Int64 = 4
     Tlen::Float64 = 1.5
 end
 

@@ -2,7 +2,7 @@ __precompile__()
 
 module RealAlg
 
-using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra
+using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, DataInterpolations
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
 export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim
@@ -36,7 +36,7 @@ const Rs_Pos = CellData.Pos.Rs       # Particle radius [m]
 const as_neg = 3*CellData.Neg.ϵ_s/Rs_Neg # Specific interfacial surf. area
 const as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
 
-function ∂Uocp(Electrode,θ)
+@inline function ∂Uocp(Electrode,θ)
     if Electrode == "Neg"
     ∂Uocp = (-20000*exp(-2000*θ) - 3.96*exp(-3*θ))
     else
