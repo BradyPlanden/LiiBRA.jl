@@ -44,4 +44,8 @@ const as_pos = 3*CellData.Pos.ϵ_s/Rs_Pos # Specific interfacial surf. area
     end
 end
 
+@inline function κ(ce)
+    return @. (4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24)
+end
+
 end # module

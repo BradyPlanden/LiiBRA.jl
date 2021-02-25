@@ -52,26 +52,21 @@ tfft = CellData.RA.Ts*f
 i=Int64(1)
  for run in tfs[:,1]
     if tfs[i,2] == "Pos"
-       #var = genvar()
-       #par = (extract(var, run), "Pos")
        tf, D = run(CellData,s,tfs[i,3],"Pos")
     elseif tfs[i,2] == "Neg"
-        #var = genvar()
-        #par = extract(var, run)
         tf, D = run(CellData,s,tfs[i,3],"Neg")
     else 
         tf, D = run(CellData,s,tfs[i,3])
     end
-    println("D:",size(D))
-    println("tf:",size(tf))
-    jk = Fs.*real(ifft(tf)) # inverse fourier transform tranfser function response
+    jk = Fs.*real(ifft(permutedims(tf))) # inverse fourier transform tranfser function response
     stpsum = cumsum(jk, dims=1).*CellData.RA.Ts # cumulative sum of tf response * sample time
     nR = size(stpsum,2)
 
     i = i + 1
-    #println("jk:",size(jk))
+    #println("jk:",jk, "\n")
     #println("stpsum:",size(stpsum))
-    #println("tf:",typeof(tf))
+    #println("tf:",tf, "\n")
+    println("D:",D)
 end
 
 #= #Transfer functions to call

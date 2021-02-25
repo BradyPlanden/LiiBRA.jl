@@ -1,13 +1,15 @@
 using Parameters
 
 @with_kw struct Constants
-    T::Int64 = 25
+    T::Float64 = 298.15
     t_plus::Float64 = 0.363
     De::Float64 = 7.5e-11
-    κ::Int64 = 1
+    κ::Float64 = 1
     Init_SOC::Float64 = 0.5
     ce0::Float64 = 2000
     dln::Float64 = 3.0
+    Ea_κ::Float64 = 0.0
+    κ_ra::Float64 = 0.0
 end
 
 @with_kw struct Geometry
@@ -20,6 +22,8 @@ end
     L::Float64 = 0.000128
     Rs::Float64 = 1.25e-5
     Ds::Float64 = 3.9e-14
+    Ea_σ::Float64 = 0.0
+    Ea_Ds::Float64 = 0.0
     ϵ_s::Float64 = 0.471
     ϵ_e::Float64 = 0.357
     De_brug::Float64 = 1.5
@@ -40,6 +44,8 @@ end
     L::Float64 = 0.00019
     Rs::Float64 = 1.25e-5
     Ds::Float64 = 1.0e-13
+    Ea_σ::Float64 = 0.0
+    Ea_Ds::Float64 = 0.0
     ϵ_s::Float64 = 0.471
     ϵ_e::Float64 = 0.357
     De_brug::Float64 = 1.6

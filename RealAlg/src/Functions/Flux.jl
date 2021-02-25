@@ -63,6 +63,9 @@ if Def == "Pos" #Double check this implementation
     D_term = -D_term
 end
 #println("D_term:",D_term)
+println("z:",z)
+println("ν:",ν)
+println("ν_∞:",ν_∞)
 return j_tf, D_term
 
 end

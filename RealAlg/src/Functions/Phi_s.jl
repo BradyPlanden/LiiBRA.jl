@@ -59,8 +59,10 @@ D_term = @. L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞)/(as*σ_eff*(κ_eff+σ_eff)
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
+   D_term = -D_term
 end
-
+println("D_term:",D_term)
+println("z:",z)
 return ϕ_tf, D_term
 
 end

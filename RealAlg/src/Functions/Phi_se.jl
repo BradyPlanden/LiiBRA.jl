@@ -63,6 +63,7 @@ D_term = @. L/(CC_A*ν_∞*sinh(ν_∞)*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*co
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
+   D_term = -D_term
 end
 
 return ϕ_tf, D_term
