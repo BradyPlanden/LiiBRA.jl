@@ -1,4 +1,4 @@
-function DRA(CellData::Cell,L::NTuple{10,Array{Number,1}})
+function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}})
     """ 
     Discrete Realiastion Algorithm 
     # Add License
@@ -52,11 +52,11 @@ tfft = CellData.RA.Ts*f
 i=Int64(1)
  for run in tfs[:,1]
     if tfs[i,2] == "Pos"
-       tf, D = run(CellData,s,tfs[i,3],"Pos")
+       tf, D = run(CellData,FCall,s,tfs[i,3],"Pos")
     elseif tfs[i,2] == "Neg"
-        tf, D = run(CellData,s,tfs[i,3],"Neg")
+        tf, D = run(CellData,FCall,s,tfs[i,3],"Neg")
     else 
-        tf, D = run(CellData,s,tfs[i,3])
+        tf, D = run(CellData,FCall,s,tfs[i,3])
     end
     jk = Fs.*real(ifft(permutedims(tf))) # inverse fourier transform tranfser function response
     stpsum = cumsum(jk, dims=1).*CellData.RA.Ts # cumulative sum of tf response * sample time

@@ -9,7 +9,6 @@ using Parameters
     ce0::Float64 = 2000
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
-    κ_ra::Float64 = 0.0
 end
 
 @with_kw struct Geometry
@@ -73,6 +72,23 @@ end
     Tlen::Float64 = 1.5
 end
 
+# struct kappa{T<:Number}
+#     ce::T
+#     function kappa(ce::T) where T
+#         return 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
+#     end
+#     new{typeof(ce)}(ce)
+# end
+
+struct kappa{T<:Number}
+    κ::T
+    function kappa(ce::T) where T
+        κ  =  4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
+        new{typeof(κ)}(κ)
+   end
+end
+
+
 @with_kw struct Cell
     Const::Constants
     Geo::Geometry
@@ -80,4 +96,9 @@ end
     Pos::Positive
     Sep::Seperator
     RA::RealisationAlgorthim
+    
+end
+
+@with_kw struct FCalls
+    Kap::kappa
 end

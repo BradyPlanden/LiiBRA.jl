@@ -1,4 +1,4 @@
-@inline function C_se(CellData::Cell,s,z,Def)
+@inline function C_se(CellData::Cell,FCall::FCalls,s,z,Def)
     """ 
     Flux Transfer Function
     # Add License
@@ -24,7 +24,7 @@ Rs = Electrode.Rs       # Particle radius [m]
 Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
-κ_eff = CellData.Const.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
+κ_eff = FCall.Kap.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC

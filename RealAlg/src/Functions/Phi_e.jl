@@ -1,4 +1,4 @@
-@inline function Phi_e(CellData::Cell,s,z)
+@inline function Phi_e(CellData::Cell,FCall::FCalls,s,z)
    """ 
    Electrolyte Potential Transfer Function
    # Add License
@@ -17,9 +17,9 @@ Ds_Neg = CellData.Neg.Ds       # Solid diffusivity [m^2/s]
 Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
-κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
-κ_eff_Sep = CellData.Const.κ*ϵ2^CellData.Sep.κ_brug
-κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
+κ_eff_Neg = FCall.Kap.κ*ϵ1^CellData.Neg.κ_brug
+κ_eff_Sep = FCall.Kap.κ*ϵ2^CellData.Sep.κ_brug
+κ_eff_Pos = FCall.Kap.κ*ϵ3^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
 dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
