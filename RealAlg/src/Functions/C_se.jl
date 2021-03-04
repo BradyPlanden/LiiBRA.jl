@@ -28,7 +28,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
-θ = CellData.Const.Init_SOC * (Electrode.θ_max-Electrode.θ_min) + Electrode.θ_min 
+θ = CellData.Const.Init_SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0 
 
 #Beta's
 β = @. Rs*sqrt(s/Ds)

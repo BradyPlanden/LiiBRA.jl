@@ -19,8 +19,8 @@ CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
 
 #Defining SOC
-θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_max-CellData.Neg.θ_min) + CellData.Neg.θ_min 
-θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_max-CellData.Pos.θ_min) + CellData.Pos.θ_min 
+θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
+θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0 
 
 #Beta's
 βn = @. Rs_Neg*sqrt(s/Ds_Neg)
@@ -43,10 +43,10 @@ j0_neg = CellData.Neg.k_norm*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_ne
 j0_pos = CellData.Pos.k_norm*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
 #Resistances
-Rct_neg = R*T/(j0_neg*F)^2
+Rct_neg = R*T/(j0_neg*F^2)
 Rtot_neg = Rct_neg + CellData.Neg.RFilm
 
-Rct_pos = R*T/(j0_pos*F)^2
+Rct_pos = R*T/(j0_pos*F^2)
 Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 #∂Uocp_neg = UOCP(θ_neg)

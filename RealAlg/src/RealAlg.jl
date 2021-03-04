@@ -19,7 +19,7 @@ include("Methods/DRA.jl")
 CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
 const Lpos = CellData.Pos.L
 const Lneg = CellData.Neg.L
-const Lsep = CellData.Geo.Lsep
+const Lsep = CellData.Sep.L
 const Ltot = CellData.Geo.Ltot
 const Lnegsep = Lneg+Lsep
 

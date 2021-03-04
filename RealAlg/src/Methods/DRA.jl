@@ -66,7 +66,7 @@ i=Int64(1)
     #println("jk:",jk, "\n")
     #println("stpsum:",size(stpsum))
     #println("tf:",tf, "\n")
-    println("D:",D)
+    #println("D:",D)
 end
 
 #= #Transfer functions to call

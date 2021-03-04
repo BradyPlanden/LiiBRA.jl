@@ -28,7 +28,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
-θ = CellData.Const.Init_SOC * (Electrode.θ_max-Electrode.θ_min) + Electrode.θ_min 
+θ = CellData.Const.Init_SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
 
 #Beta's
 β = @. Rs*sqrt(s/Ds)
@@ -44,7 +44,7 @@ cs0 = cs_max * θ
 j0 = Electrode.k_norm*(ce0*(cs_max-cs0))^(1-α)*cs0^α
 
 #Resistances
-Rct = R*T/(j0*F)^2
+Rct = R*T/(j0*F^2)
 Rtot = Rct + Electrode.RFilm
 
 #∂Uocp_Def = UOCP(θ_Def)
@@ -60,9 +60,16 @@ D_term = @. L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞)/(as*σ_eff*(κ_eff+σ_eff)
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
    D_term = -D_term
+   println("D_term:Phi_s:Pos:",D_term)
+   println("z:Phi_s:Pos:",z)
+   println("ν_∞:Phi_s:Pos:",ν_∞)
+   println("ν:Phi_s:Pos:",ν)
+   println("Rtot:Phi_s:Pos:",Rtot)
+else
+println("D_term:Phi_s:Neg:",D_term)
+println("z:Phi_s:Neg:",z)
+println("ν:Phi_s:Neg:",ν)
 end
-println("D_term:",D_term)
-println("z:",z)
 return ϕ_tf, D_term
 
 end

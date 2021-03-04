@@ -28,7 +28,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
-θ = CellData.Const.Init_SOC * (Electrode.θ_max-Electrode.θ_min) + Electrode.θ_min 
+θ = CellData.Const.Init_SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0 
 
 #Beta's
 β = @. Rs*sqrt(s/Ds)
@@ -44,7 +44,7 @@ cs0 = cs_max * θ
 j0 = Electrode.k_norm*(ce0*(cs_max-cs0))^(1-α)*cs0^α
 
 #Resistances
-Rct = R*T/(j0*F)^2
+Rct = R*T/(j0*F^2)
 Rtot = Rct + Electrode.RFilm
 
 #∂Uocp_Def = UOCP(θ_Def)
@@ -66,6 +66,8 @@ end
 println("z:",z)
 println("ν:",ν)
 println("ν_∞:",ν_∞)
+println("D_term:",D_term)
+
 return j_tf, D_term
 
 end
