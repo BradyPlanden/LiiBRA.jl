@@ -40,8 +40,8 @@ cs_max = Electrode.cs_max
 cs0 = cs_max * θ
 α = Electrode.α
 
-
-j0 = Electrode.k_norm*(ce0*(cs_max-cs0))^(1-α)*cs0^α #Exchange Current Density
+κ = Electrode.k_norm/Electrode.cs_max/ce0^(1-α)
+j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α #Exchange Current Density
 
 #Resistances
 Rct = R*T/(j0*F^2)

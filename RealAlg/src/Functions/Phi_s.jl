@@ -36,12 +36,12 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
-cs_max = Electrode.cs_max
-cs0 = cs_max * θ
+cs0 = Electrode.cs_max * θ
 α = Electrode.α
 
 #Current Flux Density
-j0 = Electrode.k_norm*(ce0*(cs_max-cs0))^(1-α)*cs0^α
+κ = Electrode.k_norm/Electrode.cs_max/ce0^(1-α)
+j0 = κ*(ce0*(Electrode.cs_max-cs0))^(1-α)*cs0^α
 
 #Resistances
 Rct = R*T/(j0*F^2)
