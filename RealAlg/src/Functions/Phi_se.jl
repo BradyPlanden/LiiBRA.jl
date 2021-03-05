@@ -25,7 +25,7 @@ Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 κ_eff = FCall.Kap.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
-σ_eff = Electrode.σ*ϵ1^Electrode.σ_brug #Effective Electrode Conductivity 
+σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
 θ = CellData.Const.Init_SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0

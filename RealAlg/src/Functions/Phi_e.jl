@@ -12,16 +12,13 @@
 
 T = CellData.Const.T      # Temperature
 t_plus = CellData.Const.t_plus  # Transference Number
-ζ = (1-t_plus)/F    #Simplifying Variable
-Ds_Neg = CellData.Neg.Ds       # Solid diffusivity [m^2/s]
-Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
 κ_eff_Neg = FCall.Kap.κ*ϵ1^CellData.Neg.κ_brug
 κ_eff_Sep = FCall.Kap.κ*ϵ2^CellData.Sep.κ_brug
 κ_eff_Pos = FCall.Kap.κ*ϵ3^CellData.Pos.κ_brug
-σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
-σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
+σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
+σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
 dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
 κ_D_eff = (2*R*T/F)*κ_eff_Neg*(1-t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
 
@@ -30,8 +27,8 @@ dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
 θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
 
 #Beta's
-βn = Rs_Neg.*sqrt.(s./Ds_Neg)
-βp = Rs_Pos.*sqrt.(s./Ds_Pos)
+βn = CellData.Neg.Rs.*sqrt.(s./CellData.Neg.Ds)
+βp = CellData.Pos.Rs.*sqrt.(s./CellData.Pos.Ds)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -59,9 +56,9 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 ∂Uocp_pos = ∂Uocp("Pos",θ_pos)
 ∂Uocp_neg = ∂Uocp("Neg",θ_neg)
 
-ν_neg = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg.+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg)).*(tanh.(βn)./(tanh.(βn)-βn)))) #Condensing Variable - eq. 4.13
+ν_neg = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg.+∂Uocp_neg*(CellData.Neg.Rs/(F*CellData.Neg.Ds)).*(tanh.(βn)./(tanh.(βn)-βn)))) #Condensing Variable - eq. 4.13
 ν_neg_∞ = @. Lneg*sqrt(as_neg*((1/κ_eff_Neg)+(1/σ_eff_Neg))/(Rtot_neg))
-ν_pos = @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos.+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos)).*(tanh.(βp)./(tanh.(βp)-βp)))) #Condensing Variable - eq. 4.13
+ν_pos = @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos.+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds )).*(tanh.(βp)./(tanh.(βp)-βp)))) #Condensing Variable - eq. 4.13
 ν_pos_∞ = @. Lpos*sqrt(as_pos*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
 
 

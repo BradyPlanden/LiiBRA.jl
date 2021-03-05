@@ -1,10 +1,10 @@
 function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}})
     """ 
-    Discrete Realiastion Algorithm 
+    Discrete Realiastion Algorithm
     # Add License
     # Add Ins and Outs
-        # Cell Data 
-        # Frequency Vector 
+        # Cell Data
+        # Frequency Vector
         # Discretisation Locations
         # Electrode Definition
     """
@@ -12,7 +12,8 @@ function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}})
 
 # Create s Vector
 Fs = 1/CellData.RA.Ts
-Tlen = 128
+Tlen = 32768
+#Tlen = 128
 Nfft = 2^(ceil(log2(Fs*Tlen)))
 f = 0:Nfft-1
 s = (2im.*Fs)*tan.(pi.*f./Nfft)

@@ -15,18 +15,17 @@ Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 κ_eff_Neg = FCall.Kap.κ*ϵ1^CellData.Neg.κ_brug
 κ_eff_Pos = FCall.Kap.κ*ϵ3^CellData.Pos.κ_brug
-σ_eff_Neg = CellData.Neg.σ*ϵ1^CellData.Neg.σ_brug #Effective Conductivity Neg
-σ_eff_Pos = CellData.Pos.σ*ϵ3^CellData.Pos.σ_brug #Effective Conductivity Pos
+σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
+σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
 
 #Defining SOC
 θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
 θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0 
 
 #Beta's
-βn = @. Rs_Neg*sqrt(s/Ds_Neg)
-βn = permutedims(βn)
-βp = @. Rs_Pos*sqrt(s/Ds_Pos)
-βp = permutedims(βp)
+s = s'
+βn = @. CellData.Neg.Rs*sqrt(s/Ds_Neg)
+βp = @. CellData.Pos.Rs*sqrt(s/Ds_Pos)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -35,31 +34,23 @@ cs0_neg = cs_max_neg * θ_neg
 cs_max_pos = CellData.Pos.cs_max
 cs0_pos = cs_max_pos * θ_pos
 
-α_neg = CellData.Neg.α
-α_pos = CellData.Pos.α
-
 #Current Flux Density
-κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-α_pos)
-κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-α_neg)
-j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
-j0_pos = κ_pos*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
+κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-CellData.Pos.α)
+κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
+j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
+j0_pos = κ_pos*(ce0*cs_max_pos*cs0_pos)^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
 
 #Resistances
-Rct_neg = R*T/(j0_neg*F^2)
-Rtot_neg = Rct_neg + CellData.Neg.RFilm
+Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
+Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
-Rct_pos = R*T/(j0_pos*F^2)
-Rtot_pos = Rct_pos + CellData.Pos.RFilm
+#OCP derivative
+∂Uocp_pos = ∂Uocp("Pos",θ_pos)
+∂Uocp_neg = ∂Uocp("Neg",θ_neg)
 
-#∂Uocp_neg = UOCP(θ_neg)
-∂Uocp_neg = (-20000*exp(-2000*θ_neg) - 3.96*exp(-3*θ_neg))
-#∂Uocp_pos = UOCP(θ_pos)
-∂Uocp_pos = (-32.4096*exp(-40*(-0.133875 + θ_pos)) - 0.0135664./((0.998432 - θ_pos).^1.49247)+ 0.0595559*exp(-0.04738*θ_pos.^8).*θ_pos.^7 - 0.823297*(sech(8.60942 - 14.5546*θ_pos)).^2)
-
-s = permutedims(s)
 #Condensing Variable
-ν_n =  @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Rs_Neg/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn))))
-ν_p =  @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Rs_Pos/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp))))
+ν_n =  @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(CellData.Neg.Rs/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn))))
+ν_p =  @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*Ds_Pos))*(tanh(βp)/(tanh(βp)-βp))))
 
 λ = roots(CellData.RA.M+1)
 λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero

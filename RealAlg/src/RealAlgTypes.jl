@@ -1,11 +1,12 @@
 using Parameters
 
 @with_kw struct Constants
-    T::Float64 = 298.15
+    T::Float64 = 273.15
+    T_ref::Float64 = 298.15
     t_plus::Float64 = 0.363
     De::Float64 = 7.5e-11
     κ::Float64 = 1
-    Init_SOC::Float64 = 0.5
+    Init_SOC::Float64 = 0.0
     ce0::Float64 = 2000
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
@@ -17,19 +18,19 @@ end
 end
 
 @with_kw struct Negative
-    L::Float64 = 0.000128
-    Rs::Float64 = 1.25e-5
-    Ds::Float64 = 3.9e-14
+    L::Float64 = 1.28e-4
+    Rs::Float64 = 1.25e-5   # Particle radius [m]
+    Ds::Float64 = 3.9e-14   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
     Ea_Ds::Float64 = 0.0
     ϵ_s::Float64 = 0.471
     ϵ_e::Float64 = 0.357
     De_brug::Float64 = 1.5
     κ_brug::Float64 = 1.5
-    σ::Float64 = 3.8
+    σ::Float64 = 100
     σ_brug::Float64 = 1.0
-    θ_100::Float64 = 0.762
-    θ_0::Float64 = 0.17
+    θ_100::Float64 = 0.53
+    θ_0::Float64 = 0.05
     cs_max::Float64 = 26390
     α::Float64 = 0.5
     k_norm::Float64 = 2.2842e-05
@@ -40,8 +41,8 @@ end
 
 @with_kw struct Positive
     L::Float64 = 0.00019
-    Rs::Float64 = 8.5e-6
-    Ds::Float64 = 1.0e-13
+    Rs::Float64 = 8.5e-6    # Particle radius [m]
+    Ds::Float64 = 1.0e-13   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
     Ea_Ds::Float64 = 0.0
     ϵ_s::Float64 = 0.297
