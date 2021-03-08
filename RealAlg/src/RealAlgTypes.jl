@@ -5,11 +5,11 @@ using Parameters
     T_ref::Float64 = 298.15
     t_plus::Float64 = 0.363
     De::Float64 = 7.5e-11
-    κ::Float64 = 1
     Init_SOC::Float64 = 0.0
     ce0::Float64 = 2000
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
+    Ea_De::Float64 = 0.0 #*
 end
 
 @with_kw struct Geometry
@@ -40,7 +40,7 @@ end
 end
 
 @with_kw struct Positive
-    L::Float64 = 0.00019
+    L::Float64 = 1.9e-4
     Rs::Float64 = 8.5e-6    # Particle radius [m]
     Ds::Float64 = 1.0e-13   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
@@ -56,7 +56,7 @@ end
     cs_max::Float64 = 22860
     α::Float64 = 0.5
     k_norm::Float64 = 2.2073e-5
-    RFilm::Float64 = 1.94e-11
+    RFilm::Float64 = 10
     
 end
 
@@ -70,8 +70,11 @@ end
 @with_kw struct RealisationAlgorthim
     Fs::Float64 = 2
     SamplingT::Float64 = 1
-    M::Int64 = 4
-    Tlen::Float64 = 1.5
+    M::Int64 = 4 # Model order
+    N::Int64 = 1 # Inputs
+    Tlen::Int64 = 24 #32768
+    H1::Array{Int64,1} = 0:10
+    H2::Array{Int64,1} = 0:10
 end
 
 # struct kappa{T<:Number}
@@ -106,5 +109,5 @@ end
 end
 
 @with_kw struct TransferFun
-tfs = [[C_e, C_se, C_se, Phi_e, Phi_s, Phi_s, Phi_se, Phi_se, j, j] ["Na", "Pos", "Neg", "Na", "Pos", "Neg", "Pos", "Neg", "Pos", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6],Number[0,1], Number[0,1], Number[128e-6, 204e-6, 394e-6],Number[1],Number[1],Number[0,1],Number[0,1],Number[0,1],Number[0,1]]]
+tfs = [[C_e, Phi_e, C_se, Phi_s, Phi_se, j, C_se, Phi_s, Phi_se, j] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6], Number[128e-6, 204e-6, 394e-6], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
 end

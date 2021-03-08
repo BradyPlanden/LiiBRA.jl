@@ -59,14 +59,13 @@ res0 = -3*(∂Uocp_elc)/(as*F*L*CC_A*Rs) # residual for pole removal
 ϕ_tf = @. L/(CC_A*ν*sinh(ν)*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))))-res0  #Transfer Function - eq. 4.14
 zero_tf = @. (6*κ_eff*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*κ_eff*σ_eff) + 5*as*Ds*F*L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)/(30*CC_A*as*Ds*F*κ_eff*L*σ_eff))
 D_term = @. L/(CC_A*ν_∞*sinh(ν_∞)*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1)))) # Contribution to D as G->∞
-ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
-res0 = zeros(length(z))
+ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
    D_term = -D_term
 end
-
+res0 = zeros(length(z))
 return ϕ_tf, D_term, res0
 
 end

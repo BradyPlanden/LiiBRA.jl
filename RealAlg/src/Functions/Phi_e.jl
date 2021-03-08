@@ -102,24 +102,23 @@ D_term = fill(0.0,length(z))
 # Loop Tf's
    for i = 1:length(z)
       pt = z[i]
-   
          if pt <= Lneg
             ϕ_tf[i,:] = @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*Lneg)
             D_term[i,:]  .=  @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg_∞*pt/Lneg)) - pt*ν_neg_∞*sinh(ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞) + (Lneg*(cosh(ν_neg_∞)-cosh(ν_neg_∞*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞)))
-            ϕ_tf[findall(s.==0),:] .= zero_tf
+            ϕ_tf[:,findall(s.==0)] .= zero_tf
    
          elseif pt <= Lneg + Lsep
             ϕ_tf[i,:] = @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
             zero_tf = @. (2*κ_eff_Neg*Lneg-κ_eff_Sep*Lneg-2*κ_eff_Neg*pt)/(2*CC_A*κ_eff_Neg*κ_eff_Sep)
             D_term[i,:] .= @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
-            ϕ_tf[findall(s.==0),:] .= zero_tf
+            ϕ_tf[:,findall(s.==0)] .= zero_tf
    
          else
             ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
             zero_tf = @. -(κ_eff_Sep*κ_eff_Pos*Lneg*Lpos)/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos) + (κ_eff_Neg*(-2*κ_eff_Pos*Lpos*Lsep+κ_eff_Sep*(Lneg+Lsep-pt)*(Lneg+2*Lpos+Lsep-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos)
             D_term[i,:]  .= @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
-            ϕ_tf[findall(s.==0),:] .= zero_tf
+            ϕ_tf[:,findall(s.==0)] .= zero_tf
       end
  end
  if Debug == 1

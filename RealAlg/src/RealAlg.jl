@@ -2,7 +2,7 @@ __precompile__()
 
 module RealAlg
 
-using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, Dierckx
+using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
 export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, kappa, FCalls, TransferFun

@@ -52,6 +52,8 @@ Rtot = Rct + Electrode.RFilm
 #Transfer Function
 j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
 D_term = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
+zero_tf =ones(2)*1/(CellData.Geo.CC_A*as*F*Electrode.L)
+j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation

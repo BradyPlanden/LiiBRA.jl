@@ -88,6 +88,10 @@ k6 = @. k1*k6_s
 
 
 j_Neg = @. ((κ_eff_Neg+σ_eff_Neg)*cosh(ν_n)*ν_n)*(k1*ζ*Bound_Neg_1*sin(Bound_Neg_1))/(ν_n^2*sinh(ν_n)+CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2)))
+zero_tf = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
+j_Neg[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
+
+
 
 Hlp1 = σ_eff_Pos+κ_eff_Pos
 Hlp2 = @. (Hlp1*cosh(ν_p)*ν_p)
@@ -101,6 +105,8 @@ j_Pos5 = @. (k5*ζ*σ_eff_Pos*cos(Bound_Pos_0)*κ_eff_Pos*cos(Bound_Pos_1)*ν_p^
 j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
+zero_tf = @. -ζ*(k6*cos(Bound_Pos_0)-cos(Bound_Pos_1)) + k5*(sin(Bound_Pos_1-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
+j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 C_e =  @. ((j_Neg + j_Pos)/(s+λ))
 
@@ -116,9 +122,9 @@ for x in z #Eigen Weighting
     end
 i = i+1
 end
+
 ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
 C_e = ψ_dims*C_e
-
 D_term = zeros(length(z))
 res0 = zeros(length(z))
 return C_e, D_term, res0

@@ -51,19 +51,19 @@ Rtot = Rct + Electrode.RFilm
 #∂Uocp_Def = UOCP(θ_Def)
 ∂Uocp_elc = ∂Uocp(Def,θ)
 
-cse_res = -3/(as*F*L*CC_A*Ds) #Residual Variable for Pole Removal - eq. 4.45
+cse_res = -3/(as*F*L*CC_A*Rs) #Residual Variable for Pole Removal - eq. 4.45
 ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
 cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)) #Transfer Function - eq. 4.17
 cse_tf = @. cse_tf-cse_res #Pole removal - eq. 4.43
 zero_tf = @. (5*as*Ds*F*L^2*((2-6z+3z^2)+(3z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
-cse_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
+cse_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 D_term = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation
     cse_tf = -cse_tf
     cse_res = -cse_res
 end
-
+cse_res = cse_res*ones(length(z))
 return cse_tf, D_term, cse_res
 
 end
