@@ -7,6 +7,7 @@ loc = (Number[0, 128e-6, 204e-6, 394e-6],Number[0,1], Number[0,1], Number[128e-6
 Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/universal(SI2019)
 FCall= FCalls(kappa(CellData.Const.ce0))
 κ_dra=FCall.Kap.κ*exp(CellData.Const.Ea_κ*Arr_Factor)
+TransferFuns = TransferFun()
 
 
-DRA(CellData,FCall,loc)
+DRA(CellData,FCall,loc,TransferFuns)

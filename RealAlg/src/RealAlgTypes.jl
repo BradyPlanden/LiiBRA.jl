@@ -68,7 +68,8 @@ end
 end
 
 @with_kw struct RealisationAlgorthim
-    Ts::Float64 = 0.5
+    Fs::Float64 = 2
+    SamplingT::Float64 = 1
     M::Int64 = 4
     Tlen::Float64 = 1.5
 end
@@ -102,4 +103,8 @@ end
 
 @with_kw struct FCalls
     Kap::kappa
+end
+
+@with_kw struct TransferFun
+tfs = [[C_e, C_se, C_se, Phi_e, Phi_s, Phi_s, Phi_se, Phi_se, j, j] ["Na", "Pos", "Neg", "Na", "Pos", "Neg", "Pos", "Neg", "Pos", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6],Number[0,1], Number[0,1], Number[128e-6, 204e-6, 394e-6],Number[1],Number[1],Number[0,1],Number[0,1],Number[0,1],Number[0,1]]]
 end

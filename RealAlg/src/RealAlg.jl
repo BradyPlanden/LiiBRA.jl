@@ -2,10 +2,10 @@ __precompile__()
 
 module RealAlg
 
-using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, DataInterpolations
+using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, Dierckx
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, kappa, FCalls
+export Cell, C_e, Negative, Constants, Geometry, Positive, Seperator, j, ∂Uocp, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, kappa, FCalls, TransferFun
 
 include("RealAlgTypes.jl")
 include("Functions/C_e.jl")
@@ -34,7 +34,7 @@ const R = universal(SI2019)       # Universal Gas Constant
 const as_neg = 3*CellData.Neg.ϵ_s/CellData.Neg.Rs # Specific interfacial surf. area
 const as_pos = 3*CellData.Pos.ϵ_s/CellData.Pos.Rs # Specific interfacial surf. area
 
-const Debug = 1 #Print Variables for Debugging    
+const Debug = 0 #Print Variables for Debugging    
 
 @inline function ∂Uocp(Electrode,θ)
     if Electrode == "Neg"

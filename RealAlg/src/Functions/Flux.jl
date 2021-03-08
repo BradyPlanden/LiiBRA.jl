@@ -52,6 +52,7 @@ Rtot = Rct + Electrode.RFilm
 #Transfer Function
 j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
 D_term = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
+res0 = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation
     j_tf = -j_tf
@@ -70,6 +71,6 @@ else
     end
 end
 
-return j_tf, D_term
+return j_tf, D_term, res0
 
 end

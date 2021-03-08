@@ -48,6 +48,7 @@ Rtot = R*T/(j0*F^2) + Electrode.RFilm
 ϕ_tf = @. -L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν))-L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
 D_term = @. -L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞))-L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
 D_term_check = @. ((-2+z)*z*L)/(2*CellData.Geo.CC_A*σ_eff)
+res0 = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
@@ -80,6 +81,6 @@ else
       #println("ν:Phi_s:Neg:",ν)
    end
 end
-return ϕ_tf, D_term
+return ϕ_tf, D_term, res0
 
 end

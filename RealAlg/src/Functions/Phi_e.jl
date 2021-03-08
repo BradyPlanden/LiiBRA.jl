@@ -96,17 +96,17 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 ϕ_tf = fill(0.0 + im,(length(z),length(s)))
 #ϕ_tf = convert(Complex{Float64},ϕ_tf)
 
-D_term = fill(0.0 + im,(length(z),length(s)))
+D_term = fill(0.0,length(z))
 #D_term = convert(Complex{Float64},ϕ_tf)
 
-# else
+# Loop Tf's
    for i = 1:length(z)
       pt = z[i]
    
          if pt <= Lneg
             ϕ_tf[i,:] = @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*Lneg)
-            D_term[i,:]  =  @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg)))
+            D_term[i,:]  .=  @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg_∞*pt/Lneg)) - pt*ν_neg_∞*sinh(ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞) + (Lneg*(cosh(ν_neg_∞)-cosh(ν_neg_∞*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞)))
             ϕ_tf[findall(s.==0),:] .= zero_tf
    
          elseif pt <= Lneg + Lsep
@@ -122,7 +122,12 @@ D_term = fill(0.0 + im,(length(z),length(s)))
             ϕ_tf[findall(s.==0),:] .= zero_tf
       end
  end
-#println("D_term",size(D_term))
-return ϕ_tf, D_term
+ if Debug == 1
+      println("D_term:Phi_e:",D_term)
+      println("ϕ_tf:Phi_e:",ϕ_tf)
+ end
+res0 = zeros(length(z))
+
+return ϕ_tf, D_term, res0
 
 end

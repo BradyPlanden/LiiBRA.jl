@@ -106,7 +106,7 @@ C_e =  @. ((j_Neg + j_Pos)/(s+λ))
 
 i=1
 ψ = fill(0.0,1,length(z))
-for x in z
+for x in z #Eigen Weighting
     if x < Lneg
        ψ[i] = k1[i]*cos(in1[i]*x) #negative electrode
     elseif x < Lnegsep
@@ -118,8 +118,10 @@ i = i+1
 end
 ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
 C_e = ψ_dims*C_e
+
 D_term = zeros(length(z))
-return C_e, D_term
+res0 = zeros(length(z))
+return C_e, D_term, res0
 end
 
 function roots(roots_n)
