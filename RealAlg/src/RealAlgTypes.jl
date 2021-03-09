@@ -56,7 +56,7 @@ end
     cs_max::Float64 = 22860
     α::Float64 = 0.5
     k_norm::Float64 = 2.2073e-5
-    RFilm::Float64 = 10
+    RFilm::Float64 = 0
     
 end
 
@@ -72,9 +72,9 @@ end
     SamplingT::Float64 = 1
     M::Int64 = 4 # Model order
     N::Int64 = 1 # Inputs
-    Tlen::Int64 = 24 #32768
-    H1::Array{Int64,1} = 0:10
-    H2::Array{Int64,1} = 0:10
+    Tlen::Int64 = 32768 #24
+    H1::Array{Int64,1} = 0:2000 #10
+    H2::Array{Int64,1} = 0:2000 #10
 end
 
 # struct kappa{T<:Number}
@@ -109,5 +109,5 @@ end
 end
 
 @with_kw struct TransferFun
-tfs = [[C_e, Phi_e, C_se, Phi_s, Phi_se, j, C_se, Phi_s, Phi_se, j] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6], Number[128e-6, 204e-6, 394e-6], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+tfs = [[C_e, Phi_e, C_se, Phi_s, Phi_se, j, C_se, Phi_s, j, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6], Number[128e-6, 204e-6, 394e-6], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
 end

@@ -23,7 +23,6 @@ CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0 
 
 #Beta's
-s = s'
 βn = @. CellData.Neg.Rs*sqrt(s/Ds_Neg)
 βp = @. CellData.Pos.Rs*sqrt(s/Ds_Pos)
 
@@ -45,8 +44,8 @@ Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
 Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 #OCP derivative
-∂Uocp_pos = ∂Uocp("Pos",θ_pos)
-∂Uocp_neg = ∂Uocp("Neg",θ_neg)
+∂Uocp_pos = ∂Uocp("Pos",θ_pos)/cs_max_pos
+∂Uocp_neg = ∂Uocp("Neg",θ_neg)/cs_max_neg
 
 #Condensing Variable
 ν_n =  @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(CellData.Neg.Rs/(F*Ds_Neg))*(tanh(βn)/(tanh(βn)-βn))))
@@ -54,11 +53,17 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 λ = roots(CellData.RA.M+1)
 λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
+println("λ:",size(λ))
+println("ν_n:",size(ν_n))
+println("∂Uocp:",∂Uocp_neg)
 
 #Create all k's
-in1 = sqrt.(λ.*ϵ1./D1)
-in2 = sqrt.(λ*ϵ2./D2)
-in3 = sqrt.(λ*ϵ3./D3)
+in1 = @. sqrt(λ*ϵ1/D1)
+in2 = @. sqrt(λ*ϵ2/D2)
+in3 = @. sqrt(λ*ϵ3/D3)
+println("in1",in1)
+println("in2",in2)
+println("in3",in3)
 
 Bound_Neg_1 = Lneg * in1
 Bound_Sep_0 = Lneg * in2
@@ -67,16 +72,26 @@ Bound_Pos_0 = (Lneg+Lsep) * in3
 Bound_Pos_1 = Ltot * in3
 Bound_Pos_2 = Lpos * in3
 
+println("Bound_Neg_1:",Bound_Neg_1)
+println("Bound_Sep_0:",Bound_Sep_0)
+println("Bound_Sep_1:",Bound_Sep_1)
+println("Bound_Pos_0:",Bound_Pos_0)
+println("Bound_Pos_1:",Bound_Pos_1)
+println("Bound_Pos_2:",Bound_Pos_2)
+
 #Scaled coefficients
 k3_s = cos.(Bound_Neg_1).*cos.(Bound_Sep_0)+D1*in1.*sin.(Bound_Neg_1).*sin.(Bound_Sep_0)./(D2*in2)
 k4_s = cos.(Bound_Neg_1).*sin.(Bound_Sep_0) - D1*in1.*cos.(Bound_Sep_0).*sin.(Bound_Neg_1)./(D2*in2);
-k5_s = k3_s.*(cos.(Bound_Sep_1).*cos.(Bound_Pos_1)+D2*in2.*sin.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*cos.(Bound_Pos_1)-D2*in2.*cos.(Bound_Sep_1).*sin.(Bound_Pos_1)./(D3*in3));
-k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_1)-D2*in2.*sin.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*sin.(Bound_Pos_1)+D2*in2.*cos.(Bound_Sep_1).*cos.(Bound_Pos_1)./(D3*in3));
-
+k5_s = k3_s.*(cos.(Bound_Sep_1).*cos.(Bound_Pos_0)+D2*in2.*sin.(Bound_Sep_1).*sin.(Bound_Pos_0)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*cos.(Bound_Pos_0)-D2*in2.*cos.(Bound_Sep_1).*sin.(Bound_Pos_0)./(D3*in3));
+k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_0)-D2*in2.*sin.(Bound_Sep_1).*cos.(Bound_Pos_0)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*sin.(Bound_Pos_0)+D2*in2.*cos.(Bound_Sep_1).*cos.(Bound_Pos_0)./(D3*in3));
+println("k3_s:",k3_s)
+println("k4_s:",k4_s)
+println("k5_s:",k5_s)
+println("k6_s:",k6_s)
 
 #Solving for k1:
-Int_ψ1 = ϵ1*(2*Bound_Neg_1+sin.(2*Bound_Neg_1)./(4*in1))
-Int_ψ2 = ϵ2./(4*in2) .* (2 .* (k3_s.^2 .+ k4_s.^2) .* Lsep .* in2 + 2*k3_s .* k4_s .* cos.(2 .* Bound_Sep_0) .- 2 .* k3_s .* k4_s .* cos.(2 .* Bound_Sep_1) .- (k3_s .- k4_s) .* (k3_s .+ k4_s) .* (sin.(2 .* Bound_Sep_0) .- sin.(2 .* Bound_Sep_1)))
+Int_ψ1 = @. ϵ1*(2*Bound_Neg_1+sin(2*Bound_Neg_1))/(4*in1)
+Int_ψ2 = @. ϵ2/(4*in2)*(2*(k3_s^2+k4_s^2)*Lsep*in2+2*k3_s*k4_s*cos(2*Bound_Sep_0)-2*k3_s*k4_s*cos(2*Bound_Sep_1)-(k3_s-k4_s)*(k3_s+k4_s)*(sin(2*Bound_Sep_0)-sin(2*Bound_Sep_1)))
 Int_ψ3 = ϵ3./(4*in3) .* (2 .* (k5_s.^2+k6_s.^2) .* Lpos .* in3 + 2*k5_s .* k6_s .* cos.(2 .* Bound_Pos_0) .- 2 .* k5_s .* k6_s .* cos.(2 .* Bound_Pos_1) .- (k5_s .- k6_s) .* (k5_s .+ k6_s) .* (sin.(2 .* Bound_Pos_0) .- sin.(2 .* Bound_Pos_1)))
 
 
@@ -86,48 +101,81 @@ k4 = @. k1*k4_s
 k5 = @. k1*k5_s
 k6 = @. k1*k6_s
 
+println("k5:",k5)
+println("k6:",k6)
+println("k4:",k4)
+println("k3:",k3)
+println("k1:",k1)
+println("Int_ψ1:",Int_ψ1)
+println("Int_ψ2:",Int_ψ2)
+println("Int_ψ3:",Int_ψ3)
 
-j_Neg = @. ((κ_eff_Neg+σ_eff_Neg)*cosh(ν_n)*ν_n)*(k1*ζ*Bound_Neg_1*sin(Bound_Neg_1))/(ν_n^2*sinh(ν_n)+CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2)))
+j_Neg = @. (((κ_eff_Neg+σ_eff_Neg)*cosh(ν_n)*ν_n)*(k1*ζ*Bound_Neg_1*sin(Bound_Neg_1)))/(sinh(ν_n)+CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2+ν_n^2))) + (((κ_eff_Neg+σ_eff_Neg)*cosh(Bound_Neg_1)*ν_n^2)*(k1*ζ))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2+ν_n^2)))
 zero_tf = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
 j_Neg[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 
 
-Hlp1 = σ_eff_Pos+κ_eff_Pos
-Hlp2 = @. (Hlp1*cosh(ν_p)*ν_p)
-Hlp3 = @. (Bound_Pos_2^2)+ν_p^2*sinh(ν_p)
+Hlp2 = @. ((σ_eff_Pos+κ_eff_Pos*cosh(ν_p))*ν_p)
+Hlp3 = @. (Bound_Pos_2^2+ν_p^2)*sinh(ν_p)
 
-j_Pos1 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_1)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos2 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_2)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos3 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_0)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos4 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_1)*Hlp2)/(CC_A*Hlp1*Hlp3)
-j_Pos5 = @. (k5*ζ*σ_eff_Pos*cos(Bound_Pos_0)*κ_eff_Pos*cos(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
-j_Pos6 = @. (k6*ζ*σ_eff_Pos*sin(Bound_Pos_0)*κ_eff_Pos*sin(Bound_Pos_1)*ν_p^2)/(CC_A*Hlp1*(Bound_Pos_2^2 + ν_p^2))
+j_Pos1 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_1)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
+j_Pos2 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_2)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
+j_Pos3 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_0)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
+j_Pos4 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_1)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
+j_Pos5 = @. (k5*ζ*(σ_eff_Pos*cos(Bound_Pos_0)+κ_eff_Pos*cos(Bound_Pos_1))*ν_p^2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*(Bound_Pos_2^2 + ν_p^2))
+j_Pos6 = @. (k6*ζ*(σ_eff_Pos*sin(Bound_Pos_0)+κ_eff_Pos*sin(Bound_Pos_1))*ν_p^2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*(Bound_Pos_2^2 + ν_p^2))
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6
-zero_tf = @. -ζ*(k6*cos(Bound_Pos_0)-cos(Bound_Pos_1)) + k5*(sin(Bound_Pos_1-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
+zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1)) + k5*(sin(Bound_Pos_1-sin(Bound_Pos_0))))/(CC_A*Bound_Pos_2)
 j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
-C_e =  @. ((j_Neg + j_Pos)/(s+λ))
+C_e =  ((j_Neg + j_Pos)./(s.+λ))
 
+println("C_e:",size(C_e))
+println("zero_tf:",zero_tf)
 i=1
 ψ = fill(0.0,1,length(z))
 for x in z #Eigen Weighting
-    if x < Lneg
+    if x < Lneg+eps()
        ψ[i] = k1[i]*cos(in1[i]*x) #negative electrode
-    elseif x < Lnegsep
-        ψ[i] = @. k3[i]*cos(in2[i]*x)+k4[i]*sin(in2[i]*x) # separator
+    elseif x > Lnegsep-eps()
+        ψ[i] = k5[i]*cos(in3[i]*x)+k6[i]*sin(in3[i]*x) # postive electrode
     else
-        ψ[i] = @. k5[i]*cos(in3[i]*x)+k6[i]*sin(in3[i]*x) # postive electrode
+        ψ[i] = k3[i]*cos(in2[i]*x)+k4[i]*sin(in2[i]*x) # separator
     end
+
+    println("x:",x)
+    println("lneg:",Lneg+eps())
+    println("lnegsep:",Lnegsep-eps())
 i = i+1
 end
 
-ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
-C_e = ψ_dims*C_e
+Ce_tf = zeros(ComplexF64,CellData.RA.M,length(s))
+for broad in 1:length(z)
+    tmp = ψ.*C_e[broad,:]
+    Ce_tf = tmp'+Ce_tf
+end
+
+#ψ_dims = ψ.*diagm(0=>fill(1., size(ψ,2)))
+#Ce_tf = ψ*C_e
 D_term = zeros(length(z))
 res0 = zeros(length(z))
-return C_e, D_term, res0
+
+print("z:",z, "\n")
+println("Ce_tf:",size(Ce_tf))
+println("ψ:",size(ψ))
+println("βn:",size(βn)) #good
+println("j0_neg:",size(j0_neg)) #good
+println("θ_neg:",θ_neg) #good
+println("Rtot_neg:",Rtot_neg) #good
+println("λ:",λ) #good
+println("s:",size(s))
+println("j_Neg:",size(j_Neg), "\n") #no 
+println("j_Pos:",size(j_Pos), "\n") #no
+println("ν_n:",size(ν_n)) #no
+
+return Ce_tf, D_term, res0
 end
 
 function roots(roots_n)

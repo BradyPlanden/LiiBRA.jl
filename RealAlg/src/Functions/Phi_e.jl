@@ -53,8 +53,8 @@ Rct_pos = R*T/(j0_pos*F^2)
 Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 #OCP derivative
-∂Uocp_pos = ∂Uocp("Pos",θ_pos)
-∂Uocp_neg = ∂Uocp("Neg",θ_neg)
+∂Uocp_pos = ∂Uocp("Pos",θ_pos)/cs_max_pos
+∂Uocp_neg = ∂Uocp("Neg",θ_neg)/cs_max_neg
 
 ν_neg = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg.+∂Uocp_neg*(CellData.Neg.Rs/(F*CellData.Neg.Ds)).*(tanh.(βn)./(tanh.(βn)-βn)))) #Condensing Variable - eq. 4.13
 ν_neg_∞ = @. Lneg*sqrt(as_neg*((1/κ_eff_Neg)+(1/σ_eff_Neg))/(Rtot_neg))
@@ -98,32 +98,40 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 D_term = fill(0.0,length(z))
 #D_term = convert(Complex{Float64},ϕ_tf)
-
+i=Int64(1)
 # Loop Tf's
-   for i = 1:length(z)
-      pt = z[i]
-         if pt <= Lneg
+   for pt in z
+         if pt <= Lneg+eps()
             ϕ_tf[i,:] = @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*Lneg)
             D_term[i,:]  .=  @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg_∞*pt/Lneg)) - pt*ν_neg_∞*sinh(ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞) + (Lneg*(cosh(ν_neg_∞)-cosh(ν_neg_∞*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞)))
-            ϕ_tf[:,findall(s.==0)] .= zero_tf
+            ϕ_tf[i,findall(s.==0)] .= zero_tf
    
-         elseif pt <= Lneg + Lsep
-            ϕ_tf[i,:] = @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
+         elseif pt <= Lneg + Lsep + eps()
+            ϕ_tf[i,:] = @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
             zero_tf = @. (2*κ_eff_Neg*Lneg-κ_eff_Sep*Lneg-2*κ_eff_Neg*pt)/(2*CC_A*κ_eff_Neg*κ_eff_Sep)
-            D_term[i,:] .= @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
-            ϕ_tf[:,findall(s.==0)] .= zero_tf
+            D_term[i,:] .= @. (Lneg - pt)/(CC_A*κ_eff_Sep) + (Lneg*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
+            ϕ_tf[i,findall(s.==0)] .= zero_tf
    
          else
-            ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2))-ν_neg)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
+            ϕ_tf[i,:] = @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
             zero_tf = @. -(κ_eff_Sep*κ_eff_Pos*Lneg*Lpos)/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos) + (κ_eff_Neg*(-2*κ_eff_Pos*Lpos*Lsep+κ_eff_Sep*(Lneg+Lsep-pt)*(Lneg+2*Lpos+Lsep-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*Lpos)
-            D_term[i,:]  .= @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2))-ν_neg_∞)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
-            ϕ_tf[:,findall(s.==0)] .= zero_tf
+            D_term[i,:]  .= @. (Lsep/(CC_A*κ_eff_Sep)) + Lneg*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - Lpos*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
+            ϕ_tf[i,findall(s.==0)] .= zero_tf
       end
+      i=i+1
  end
  if Debug == 1
-      println("D_term:Phi_e:",D_term)
-      println("ϕ_tf:Phi_e:",ϕ_tf)
+      println("D_term:Phi_e:",size(D_term))
+      println("ϕ_tf:Phi_e:",ϕ_tf[:,2])
+      println("D_term:Phi_e:Pos",D_term)
+      println("z:Phi_e:Pos",z)
+      println("ν_∞:Phi_e:Pos",ν_neg_∞)
+      println("j0:Phi_e:Pos",j0_neg)
+      println("Rtot:Phi_e:Pos",Rtot_neg)
+      println("σ_eff:Phi_e:Pos",σ_eff_Neg)
+      println("∂Uocp_elc:Phi_e:Pos",∂Uocp_neg)
+      println("L:Phi_e:Pos",Lneg)
  end
 res0 = zeros(length(z))
 

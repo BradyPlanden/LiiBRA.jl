@@ -18,7 +18,7 @@
 
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
-κ_eff = FCall.Kap.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
+κ_eff = FCall.Kap.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
@@ -26,7 +26,6 @@ as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 
 #Beta's
 β = @. Electrode.Rs*sqrt(s/Electrode.Ds )
-β = permutedims(β)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -43,7 +42,7 @@ Rct = R*CellData.Const.T /(j0*F^2)
 Rtot = Rct + Electrode.RFilm
 
 #∂Uocp_Def = UOCP(θ_Def)
-∂Uocp_elc = ∂Uocp(Def,θ)
+∂Uocp_elc = ∂Uocp(Def,θ)/cs_max
 
 #Condensing Variable
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β))))
@@ -63,6 +62,11 @@ if Def == "Pos" #Double check this implementation
         println("D_term:Flux:Pos",D_term)
         println("z:Flux:Pos",z)
         println("ν_∞:Flux:Pos",ν_∞)
+        println("j0:Flux:Pos",j0)
+        println("Rtot:Flux:Pos",Rtot)
+        println("σ_eff:Flux:Pos",σ_eff)
+        println("ν_∞:Flux:Pos",ν_∞)
+        println("L:Flux:Pos",Electrode.L)
     end
 else 
     if Debug == 1  

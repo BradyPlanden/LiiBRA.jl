@@ -19,7 +19,7 @@ function Phi_s(CellData::Cell,FCall::FCalls,s,z,Def)
 L = Electrode.L #Electrode Length
 T = CellData.Const.T  # Temperature
 as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
-κ_eff = FCall.Kap.κ*ϵ1^Electrode.κ_brug #Effective Electrolyte Conductivity 
+κ_eff = FCall.Kap.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
@@ -27,7 +27,6 @@ as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 
 #Beta's
 β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
-β = permutedims(β)
 
 #Prepare for j0
 cs0 = Electrode.cs_max * θ
@@ -40,9 +39,9 @@ j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electro
 Rtot = R*T/(j0*F^2) + Electrode.RFilm
 
 #∂Uocp_Def = UOCP(θ_Def)
-∂Uocp_elc = ∂Uocp(Def,θ)
+∂Uocp_elc = ∂Uocp(Def,θ)/Electrode.cs_max
 
-ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds)).*(tanh.(β)./(tanh.(β)-β)))) #Condensing Variable - eq. 4.13
+ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 ϕ_tf = @. -L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν))-L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19

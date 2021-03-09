@@ -15,6 +15,8 @@ function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}},Transfer
     Nfft = 2^(ceil(log2(CellData.RA.Fs*Tlen)))
     f = 0:Nfft-1
     s = (2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft)
+    s=s'
+    println("s:",size(s))
 
     # Loop Call Transfer Functions ---------------------------------
     tfft = @. Ts*f
@@ -38,6 +40,8 @@ function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}},Transfer
             tf, D_term, res0 = run(CellData,FCall,s,TransferFuns.tfs[i,3])
         end
         #println("D:",D[:,1], "\n")
+        println("tf:")
+        display("text/plain", tf[:,1:10])
         jk = CellData.RA.Fs.*real(ifft(tf)) # inverse fourier transform tranfser function response
         stpsum = cumsum(jk, dims=1).*Ts # cumulative sum of tf response * sample time
         nR = size(stpsum,1)
@@ -52,15 +56,14 @@ function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}},Transfer
                 dsTf[Output,:] = derivative(spl1,samplingtf[Output,:])
             end
 
-        # println("samplingtf",samplingtf)
+         #println("samplingtf",samplingtf[:,1:10])
          println("dsTf:",size(dsTf))
-         println("res0:",res0)
+         println("res0:",size(res0))
         puls = [puls; dsTf[:,2:end]]
         D = [D; D_term]
         C_Aug = [C_Aug; res0]
         DC_Gain = [DC_Gain; tf[:,1]]
         i = i + 1
-        #println("puls:",size(puls))
         if Debug == 1
             #println("jk:",jk, "\n")
             println("stpsum:",size(stpsum))
@@ -110,7 +113,7 @@ function DRA(CellData::Cell,FCall::FCalls,L::NTuple{10,Array{Number,1}},Transfer
         println("A:",A)
         println("eigenA:",eigA.values)
         B = Control[:,1:CellData.RA.N]
-        C = Observibility[1:CellData.RA.M,:]
+        C = Observibility[1:size(puls,1),:]
         println("C:",size(C))
         # Transform A,B,C matrices to final form
         C = C*SFactor[ones(Int64,size(C,2)),:]
