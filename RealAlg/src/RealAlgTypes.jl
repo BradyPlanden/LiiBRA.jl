@@ -70,11 +70,12 @@ end
 @with_kw struct RealisationAlgorthim
     Fs::Float64 = 2
     SamplingT::Float64 = 1
-    M::Int64 = 4 # Model order
+    M::Int64 = 10 # Model order
     N::Int64 = 1 # Inputs
-    Tlen::Int64 = 32768 #24
-    H1::Array{Int64,1} = 0:2000 #10
-    H2::Array{Int64,1} = 0:2000 #10
+    Tlen::Int64 = 65536 #32768 #24
+    H1::Array{Int64,1} = 0:2000 #4000 #2000
+    H2::Array{Int64,1} = 0:2000 #4000 #2000
+    Outs::Int64 = 21
 end
 
 # struct kappa{T<:Number}

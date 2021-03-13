@@ -80,7 +80,7 @@ if Def == "Pos" #Double check this implementation
     end
 end
 cse_res = cse_res*ones(length(z))
-println("cse_res:C_se:Pos",cse_res)
+# println("cse_res:C_se:Pos",cse_res)
 return cse_tf, D_term, cse_res
 
 end

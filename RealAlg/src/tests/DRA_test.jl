@@ -10,4 +10,4 @@ FCall= FCalls(kappa(CellData.Const.ce0))
 TransferFuns = TransferFun()
 
 
-DRA(CellData,FCall,loc,TransferFuns)
+A = DRA(CellData,FCall,loc,TransferFuns)

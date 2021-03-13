@@ -49,25 +49,27 @@ Rtot = Rct + Electrode.RFilm
 ∂Uocp_elc = ∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
 
 res0 = (-3*(∂Uocp_elc)/(as*F*L*CC_A*Rs))./s # residual for pole removal
-#println("res0:Phi_se:Pos",res0[2,:])
+ok = @. (tanh(β)/(tanh(β)-β))
+# println("tanhβ:Phi_se",ok[2])
 
 ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 
-ϕ_tf = @. L/(CC_A*ν*sinh(ν)*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1)))) #Transfer Function - eq. 4.14
+ϕ_tf = @. L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
 ϕ_tf = ϕ_tf.-res0
-println("ϕ_tf:Phi_se:Pos",ϕ_tf[:,1])
-zero_tf = @. (6*κ_eff*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*κ_eff*σ_eff) + 5*as*Ds*F*L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)/(30*CC_A*as*Ds*F*κ_eff*L*σ_eff))
-D_term = @. L/(CC_A*ν_∞*sinh(ν_∞)*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1)))) # Contribution to D as G->∞
+zero_tf = @. (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*L) + (5*as*Ds*F*L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*L)
+D_term = @. L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
    D_term = -D_term
    if Debug == 1
+      println("ϕ_tf:Phi_se:Pos",ϕ_tf[:,1])
       println("D_term:Phi_se:Pos",D_term)
       println("z:Phi_se:Pos",z)
+      println("zero_tf:Phi_se:Pos",zero_tf)
       println("ν_∞:Phi_se:Pos",ν_∞)
       println("j0:Phi_se:Pos",j0)
       println("Rtot:Phi_se:Pos",Rtot)
