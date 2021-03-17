@@ -1,4 +1,4 @@
-@inline function C_e(CellData::Cell,FCall::FCalls,s,z)
+@inline function C_e(CellData::Cell,s,z)
 """ 
 Electrolyte Concentration Transfer Function
 # Add License
@@ -13,14 +13,14 @@ t_plus = CellData.Const.t_plus  # Transference Number
 Ds_Neg = CellData.Neg.Ds       # Solid diffusivity [m^2/s]
 Ds_Pos = CellData.Pos.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
-κ_eff_Neg = FCall.Kap.κ*ϵ1^CellData.Neg.κ_brug
-κ_eff_Pos = FCall.Kap.κ*ϵ3^CellData.Pos.κ_brug
+κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
+κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
 
 #Defining SOC
-θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
-θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0 
+θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
+θ_pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0 
 
 #Beta's
 βn = @. CellData.Neg.Rs*sqrt(s/Ds_Neg)
@@ -141,7 +141,7 @@ j_Pos6 = @. (k6*ζ*(σ_eff_Pos*sin(Bound_Pos_0)+κ_eff_Pos*sin(Bound_Pos_1))*ν_
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6 =#
 
-j_Pos = @. -ζ*ν_p./(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p.^2).*sinh(ν_p)).*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos.*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos + σ_eff_Pos*cosh(ν_p)).*(k6*cos(Bound_Pos_0) - k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+ sinh(ν_p).*(k5*σ_eff_Pos*cos(Bound_Pos_0)+ k5*κ_eff_Pos*cos(Bound_Pos_1) +k6*σ_eff_Pos*sin(Bound_Pos_0) +k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p);
+j_Pos = @. -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
 zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
 j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
@@ -209,7 +209,7 @@ return Ce_tf, D_term, res0
 end
 
 function roots(roots_n)
-    root = Number[0]
+    root = Float64[0]
     i = 0.00001
     ∇ = 0.00001
     if(roots_n > 1)
@@ -224,7 +224,7 @@ function roots(roots_n)
 end
 
 function flambda(λ)
-    k1 = 1
+    k1 = 1.0
     sle1 = sqrt(λ*ϵ1/D1)
     sle2 = sqrt(λ*ϵ2/D2)
     sle3 = sqrt(λ*ϵ3/D3)
@@ -233,4 +233,4 @@ function flambda(λ)
     k5 = k3*(cos(sle2*Lnegsep).*cos(sle3*Lnegsep) + D2*sle2.*sin(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*cos(sle3*Lnegsep) - D2*sle2.*cos(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))
     k6 = k3*(cos(sle2*Lnegsep).*sin(sle3*Lnegsep) - D2*sle2.*sin(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*sin(sle3*Lnegsep) + D2*sle2.*cos(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))
     Psiprime = -k5.*sle3.*sin(sle3*Ltot) + k6.*sle3.*cos(sle3*Ltot)
-  end
+end

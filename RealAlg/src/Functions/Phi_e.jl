@@ -1,4 +1,4 @@
-@inline function Phi_e(CellData::Cell,FCall::FCalls,s,z)
+@inline function Phi_e(CellData::Cell,s,z)
    """ 
    Electrolyte Potential Transfer Function
    # Add License
@@ -14,17 +14,17 @@ T = CellData.Const.T      # Temperature
 t_plus = CellData.Const.t_plus  # Transference Number
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
-κ_eff_Neg = FCall.Kap.κ*ϵ1^CellData.Neg.κ_brug
-κ_eff_Sep = FCall.Kap.κ*ϵ2^CellData.Sep.κ_brug
-κ_eff_Pos = FCall.Kap.κ*ϵ3^CellData.Pos.κ_brug
+κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
+κ_eff_Sep = CellData.Const.κ*ϵ2^CellData.Sep.κ_brug
+κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
 dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
 κ_D_eff = (2*R*T/F)*κ_eff_Neg*(1-t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
 
 #Defining SOC
-θ_neg = CellData.Const.Init_SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
-θ_pos = CellData.Const.Init_SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
+θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
+θ_pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
 
 #Beta's
 βn = CellData.Neg.Rs.*sqrt.(s./CellData.Neg.Ds)

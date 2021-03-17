@@ -1,4 +1,4 @@
-function Phi_s(CellData::Cell,FCall::FCalls,s,z,Def)
+function Phi_s(CellData::Cell,s,z,Def)
     """ 
     Solid Potential Transfer Function
     # Add License
@@ -19,11 +19,11 @@ function Phi_s(CellData::Cell,FCall::FCalls,s,z,Def)
 L = Electrode.L #Electrode Length
 T = CellData.Const.T  # Temperature
 as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
-κ_eff = FCall.Kap.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
+κ_eff = CellData.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 
 #Defining SOC
-θ = CellData.Const.Init_SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
+θ = CellData.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
 
 #Beta's
 β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
