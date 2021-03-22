@@ -10,4 +10,15 @@ FCall= FCalls(kappa(CellData.Const.ce0))
 TransferFuns = TransferFun()
 
 
-A = DRA(CellData,FCall,loc,TransferFuns)
+const A_DRA = Array{Float64}(undef,0,CellData.RA.M)
+const B_DRA = Array{Float64}(undef,0,CellData.RA.M)
+const C_DRA = Array{Float64}(undef,0,CellData.RA.M)
+const D_DRA = Array{Float64}(undef,0,CellData.RA.M)
+for Temperature in 5.0:5.0:5.0
+    CellData.Const.T = 273.15+Temperature
+    for SOC in 0:0.05:0.05
+        CellData.Const.SOC = SOC
+        A, B, C, D = DRA(CellData,FCall,loc,TransferFuns)
+        println("DRA")
+    end
+end

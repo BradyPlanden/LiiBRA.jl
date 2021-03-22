@@ -179,7 +179,7 @@ for loop in 1:length(λ)
 end
 # println("ψ:")
 # display("text/plain", ψ)
-Ce_tf = zeros(ComplexF64,CellData.RA.M,length(s))
+Ce_tf = Array{ComplexF64}(undef,CellData.RA.M,length(s))
 #= for loop in 1:length(λ)
     for broad in 1:length(z)
     tmp = ψ.*C_e[broad,:]
