@@ -16,8 +16,6 @@ function Phi_s(CellData::Cell,s,z,Def)
     Electrode = CellData.Neg #Electrode Length
  end
 
-L = Electrode.L #Electrode Length
-T = CellData.Const.T  # Temperature
 as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 κ_eff = CellData.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
@@ -35,19 +33,19 @@ cs0 = Electrode.cs_max * θ
 κ = Electrode.k_norm/Electrode.cs_max/CellData.Const.ce0^(1-Electrode.α)
 j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
 
-#Resistances
-Rtot = R*T/(j0*F^2) + Electrode.RFilm
+#Resistance
+Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
-#∂Uocp_Def = UOCP(θ_Def)
+#∂Uocp_Def
 ∂Uocp_elc = ∂Uocp(Def,θ)/Electrode.cs_max
 
-ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
-ν_∞ = @. L*sqrt((as*(1/κ_eff)+(1/σ_eff))/(Rtot))
+ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
+ν_∞ = @. Electrode.L*sqrt((as*(1/κ_eff)+(1/σ_eff))/(Rtot))
 
-ϕ_tf = @. -L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν))-L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
-D_term = @. -L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞))-L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-D_term_check = @. ((-2+z)*z*L)/(2*CellData.Geo.CC_A*σ_eff)
-zero_tf = @. L*(z-2)*z/(2*CellData.Geo.CC_A*σ_eff)
+ϕ_tf = @. -Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
+D_term = @. -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Geo.CC_A*σ_eff*(κ_eff+σ_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
+D_term_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Geo.CC_A*σ_eff)
+zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Geo.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 

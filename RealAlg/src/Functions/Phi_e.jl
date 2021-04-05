@@ -10,8 +10,6 @@
    """
 
 
-T = CellData.Const.T      # Temperature
-t_plus = CellData.Const.t_plus  # Transference Number
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
 κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
@@ -20,7 +18,7 @@ De = CellData.Const.De # Electrolyte Diffusivity
 σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
 dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
-κ_D_eff = (2*R*T/F)*κ_eff_Neg*(1-t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
+κ_D_eff = (2*R*CellData.Const.T/F)*κ_eff_Neg*(1-CellData.Const.t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
 
 #Defining SOC
 θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
@@ -46,10 +44,10 @@ j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
 j0_pos = κ_pos*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
 #Resistances
-Rct_neg = R*T/(j0_neg*F^2)
+Rct_neg = R*CellData.Const.T/(j0_neg*F^2)
 Rtot_neg = Rct_neg + CellData.Neg.RFilm
 
-Rct_pos = R*T/(j0_pos*F^2)
+Rct_pos = R*CellData.Const.T/(j0_pos*F^2)
 Rtot_pos = Rct_pos + CellData.Pos.RFilm
 
 #OCP derivative
@@ -93,11 +91,8 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 #          #D_term  = @.  
 #    end
 
-ϕ_tf = fill(0.0 + im,(length(z),length(s)))
-#ϕ_tf = convert(Complex{Float64},ϕ_tf)
-
+ϕ_tf = Array{ComplexF64}(undef,length(z),length(s))
 D_term = fill(0.0,length(z))
-#D_term = convert(Complex{Float64},ϕ_tf)
 i=Int64(1)
 # Loop Tf's
    for pt in z
