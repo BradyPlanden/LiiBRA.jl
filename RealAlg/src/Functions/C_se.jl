@@ -56,7 +56,7 @@ cse_res = -3/(as*F*L*CC_A*Rs) #Residual Variable for Pole Removal - eq. 4.45
 cse_tf = @. ν*Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1))*tanh(β))/(as*F*L*CC_A*Ds*(κ_eff+σ_eff)*sinh(ν)*(tanh(β)-β)) #Transfer Function - eq. 4.17
 cse_tf =  cse_tf.-cse_res./s  #Pole removal - eq. 4.43
 
-zero_tf = @. (5*as*Ds*F*L^2*(κ_eff*(2-6*z+3*z^2)+(3*z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
+zero_tf = @. @fastmath (5*as*Ds*F*L^2*(κ_eff*(2-6*z+3*z^2)+(3*z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
 cse_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 D_term = zeros(length(z))
 

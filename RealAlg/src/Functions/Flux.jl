@@ -46,10 +46,10 @@ Rtot = Rct + Electrode.RFilm
 
 #Condensing Variable
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β))))
-ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
+ν_∞ = @. @fastmath Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function
-j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+j_tf = @. @fastmath ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
 D_term = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
 zero_tf =ones(2)*1/(CellData.Geo.CC_A*as*F*Electrode.L)
 j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]

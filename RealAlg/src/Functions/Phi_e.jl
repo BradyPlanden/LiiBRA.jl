@@ -55,9 +55,9 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 ∂Uocp_neg = ∂Uocp("Neg",θ_neg)/cs_max_neg
 
 ν_neg = @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg.+∂Uocp_neg*(CellData.Neg.Rs/(F*CellData.Neg.Ds)).*(tanh.(βn)./(tanh.(βn)-βn)))) #Condensing Variable - eq. 4.13
-ν_neg_∞ = @. Lneg*sqrt(as_neg*((1/κ_eff_Neg)+(1/σ_eff_Neg))/(Rtot_neg))
+ν_neg_∞ = @. @fastmath Lneg*sqrt(as_neg*((1/κ_eff_Neg)+(1/σ_eff_Neg))/(Rtot_neg))
 ν_pos = @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos.+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds )).*(tanh.(βp)./(tanh.(βp)-βp)))) #Condensing Variable - eq. 4.13
-ν_pos_∞ = @. Lpos*sqrt(as_pos*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
+ν_pos_∞ = @. @fastmath Lpos*sqrt(as_pos*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
 
 
 # if tf = Rod17 #Consider splitting into different function calls.
@@ -95,7 +95,7 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 D_term = fill(0.0,length(z))
 i=Int64(1)
 # Loop Tf's
-   for pt in z
+  @fastmath for pt in z
          if pt <= Lneg+eps()
             ϕ_tf[i,:] = @. (Lneg*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Lneg)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (Lneg*(cosh(ν_neg)-cosh(ν_neg*(Lneg-pt)/Lneg)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*Lneg)

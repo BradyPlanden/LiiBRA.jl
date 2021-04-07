@@ -1,4 +1,4 @@
-@inline function DRA(CellData::Cell,s,f,L::NTuple{10,Array{Number,1}},TransferFuns)
+@inline function DRA(CellData::Cell,s,f,L::NTuple,TransferFuns)
     """ 
     Discrete Realiastion Algorithm
     # Add License
@@ -31,11 +31,11 @@
 
     for run in TransferFuns.tfs[:,1]
         if TransferFuns.tfs[i,2] == "Pos"
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Pos")
+            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Pos") #high compute line
         elseif TransferFuns.tfs[i,2] == "Neg"
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Neg")
+            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Neg") #high compute line
         else 
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3])
+            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3]) #high compute line
         end
 
         jk = CellData.RA.Fs.*real(ifft(tf,2)') # inverse fourier transform tranfser function response
@@ -46,7 +46,7 @@
 
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
             for Output in 1:nR
-                spl1 = Spline1D(tfft,stpsum[Output,:]; k=3)
+                spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
                 #dsTf[Output,:] = diff(samplingtf[Output,:], dims=2)
             end
@@ -75,23 +75,23 @@
     end
     puls = reverse!(puls, dims=2)
     if DRA_Debug == 1
-        # println("tf__:",size(tf__))
-        # display("text/plain", tf__)
+        println("tf__:",size(tf__))
+        display("text/plain", tf__)
 
-        # println("testifft__:",size(testifft__))
-        # display("text/plain", testifft__)
+        println("testifft__:",size(testifft__))
+        display("text/plain", testifft__)
 
-        # println("jk__:",size(jk__))
-        # display("text/plain", jk__)
+        println("jk__:",size(jk__))
+        display("text/plain", jk__)
 
-        # println("stpsum__:")
-        # display("text/plain", stpsum__)
+        println("stpsum__:")
+        display("text/plain", stpsum__)
     end
 
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
     puls .= puls./SFactor
-    #println("puls:",size(puls))
+   
     #Hankel Formation, perform svd to determine the highest order singular values
     Puls_L = size(puls,1)
     Hank1 = Array{Float64}(undef,length(CellData.RA.H1)*Puls_L,length(CellData.RA.H2))
@@ -100,8 +100,8 @@
 
     for lp1 in 1:length(CellData.RA.H2)
         for lp2 in 1:length(CellData.RA.H1)
-            Hank1[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,CellData.RA.H2[lp1]+CellData.RA.H1[lp2]+1]
-            Hank2[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,CellData.RA.H2[lp1]+CellData.RA.H1[lp2]+2]
+             Hank1[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,CellData.RA.H2[lp1]+CellData.RA.H1[lp2]+1] #High compute line
+             Hank2[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,CellData.RA.H2[lp1]+CellData.RA.H1[lp2]+2] #High compute line
         end
     end
 
@@ -113,10 +113,10 @@
         S_ = sqrt(diagm(F.S))
         Observibility = F.U[:,1:CellData.RA.M]*S_
         Control = S_*F.V[:,1:CellData.RA.M]'
-        A = Observibility\Hank2/Control
+        @fastmath A = Observibility\Hank2/Control #High compute line
 
-        eigA = eigen(A)
-        E = diagm([1;eigA.values])
+        eigA = eigvals(A)
+        E = diagm([1;eigA])
         Ei = E'
 
         B = Control[:,1:CellData.RA.N]
@@ -127,8 +127,8 @@
         C = C.*SFactor[ones(Int64,size(C,1)),:]
         if C_Aug == 0
             A_Final = A
-            B_Final = diagm([eigA.values])'*B
-            C_Final = C*diagm([eigA.values])
+            B_Final = diagm([eigA])'*B
+            C_Final = C*diagm([eigA])
         else
             A_Final = E
             B_Final = Ei*[CellData.RA.SamplingT; B]

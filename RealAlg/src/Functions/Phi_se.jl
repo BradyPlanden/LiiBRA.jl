@@ -16,10 +16,7 @@
     Electrode = CellData.Neg #Electrode Length
  end
 
-L = Electrode.L #Electrode Length
-T = CellData.Const.T      # Temperature
-t_plus = CellData.Const.t_plus  # Transference Number
-ζ = (1-t_plus)/F    #Simplifying Variable
+ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable
 Rs = Electrode.Rs       # Particle radius [m]
 Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
 CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
@@ -43,23 +40,23 @@ cs0 = cs_max * θ
 j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α #Exchange Current Density
 
 #Resistances
-Rct = R*T/(j0*F^2)
+Rct = R*CellData.Const.T/(j0*F^2)
 Rtot = Rct + Electrode.RFilm
 
 ∂Uocp_elc = ∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
 
-res0 = (-3*(∂Uocp_elc)/(as*F*L*CC_A*Rs))./s # residual for pole removal
+res0 = @fastmath (-3*(∂Uocp_elc)/(as*F*Electrode.L*CC_A*Rs))./s # residual for pole removal
 ok = @. (tanh(β)/(tanh(β)-β))
 # println("tanhβ:Phi_se",ok[2])
 
-ν = @. L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
-ν_∞ = @. L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
+ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot.+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
+ν_∞ = @. @fastmath Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 
-ϕ_tf = @. L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
+ϕ_tf = @. @fastmath Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
 ϕ_tf = ϕ_tf.-res0
-zero_tf = @. (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*L) + (5*as*Ds*F*L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*L)
-D_term = @. L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
+zero_tf = @. @fastmath (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*Electrode.L) + (5*as*Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*Electrode.L)
+D_term = @. @fastmath Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 if Def == "Pos" #Double check this implementation
