@@ -18,16 +18,16 @@
 
     #Initialise Loop Variables
     puls = Array{Float64}(undef,0,size(OrgT,1)-1)
+    D = Array{Float64}(undef,0,1)
+    C_Aug = Array{Float64}(undef,0,1)
+    DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
     # tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
-    D = Array{Float64}(undef,0,1)
     #D_term = Array{Float64}(undef,0,1)
     #res0 = Array{Float64}(undef,0,1)
-    C_Aug = Array{Float64}(undef,0,1)
-    DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
 
     for run in TransferFuns.tfs[:,1]
         if TransferFuns.tfs[i,2] == "Pos"
@@ -73,7 +73,9 @@
             # testifft__ = [testifft__ testifft]
         end
     end
+
     puls = reverse!(puls, dims=2)
+
     if DRA_Debug == 1
         println("tf__:",size(tf__))
         display("text/plain", tf__)
@@ -97,7 +99,6 @@
     Hank1 = Array{Float64}(undef,length(CellData.RA.H1)*Puls_L,length(CellData.RA.H2))
     Hank2 = Array{Float64}(undef,length(CellData.RA.H1)*Puls_L,length(CellData.RA.H2))
 
-
     for lp1 in 1:length(CellData.RA.H2)
         for lp2 in 1:length(CellData.RA.H1)
              Hank1[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,CellData.RA.H2[lp1]+CellData.RA.H1[lp2]+1] #High compute line
@@ -111,16 +112,16 @@
     # Create Observibility and Control Matrices -> Create A, B, and C 
 
         S_ = sqrt(diagm(F.S))
-        Observibility = F.U[:,1:CellData.RA.M]*S_
-        Control = S_*F.V[:,1:CellData.RA.M]'
+        Observibility = (@view F.U[:,1:CellData.RA.M])*S_
+        Control = S_*(@view F.V[:,1:CellData.RA.M])'
         @fastmath A = Observibility\Hank2/Control #High compute line
 
         eigA = eigvals(A)
         E = diagm([1;eigA])
         Ei = E'
 
-        B = Control[:,1:CellData.RA.N]
-        C = Observibility[1:size(puls,1),:]
+        B = @view Control[:,1:CellData.RA.N]
+        C = @view Observibility[1:size(puls,1),:]
 
 
         # Transform A,B,C matrices to final form

@@ -122,12 +122,11 @@ for loop in 1:length(λ)
     end
 end
 
-Ce_tf = Array{ComplexF64}(undef,CellData.RA.M,length(s))
-Ce_tf = ψ*C_e
+C_e = ψ*C_e
 D_term = zeros(length(z))
 res0 = zeros(length(z))
 
-return Ce_tf, D_term, res0
+return C_e, D_term, res0
 end
 
 function roots(roots_n)
