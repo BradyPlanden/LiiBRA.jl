@@ -1,4 +1,4 @@
-@inline function DRA(CellData::Cell,s,f,L::NTuple,TransferFuns)
+@inline function DRA(CellData,s,f,L::NTuple,TransferFuns)
     """ 
     Discrete Realiastion Algorithm
     # Add License
@@ -42,7 +42,7 @@
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
         nR = size(stpsum,1)
         samplingtf = Array{Float64}(undef,nR,length(OrgT))
-        dsTf = Array{Float64}(undef,nR,length(OrgT))
+        #dsTf = Array{Float64}(undef,nR,length(OrgT))
 
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
             for Output in 1:nR

@@ -1,4 +1,4 @@
-@inline function Phi_se(CellData::Cell,s,z,Def)
+@inline function Phi_se(CellData,s,z,Def)
     """ 
     Solid Potential Transfer Function
     # Add License
@@ -19,7 +19,7 @@
 ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable
 Rs = Electrode.Rs       # Particle radius [m]
 Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
-CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
+CC_A = CellData.Const.CC_A   # Current-collector area [m^2]
 as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 κ_eff = CellData.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
@@ -43,7 +43,7 @@ j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α #Exchange Current Density
 Rct = R*CellData.Const.T/(j0*F^2)
 Rtot = Rct + Electrode.RFilm
 
-∂Uocp_elc = ∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
+∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
 
 res0 = @fastmath (-3*(∂Uocp_elc)/(as*F*Electrode.L*CC_A*Rs))./s # residual for pole removal
 ok = @. (tanh(β)/(tanh(β)-β))

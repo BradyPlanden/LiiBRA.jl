@@ -1,4 +1,4 @@
-function Phi_s(CellData::Cell,s,z,Def)
+function Phi_s(CellData,s,z,Def)
     """ 
     Solid Potential Transfer Function
     # Add License
@@ -38,15 +38,15 @@ j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electro
 Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
 #∂Uocp_Def
-∂Uocp_elc = ∂Uocp(Def,θ)/Electrode.cs_max
+∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. @fastmath Electrode.L*sqrt((as*(1/κ_eff)+(1/σ_eff))/(Rtot))
 
-ϕ_tf = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Geo.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Geo.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
-D_term = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Geo.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Geo.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-#D_term_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Geo.CC_A*σ_eff)
-zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Geo.CC_A*σ_eff)
+ϕ_tf = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
+D_term = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
+#D_term_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Const.CC_A*σ_eff)
+zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Const.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 

@@ -1,12 +1,11 @@
-using RealAlg, UnitSystems
+using RealAlg
 
-@inline function CData() # Create structs
-    CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
+function CData() # Create structs
+    #CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
     loc = (Number[0, 128e-6, 204e-6, 394e-6],Number[0,1], Number[0,1], Number[128e-6, 204e-6, 394e-6],Number[1],Number[1],Number[0,1],Number[0,1],Number[0,1],Number[0,1])
     TransferFuns = TransferFun()
-    return CellData, loc, TransferFuns
+    return loc, TransferFuns
 end
-
 
 
 @inline function Impulse() # Create s Vector 
@@ -21,8 +20,8 @@ end
 
     for Temp in 5.0:5.0:5.0
         CellData.Const.T = 273.15+Temp
-        Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/universal(SI2019)
-        CellData.Const.κ = Kappa(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
+        Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/R
+        CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
             for SOC in 0:0.05:0.0
                 CellData.Const.SOC = SOC
                 A, B, C, D = DRA(CellData,s,f,loc,TransferFuns)
@@ -34,9 +33,9 @@ end
     end
 
 return A_DRA, B_DRA, C_DRA, D_DRA
-
 end
 
-CellData, loc, TransferFuns = CData()
+
+loc, TransferFuns = CData()
 Nfft, f, s = Impulse()
 A_DRA, B_DRA, C_DRA, D_DRA = DRA_loop(CellData,s,f,loc,TransferFuns)

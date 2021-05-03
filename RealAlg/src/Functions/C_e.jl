@@ -1,4 +1,4 @@
-@inline function C_e(CellData::Cell,s,z)
+@inline function C_e(CellData,s,z)
 """ 
 Electrolyte Concentration Transfer Function
 # Add License
@@ -8,11 +8,12 @@ Electrolyte Concentration Transfer Function
 """
 
 ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable
-CC_A = CellData.Geo.CC_A   # Current-collector area [m^2]
-κ_eff_Neg = CellData.Const.κ*ϵ1^CellData.Neg.κ_brug
-κ_eff_Pos = CellData.Const.κ*ϵ3^CellData.Pos.κ_brug
+CC_A = CellData.Const.CC_A   # Current-collector area [m^2]
+κ_eff_Neg = CellData.Const.κ*CellData.Neg.ϵ_e^CellData.Neg.κ_brug
+κ_eff_Pos = CellData.Const.κ*CellData.Pos.ϵ_e^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
+
 
 #Defining SOC
 θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
@@ -40,12 +41,12 @@ Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
 Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 #OCP derivative
-∂Uocp_pos = ∂Uocp("Pos",θ_pos)/cs_max_pos
-∂Uocp_neg = ∂Uocp("Neg",θ_neg)/cs_max_neg
+∂Uocp_pos = CellData.Const.∂Uocp("Pos",θ_pos)/cs_max_pos
+∂Uocp_neg = CellData.Const.∂Uocp("Neg",θ_neg)/cs_max_neg
 
 #Condensing Variable
-ν_n =  @. Lneg*sqrt((as_neg/σ_eff_Neg+as_neg/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(CellData.Neg.Rs/(F*CellData.Neg.Ds))*(tanh(βn)/(tanh(βn)-βn))))
-ν_p =  @. Lpos*sqrt((as_pos/σ_eff_Pos+as_pos/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
+ν_n =  @. CellData.Neg.L*sqrt((CellData.Neg.as/σ_eff_Neg+CellData.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(CellData.Neg.Rs/(F*CellData.Neg.Ds))*(tanh(βn)/(tanh(βn)-βn))))
+ν_p =  @. CellData.Pos.L*sqrt((CellData.Pos.as/σ_eff_Pos+CellData.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
 
 
 λ = roots(CellData.RA.M+1)
@@ -53,16 +54,16 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 
 #Create all k's
-in1 = @. sqrt(λ*ϵ1/D1)
-in2 = @. sqrt(λ*ϵ2/D2)
-in3 = @. sqrt(λ*ϵ3/D3)
+in1 = @. sqrt(λ*CellData.Neg.ϵ_e/D1)
+in2 = @. sqrt(λ*CellData.Sep.ϵ_e/D2)
+in3 = @. sqrt(λ*CellData.Pos.ϵ_e/D3)
 
-Bound_Neg_1 = Lneg * in1
-Bound_Sep_0 = Lneg * in2
-Bound_Sep_1 = (Lneg+Lsep) * in2
-Bound_Pos_0 = (Lneg+Lsep) * in3
+Bound_Neg_1 = CellData.Neg.L * in1
+Bound_Sep_0 = CellData.Neg.L * in2
+Bound_Sep_1 = (CellData.Neg.L+CellData.Sep.L) * in2
+Bound_Pos_0 = (CellData.Neg.L+CellData.Sep.L) * in3
 Bound_Pos_1 = Ltot * in3
-Bound_Pos_2 = Lpos * in3
+Bound_Pos_2 = CellData.Pos.L * in3
 
 #Scaled coefficients
 k3_s = cos.(Bound_Neg_1).*cos.(Bound_Sep_0)+D1*in1.*sin.(Bound_Neg_1).*sin.(Bound_Sep_0)./(D2*in2)
@@ -71,9 +72,9 @@ k5_s = k3_s.*(cos.(Bound_Sep_1).*cos.(Bound_Pos_0)+D2*in2.*sin.(Bound_Sep_1).*si
 k6_s = k3_s.*(cos.(Bound_Sep_1).*sin.(Bound_Pos_0)-D2*in2.*sin.(Bound_Sep_1).*cos.(Bound_Pos_0)./(D3*in3))+k4_s.*(sin.(Bound_Sep_1).*sin.(Bound_Pos_0)+D2*in2.*cos.(Bound_Sep_1).*cos.(Bound_Pos_0)./(D3*in3));
 
 #Solving for k1:
-Int_ψ1 = @. ϵ1*(2*Bound_Neg_1+sin(2*Bound_Neg_1))/(4*in1)
-Int_ψ2 = @. ϵ2/(4*in2)*(2*(k3_s^2+k4_s^2)*Lsep*in2+2*k3_s*k4_s*cos(2*Bound_Sep_0)-2*k3_s*k4_s*cos(2*Bound_Sep_1)-(k3_s-k4_s)*(k3_s+k4_s)*(sin(2*Bound_Sep_0)-sin(2*Bound_Sep_1)))
-Int_ψ3 = ϵ3./(4*in3) .* (2 .* (k5_s.^2+k6_s.^2) .* Lpos .* in3 + 2*k5_s .* k6_s .* cos.(2 .* Bound_Pos_0) .- 2 .* k5_s .* k6_s .* cos.(2 .* Bound_Pos_1) .- (k5_s .- k6_s) .* (k5_s .+ k6_s) .* (sin.(2 .* Bound_Pos_0) .- sin.(2 .* Bound_Pos_1)))
+Int_ψ1 = @. CellData.Neg.ϵ_e*(2*Bound_Neg_1+sin(2*Bound_Neg_1))/(4*in1)
+Int_ψ2 = @. CellData.Sep.ϵ_e/(4*in2)*(2*(k3_s^2+k4_s^2)*CellData.Sep.L*in2+2*k3_s*k4_s*cos(2*Bound_Sep_0)-2*k3_s*k4_s*cos(2*Bound_Sep_1)-(k3_s-k4_s)*(k3_s+k4_s)*(sin(2*Bound_Sep_0)-sin(2*Bound_Sep_1)))
+Int_ψ3 = CellData.Pos.ϵ_e./(4*in3) .* (2 .* (k5_s.^2+k6_s.^2) .* CellData.Pos.L .* in3 + 2*k5_s .* k6_s .* cos.(2 .* Bound_Pos_0) .- 2 .* k5_s .* k6_s .* cos.(2 .* Bound_Pos_1) .- (k5_s .- k6_s) .* (k5_s .+ k6_s) .* (sin.(2 .* Bound_Pos_0) .- sin.(2 .* Bound_Pos_1)))
 
 k1 = @. 1/(sqrt(Int_ψ1+Int_ψ2+Int_ψ3))
 k3 = @. k1*k3_s
@@ -110,7 +111,7 @@ i=Int64(1)
 for loop in 1:length(λ)
     i=1
     for x in z #Eigen Weighting
-        if x < Lneg+eps()
+        if x < CellData.Neg.L+eps()
             ψ[i,loop] = k1[loop]*cos(in1[loop]*x) #negative electrode
         elseif x > Lnegsep-eps()
             ψ[i,loop] = k5[loop]*cos(in3[loop]*x)+k6[loop]*sin(in3[loop]*x) # postive electrode
@@ -129,7 +130,7 @@ res0 = zeros(length(z))
 return C_e, D_term, res0
 end
 
-function roots(roots_n)
+function roots(roots_n) #Change these functions to be inclusive of CellData struct -> one input for roots
     root = Float64[0]
     i = 0.00001
     ∇ = 0.00001
@@ -144,7 +145,7 @@ function roots(roots_n)
     return root
 end
 
-@fastmath function flambda(λ)
+function flambda(λ)
     k1 = Float64(1)
     sle1 = sqrt(λ*ϵ1/D1)
     sle2 = sqrt(λ*ϵ2/D2)
@@ -154,4 +155,5 @@ end
     k5 = k3*(cos(sle2*Lnegsep).*cos(sle3*Lnegsep) + D2*sle2.*sin(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*cos(sle3*Lnegsep) - D2*sle2.*cos(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))
     k6 = k3*(cos(sle2*Lnegsep).*sin(sle3*Lnegsep) - D2*sle2.*sin(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*sin(sle3*Lnegsep) + D2*sle2.*cos(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))
     Psiprime = -k5.*sle3.*sin(sle3*Ltot) + k6.*sle3.*cos(sle3*Ltot)
+    return Psiprime
 end
