@@ -1,9 +1,9 @@
 module RealAlg
 
-using Roots, UnitSystems, DataFrames, CSV, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack #, PROPACK
+using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack #, PROPACK
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export CellData, C_e, Negative, Constants, Positive, Seperator, j, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, ϵ1
+export CellData, C_e, Negative, Constants, Positive, Seperator, j, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F
 
 include("RealAlgTypes.jl")
 include("Functions/C_e.jl")

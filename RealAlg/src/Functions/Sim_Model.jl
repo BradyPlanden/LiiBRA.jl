@@ -64,8 +64,9 @@ function Sim_Model(CellData,Iapp,Tk,A,B,C,D)
 
         #Relinearise dependent on ν, σ, κ
         #Call from CellData? List of functions composed from ROM creation?
+        D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
 
-        ∂x[i,:] = A*x[i,:]+B*Iapp[i]
+
         y[i,:] = C*x[i,:]+D*Iapp[i]
 
         
@@ -102,6 +103,7 @@ function Sim_Model(CellData,Iapp,Tk,A,B,C,D)
         η_overP_neg = 
 
         #
+        x[i+1,:] = A*x[i,:]'+B*Iapp[i]
 
     end
     #Join data into struct and export
