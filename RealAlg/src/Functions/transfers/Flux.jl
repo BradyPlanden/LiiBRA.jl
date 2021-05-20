@@ -50,16 +50,18 @@ Rtot = Rct + Electrode.RFilm
 
 #Transfer Function
 j_tf = @. @fastmath ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
-D_term = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
+D = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
+D_term = "@. $ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
 zero_tf =ones(2)*1/(CellData.Const.CC_A*as*F*Electrode.L)
 j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation
     j_tf = -j_tf
-    D_term = -D_term
+    D = -D
+    D_term = "@. -$ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
     if Debug == 1
-        println("D_term:Flux:Pos",D_term)
+        println("D:Flux:Pos",D)
         println("z:Flux:Pos",z)
         println("ν_∞:Flux:Pos",ν_∞)
         println("j0:Flux:Pos",j0)
@@ -70,13 +72,13 @@ if Def == "Pos" #Double check this implementation
     end
 else 
     if Debug == 1  
-        println("D_term:Flux:Neg",D_term)
+        println("D:Flux:Neg",D)
         println("z:Flux:Neg",z)
         println("ν_∞:Flux:Neg",ν_∞)
-        println("D_term:Flux:Neg",D_term)
+        println("D:Flux:Neg",D)
     end
 end
 
-return j_tf, D_term, res0
+return j_tf, D, res0, D_term
 
 end

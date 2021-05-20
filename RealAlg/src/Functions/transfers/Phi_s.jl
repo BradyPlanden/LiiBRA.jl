@@ -44,18 +44,20 @@ Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 ν_∞ = @. @fastmath Electrode.L*sqrt((as*(1/κ_eff)+(1/σ_eff))/(Rtot))
 
 ϕ_tf = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
-D_term = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-#D_term_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Const.CC_A*σ_eff)
+D = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
+D_term = "-$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
+#D_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Const.CC_A*σ_eff)
 zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Const.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
-   D_term = -D_term
+   D = -D
+   D_term = "$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
    if Debug == 1
-      println("D_term:Phi_s:Pos:",D_term)
-      println("D_term_check:Phi_s:Pos:",D_term_check)
+      println("D:Phi_s:Pos:",D)
+      println("D_check:Phi_s:Pos:",D_check)
       #println("z:Phi_s:Pos:",z)
       println("ν_∞:Phi_s:Pos:",ν_∞)
       #println("ν:Phi_s:Pos:",ν)
@@ -68,8 +70,8 @@ if Def == "Pos" #Double check this implementation
    end
 else
    if Debug == 1
-      println("D_term:Phi_s:Neg:",D_term)
-      println("D_term_check:Phi_s:Neg:",D_term_check)
+      println("D:Phi_s:Neg:",D)
+      println("D_check:Phi_s:Neg:",D_check)
       println("ν_∞:Phi_s:Neg:",ν_∞)
       println("θ:Phi_s:Neg:",θ)
       println("κ:Phi_s:Neg:",κ)
@@ -82,6 +84,6 @@ else
       #println("ν:Phi_s:Neg:",ν)
    end
 end
-return ϕ_tf, D_term, res0
+return ϕ_tf, D, res0, D_term
 
 end

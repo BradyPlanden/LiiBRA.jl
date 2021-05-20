@@ -68,7 +68,7 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 #       if pt <= CellData.Neg.L
 #          ϕ_tf = @. CellData.Neg.L*(σ_eff*(1-cosh(ν_neg*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(κ_eff*cosh(ν_neg)-cosh(ν_neg*(1-pt))-pt*sinh(ν_neg)*ν_neg))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)
 #          zero_tf = @. -(CellData.Neg.L*pt^2)/(2*as*κ_eff) - (κ_d*CellData.Neg.L)(t_plus-1)*pt^2)/(2*A*ce0*De*F*κ_eff)
-#          #D_term  =  @. CellData.Neg.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Neg.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞)
+#          #D  =  @. CellData.Neg.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Neg.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞)
 #          ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
 
 #       elseif pt <= CellData.Neg.L + CellData.Sep.L
@@ -77,7 +77,7 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 #          ϕ_n_tf = @. CellData.Neg.L*(σ_eff*(1-cosh(ν_neg*CellData.Neg.L)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(κ_eff*cosh(ν_neg)-cosh(ν_neg*(1-CellData.Neg.L))-CellData.Neg.L*sinh(ν_neg)*ν_neg))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)
 #          ϕ_tf = @. ϕ_n_tf + ϕ_tf1 + ϕ_tf2 
 #          zero_tf = @. -(CellData.Neg.L*pt^2)/(2*as*κ_eff) - (κ_d*CellData.Neg.L)(t_plus-1)*pt^2)/(2*A*ce0*De*F*κ_eff)
-#          #D_term  = @. CellData.Sep.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Sep.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) - pt*CellData.Sep.L/(as*κ_eff)
+#          #D  = @. CellData.Sep.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Sep.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) - pt*CellData.Sep.L/(as*κ_eff)
 #          ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
 
 #       else
@@ -88,38 +88,42 @@ Rtot_pos = Rct_pos + CellData.Pos.RFilm
 #          ϕ_p_tf2 = -(κ_D_eff/κ_eff_Pos*ce0)*(cp1*(e^ΛP1*pt-e^Λp1)+cp2*(e^ΛP1*pt-e^Λp1)+cp3*(e^ΛP2*pt-e^Λp2)+cp4*(e^ΛP2*pt-e^Λp2))
 #          ϕ_tf = @. ϕ_n_tf + ϕ_s_tf1 + ϕ_s_tf2 + ϕ_p_tf1 + ϕ_p_tf2
 
-#          #D_term  = @.  
+#          #D  = @.  
 #    end
 
 ϕ_tf = Array{ComplexF64}(undef,length(z),length(s))
-D_term = fill(0.0,length(z))
+D_term = Array{String}(undef,length(z),1)
+D = fill(0.0,length(z))
 i=Int64(1)
 # Loop Tf's
   @fastmath for pt in z
          if pt <= CellData.Neg.L+eps()
             ϕ_tf[i,:] = @. (CellData.Neg.L*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/CellData.Neg.L)) - pt*ν_neg*sinh(ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(cosh(ν_neg)-cosh(ν_neg*(CellData.Neg.L-pt)/CellData.Neg.L)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg))) #Lee. Eqn. 4.22
             zero_tf = @. -(pt^2)/(2*CC_A*κ_eff_Neg*CellData.Neg.L)
-            D_term[i,:]  .=  @. (CellData.Neg.L*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg_∞*pt/CellData.Neg.L)) - pt*ν_neg_∞*sinh(ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞) + (CellData.Neg.L*(cosh(ν_neg_∞)-cosh(ν_neg_∞*(CellData.Neg.L-pt)/CellData.Neg.L)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞)))
+            D[i,:]  .=  @. (CellData.Neg.L*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg_∞*pt/CellData.Neg.L)) - pt*ν_neg_∞*sinh(ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞) + (CellData.Neg.L*(cosh(ν_neg_∞)-cosh(ν_neg_∞*(CellData.Neg.L-pt)/CellData.Neg.L)/(CC_A*κ_eff_Neg*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg_∞)*ν_neg_∞)))
             ϕ_tf[i,findall(s.==0)] .= zero_tf
-   
+            D_term[i,:] .= "@. ($(CellData.Neg.L)*($σ_eff_Neg/$κ_eff_Neg)*(1-cosh($ν_neg_∞*$pt/$(CellData.Neg.L))) - $pt*$ν_neg_∞*sinh($ν_neg_∞))/($CC_A*($κ_eff_Neg+$σ_eff_Neg)*sinh($ν_neg_∞)*$ν_neg_∞) + ($(CellData.Neg.L)*(cosh($ν_neg_∞)-cosh($ν_neg_∞*($(CellData.Neg.L)-$pt)/$(CellData.Neg.L))/($CC_A*$κ_eff_Neg*($κ_eff_Neg+$σ_eff_Neg)*sinh($ν_neg_∞)*$ν_neg_∞)))"
+         
          elseif pt <= CellData.Neg.L + CellData.Sep.L + eps()
             ϕ_tf[i,:] = @. (CellData.Neg.L - pt)/(CC_A*κ_eff_Sep) + (CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23
             zero_tf = @. (2*κ_eff_Neg*CellData.Neg.L-κ_eff_Sep*CellData.Neg.L-2*κ_eff_Neg*pt)/(2*CC_A*κ_eff_Neg*κ_eff_Sep)
-            D_term[i,:] .= @. (CellData.Neg.L - pt)/(CC_A*κ_eff_Sep) + (CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
+            D[i,:] .= @. (CellData.Neg.L - pt)/(CC_A*κ_eff_Sep) + (CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞)
             ϕ_tf[i,findall(s.==0)] .= zero_tf
+            D_term[i,:] .= "@. ($(CellData.Neg.L - pt))/($CC_A*$κ_eff_Sep) + ($(CellData.Neg.L)*((1-$σ_eff_Neg/$κ_eff_Neg)*tanh($ν_neg_∞/2)-$ν_neg_∞))/($CC_A*($κ_eff_Neg+$σ_eff_Neg)*$ν_neg_∞)"
    
          else
             ϕ_tf[i,:] = @. (CellData.Sep.L/(CC_A*κ_eff_Sep)) + CellData.Neg.L*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) - CellData.Pos.L*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos)*ν_pos)  #Lee. Eqn. 4.24
             zero_tf = @. -(κ_eff_Sep*κ_eff_Pos*CellData.Neg.L*CellData.Pos.L)/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*CellData.Pos.L) + (κ_eff_Neg*(-2*κ_eff_Pos*CellData.Pos.L*CellData.Sep.L+κ_eff_Sep*(CellData.Neg.L+CellData.Sep.L-pt)*(CellData.Neg.L+2*CellData.Pos.L+CellData.Sep.L-pt)))/(2*CC_A*κ_eff_Neg*κ_eff_Sep*κ_eff_Pos*CellData.Pos.L)
-            D_term[i,:]  .= @. (CellData.Sep.L/(CC_A*κ_eff_Sep)) + CellData.Neg.L*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - CellData.Pos.L*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
+            D[i,:]  .= @. (CellData.Sep.L/(CC_A*κ_eff_Sep)) + CellData.Neg.L*(((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg_∞/2)-ν_neg_∞))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg_∞) - CellData.Pos.L*(1+(σ_eff_Pos/κ_eff_Pos)*cosh(ν_pos_∞))/(CC_A*(κ_eff_Pos+σ_eff_Neg)*sinh(ν_pos_∞)*ν_pos_∞)
             ϕ_tf[i,findall(s.==0)] .= zero_tf
+            D_term[i,:] .= "@. ($(CellData.Sep.L)/($CC_A*$κ_eff_Sep)) + $(CellData.Neg.L)*(((1-$σ_eff_Neg/$κ_eff_Neg)*tanh($ν_neg_∞/2)-$ν_neg_∞))/($CC_A*($κ_eff_Neg+$σ_eff_Neg)*$ν_neg_∞) - $(CellData.Pos.L)*(1+($σ_eff_Pos/$κ_eff_Pos)*cosh($ν_pos_∞))/($CC_A*($κ_eff_Pos+$σ_eff_Neg)*sinh($ν_pos_∞)*$ν_pos_∞)"
       end
       i=i+1
  end
  if Debug == 1
-      println("D_term:Phi_e:",size(D_term))
+      println("D:Phi_e:",size(D))
       println("ϕ_tf:Phi_e:",ϕ_tf[:,2])
-      println("D_term:Phi_e:Pos",D_term)
+      println("D:Phi_e:Pos",D)
       println("z:Phi_e:Pos",z)
       println("ν_∞:Phi_e:Pos",ν_neg_∞)
       println("j0:Phi_e:Pos",j0_neg)
@@ -127,9 +131,10 @@ i=Int64(1)
       println("σ_eff:Phi_e:Pos",σ_eff_Neg)
       println("∂Uocp_elc:Phi_e:Pos",∂Uocp_neg)
       println("L:Phi_e:Pos",CellData.Neg.L)
+      println("D_term:", D_term)
  end
 res0 = zeros(length(z))
 
-return ϕ_tf, D_term, res0
+return ϕ_tf, D, res0, D_term
 
 end

@@ -1,17 +1,17 @@
 module RealAlg
 
-using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack #, PROPACK
+using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack, Printf #, PROPACK
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
 export CellData, C_e, Negative, Constants, Positive, Seperator, j, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F
 
 include("RealAlgTypes.jl")
-include("Functions/C_e.jl")
-include("Functions/C_se.jl")
-include("Functions/Flux.jl")
-include("Functions/Phi_s.jl")
-include("Functions/Phi_e.jl")
-include("Functions/Phi_se.jl")
+include("Functions/transfers/C_e.jl")
+include("Functions/transfers/C_se.jl")
+include("Functions/transfers/Flux.jl")
+include("Functions/transfers/Phi_s.jl")
+include("Functions/transfers/Phi_e.jl")
+include("Functions/transfers/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Data/Chen_2020/LG_M50.jl")
 

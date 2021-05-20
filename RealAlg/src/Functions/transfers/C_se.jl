@@ -58,14 +58,15 @@ cse_tf =  cse_tf.-cse_res./s  #Pole removal - eq. 4.43
 
 zero_tf = @. @fastmath (5*as*Ds*F*L^2*(κ_eff*(2-6*z+3*z^2)+(3*z^2-1)*σ_eff)-6*∂Uocp_elc*Rs*κ_eff*σ_eff*κ_eff)/(30*CC_A*as*Ds*∂Uocp_elc*F*L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
 cse_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-D_term = zeros(length(z))
+D = zeros(length(z))
+D_term = "zeros(length($z))"
 
 if Def == "Pos" #Double check this implementation
     cse_tf = -cse_tf
     cse_res = -cse_res
 
     if Debug == 1
-        println("D_term:C_se:Pos",D_term)
+        println("D:C_se:Pos",D)
         println("z:C_se:Pos",z)
         println("zero_tf:C_se:Pos",zero_tf[:,1])
         println("κ_eff:C_se:Pos",κ_eff)
@@ -81,6 +82,6 @@ if Def == "Pos" #Double check this implementation
 end
 cse_res = cse_res*ones(length(z))
 # println("cse_res:C_se:Pos",cse_res)
-return cse_tf, D_term, cse_res
+return cse_tf, D, cse_res, D_term
 
 end

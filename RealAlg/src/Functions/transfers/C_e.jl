@@ -124,10 +124,11 @@ for loop in 1:length(λ)
 end
 
 C_e = ψ*C_e
-D_term = zeros(length(z))
+D =  zeros(length(z))
+D_term = "zeros(length($z))"
 res0 = zeros(length(z))
 
-return C_e, D_term, res0
+return C_e, D, res0, D_term
 end
 
 function roots(roots_n) #Change these functions to be inclusive of CellData struct -> one input for roots

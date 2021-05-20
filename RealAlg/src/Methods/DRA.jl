@@ -1,4 +1,4 @@
-@inline function DRA(CellData,s,f,L::NTuple,TransferFuns)
+@inline function DRA(CellData,s,f,TransferFuns)
     """ 
     Discrete Realiastion Algorithm
     # Add License
@@ -19,6 +19,7 @@
     #Initialise Loop Variables
     puls = Array{Float64}(undef,0,size(OrgT,1)-1)
     D = Array{Float64}(undef,0,1)
+    Dtt = Array{String}(undef,0,1)
     C_Aug = Array{Float64}(undef,0,1)
     DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
     #tf = Vector{Array}
@@ -31,11 +32,11 @@
 
     for run in TransferFuns.tfs[:,1]
         if TransferFuns.tfs[i,2] == "Pos"
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Pos") #high compute line
+            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3],"Pos") #high compute line
         elseif TransferFuns.tfs[i,2] == "Neg"
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3],"Neg") #high compute line
+            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3],"Neg") #high compute line
         else 
-            tf, D_term, res0 = run(CellData,s,TransferFuns.tfs[i,3]) #high compute line
+            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3]) #high compute line
         end
 
         jk = CellData.RA.Fs.*real(ifft(tf,2)') # inverse fourier transform tranfser function response
@@ -53,7 +54,8 @@
 
             dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
             puls = [puls; dsTf[:,2:end]]
-            D = [D; D_term]
+            D = [D; Di]
+            Dtt = [Dtt; Dti]
             C_Aug = [C_Aug; res0]
             DC_Gain = [DC_Gain; tf[:,1]]
             i = i + 1
@@ -152,5 +154,5 @@
         #  display("text/plain", D)
     #end
 
-return A_Final, B_Final, C_Final, D
+return A_Final, B_Final, C_Final, D, Dtt
 end

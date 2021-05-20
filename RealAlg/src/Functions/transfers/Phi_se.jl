@@ -56,15 +56,17 @@ ok = @. (tanh(β)/(tanh(β)-β))
 ϕ_tf = @. @fastmath Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
 ϕ_tf = ϕ_tf.-res0
 zero_tf = @. @fastmath (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*Electrode.L) + (5*as*Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*Electrode.L)
-D_term = @. @fastmath Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
+D = @. @fastmath Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
+D_term = "@. $(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
-   D_term = -D_term
+   D = -D
+   D_term = "@. -$(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
    if Debug == 1
       println("ϕ_tf:Phi_se:Pos",ϕ_tf[:,1])
-      println("D_term:Phi_se:Pos",D_term)
+      println("D:Phi_se:Pos",D)
       println("z:Phi_se:Pos",z)
       println("zero_tf:Phi_se:Pos",zero_tf)
       println("ν_∞:Phi_se:Pos",ν_∞)
@@ -77,6 +79,6 @@ if Def == "Pos" #Double check this implementation
   end
 end
 res0 = zeros(length(z))
-return ϕ_tf, D_term, res0
+return ϕ_tf, D, res0, D_term
 
 end
