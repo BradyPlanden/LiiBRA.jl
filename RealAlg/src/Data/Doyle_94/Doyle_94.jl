@@ -14,6 +14,13 @@ using Parameters
     CC_A::Float64 = 1.0 
     κ::Float64 = 1.0
     κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
+    Uocp::Function = (Electrode, θ) ->
+        if Electrode == "Neg"
+            Uocp = (-20000*exp(-2000*θ) - 3.96*exp(-3*θ))
+        else
+            Uocp = -0.8090*ce + 4.4875 - 0.0428*tanh(18.5138*(ce - 0.5542)) - 17.7326*tanh(15.7890*(ce - 0.3117)) + 17.5842*tanh(15.9308*(ce - 0.3120))
+        end
+
     ∂Uocp::Function = (Electrode,θ) -> 
         if Electrode == "Neg"
             ∂Uocp = (-20000*exp(-2000*θ) - 3.96*exp(-3*θ))

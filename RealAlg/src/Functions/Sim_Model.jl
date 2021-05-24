@@ -1,4 +1,4 @@
-function Sim_Model(CellData,Iapp,Tk,A,B,C,D)
+function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     """ 
     Simulation of generated reduced-order models
     # Add License
@@ -64,48 +64,50 @@ function Sim_Model(CellData,Iapp,Tk,A,B,C,D)
 
         #Relinearise dependent on ν, σ, κ
         #Call from CellData? List of functions composed from ROM creation?
-        D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
+        #D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
+        for j in 1:length(Dtt)
+            D[j] .= eval(Meta.parse(Dtt[j]))
+        end
 
-
+        #SS Output
         y[i,:] = C*x[i,:]+D*Iapp[i]
 
         
         #Concentrations
-        Cse_Neg_0 = 
-        Cse_Neg_1 = 
-        Cse_Pos_0 =
-        Cse_Pos_1 = 
-        Ce_0 = 
-        Ce_1 = 
-        Ce_2 = 
-        Ce_3 = 
+        Cse_Neg = SOC*CellData.Neg.cs_max + y[i,CseNegInd] #Range - 
+        Cse_Pos = SOC*CellData.Pos.cs_max + y[i,CsePosInd] #Range
+        Ce = ce0 + y[i,CeInd]
 
         #Potentials
-        Phi_se_0 = 
-        Uocp_Neg = 
-        Uocp_Pos = 
-        Phi_e_tilde1 = 
-        Phi_e_tilde2
-        Phi_e = 
+        Uocp_Neg = CellData.Neg.Uocp("Neg",θ_neg)
+        Uocp_Pos = CellData.Neg.Uocp("Pos",θ_pos)
+        ϕ_se_neg_0 = y[i, ϕ_seNegInd[1]] #Location 0
+        ϕ_ẽ1 = [0 y[i,ϕ_ẽInd]]
+        ϕ_ẽ2 = ((Tk[i]*2*R)/F)(log.(Ce./Ce[1])*(1-CellData.Const.t_plus))
+        ϕ_e = ϕ_ẽ1+ϕ_ẽ2-ϕ_se_neg_0
 
         #Flux
-        j0_CC_neg = 
-        j0_neg =  
-        η0 = 
-        η_neg = 
-        j0_CC_pos = 
-        j0_pos = 
-        ηL = 
-        η_pos = 
+        j0_CC_neg = findmax(((CellData.Neg.cs_max+Cse_Neg[1])^(1-CellData.Neg.α))*((Cse_Neg[1]^CellData.Neg.α)*(Ce[1]^(1-CellData.Neg.α)))*k_norm_neg)[1]
+        j0_neg =  findmax(((Cse_Neg.^CellData.Neg.α)*(Ce[1:2].^(1-CellData.Neg.α)))*(CellData.Neg.cs_max.-Cse_Neg)^(1-CellData.Neg.α)*k_norm_neg)[1]
+        η0[i] = asinh.((y[i,JnegInd[1]]/(2*j0_CC_neg)))*(Tk[i]*2*R/F)
+        η_neg[i] = (Tk[i]*2*R/F)./asinh.((y[i,JnegInd]/(2*j0_neg)))
+
+        j0_CC_pos = findmax(((CellData.Pos.cs_max+Cse_Pos[1])^(1-CellData.Pos.α))*((Cse_Pos[1]^CellData.Pos.α)*(Ce[1]^(1-CellData.Pos.α)))*k_norm_pos)[1] 
+        j0_pos = findmax(((Cse_Pos.^CellData.Pos.α)*(Ce[1:2].^(1-CellData.Pos.α)))*(CellData.Pos.cs_max.-Cse_Pos)^(1-CellData.Pos.α)*k_norm_pos)[1]
+        ηL = asinh.((y[i,JposInd[1]]/(2*j0_CC_pos)))*(Tk[i]*2*R/F)
+        η_po[i] = (Tk[i]*2*R/F)./asinh.((y[i,JposInd]/(2*j0_pos)))
 
         #Cell Voltage
-        Cell_V = 
-        η_overP_neg = 
+        Cell_V[i] = (Uocp_Pos-Uocp_Neg) + (ηL-η0) + ϕ_ẽ1[end] + ϕ_ẽ2[end]+ (CellData.Pos.RFilm*j0_pos-CellData.Neg.RFilm*j0_neg)*F
 
-        #
-        x[i+1,:] = A*x[i,:]'+B*Iapp[i]
+        #ϕ_s
+        ϕ_s_neg = y[i,ϕ_sNegInd]
+        ϕ_s_pos = y[i,ϕ_sPosInd] + Cell_V[i]
+
+
+        #Update States
+        x[i+1,:] = A*x[i,:]' + B*Iapp[i]
 
     end
-    #Join data into struct and export
 
 end

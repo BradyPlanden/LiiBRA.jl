@@ -1,4 +1,4 @@
-using RealAlg
+using RealAlg, JLD
 
 function CData() # Create structs
     #CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
@@ -39,3 +39,4 @@ end
 TransferFuns = CData()
 Nfft, f, s = Impulse()
 A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData,s,f,TransferFuns)
+save("RealAlg_$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt)
