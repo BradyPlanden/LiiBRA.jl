@@ -12,23 +12,19 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     #Determine Inital conditions
 
     #Defining SOC
-    θ_neg[1] = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
-    θ_pos[1] = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
-    SOC = CellData.Concentration.SOC
-
-
+    θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
+    θ_pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
+    SOC = CellData.Const.SOC
+    x = zeros(tlength,size(A,1))
 
 
     #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
-
-
-    for i in 2:tlength
-        
-        cs_neg_avg = x[k+1,end]*csegain_neg+θ_neg*CellData.Neg.cs_max
-        θ_neg = cs_neg_avg/CellData.Neg.cs_max
-        cs_pos_avg = x[k+1,end]*csegain_pos+θ_pos*CellData.Pos.cs_max
-        θ_pos = cs_pos_avg/CellData.Pos.cs_max
+    for i in 1:tlength
+        cs_neg_avg = x[i,end]*csegain_neg+θ_neg*CellData.Neg.cs_max
+        θ_neg[i] = cs_neg_avg/CellData.Neg.cs_max
+        cs_pos_avg = x[i,end]*csegain_pos+θ_pos*CellData.Pos.cs_max
+        θ_pos[i] = cs_pos_avg/CellData.Pos.cs_max
         Cell_SOC = (θ_neg-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
         jeq_neg = CellData.Neg.k*sqrt(cs_neg_avg*(CellData.Const.Ce0*(CellData.Neg.cs_max-cs_neg_avg)))
@@ -109,5 +105,5 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         x[i+1,:] = A*x[i,:]' + B*Iapp[i]
 
     end
-
+    return Cell_V
 end

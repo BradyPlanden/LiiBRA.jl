@@ -1,12 +1,4 @@
-using RealAlg, JLD
-
-function CData() # Create structs
-    #CellData = Cell(Constants(),Geometry(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
-    #loc = (Number[0, 128e-6, 204e-6, 394e-6],Number[128e-6, 204e-6, 394e-6], Number[0,1], Number[128e-6, 204e-6, 394e-6],Number[1],Number[1],Number[0,1],Number[0,1],Number[0,1],Number[0,1])
-    TransferFuns = TransferFun()
-    return TransferFuns
-end
-
+using LIBRA, JLD
 
 @inline function Impulse() # Create s Vector 
     Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
@@ -36,7 +28,11 @@ return A_DRA, B_DRA, C_DRA, D_DRA, Dtt
 end
 
 
-TransferFuns = CData()
+TransferFuns = TransferFun()
 Nfft, f, s = Impulse()
 A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData,s,f,TransferFuns)
-save("RealAlg_$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt)
+#save("RealAlg_$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt)
+
+Tk = ones(100)*25
+Iapp = ones(100)
+CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
