@@ -1,4 +1,4 @@
-@inline function DRA(CellData,s,f,TransferFuns)
+@inline function DRA(CellData,s,f)
     """ 
     Discrete Realiastion Algorithm
     # Add License
@@ -30,13 +30,13 @@
     #D_term = Array{Float64}(undef,0,1)
     #res0 = Array{Float64}(undef,0,1)
 
-    for run in TransferFuns.tfs[:,1]
-        if TransferFuns.tfs[i,2] == "Pos"
-            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3],"Pos") #high compute line
-        elseif TransferFuns.tfs[i,2] == "Neg"
-            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3],"Neg") #high compute line
+    for run in CellData.Transfer.tfs[:,1]
+        if CellData.Transfer.tfs[i,2] == "Pos"
+            tf, Di, res0, Dti = run(CellData,s,CellData.Transfer.tfs[i,3],"Pos") #high compute line
+        elseif CellData.Transfer.tfs[i,2] == "Neg"
+            tf, Di, res0, Dti = run(CellData,s,CellData.Transfer.tfs[i,3],"Neg") #high compute line
         else 
-            tf, Di, res0, Dti = run(CellData,s,TransferFuns.tfs[i,3]) #high compute line
+            tf, Di, res0, Dti = run(CellData,s,CellData.Transfer.tfs[i,3]) #high compute line
         end
 
         jk = CellData.RA.Fs.*real(ifft(tf,2)') # inverse fourier transform tranfser function response

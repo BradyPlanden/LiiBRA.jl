@@ -3,15 +3,15 @@ module LIBRA
 using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack, Printf, JLD #, PROPACK
 
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export CellData, C_e, Negative, Constants, Positive, Seperator, j, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellTyp, Sim_Model
+export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellTyp, Sim_Model
 
-include("RealAlgTypes.jl")
-include("Functions/transfers/C_e.jl")
-include("Functions/transfers/C_se.jl")
-include("Functions/transfers/Flux.jl")
-include("Functions/transfers/Phi_s.jl")
-include("Functions/transfers/Phi_e.jl")
-include("Functions/transfers/Phi_se.jl")
+include("LIBRATypes.jl")
+include("Functions/Transfer/C_e.jl")
+include("Functions/Transfer/C_se.jl")
+include("Functions/Transfer/Flux.jl")
+include("Functions/Transfer/Phi_s.jl")
+include("Functions/Transfer/Phi_e.jl")
+include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 include("Data/Chen_2020/LG_M50.jl")

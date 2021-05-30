@@ -1,4 +1,4 @@
-@inline function j(CellData,s,z,Def)
+@inline function Flux(CellData,s,z,Def)
     """ 
     Flux Transfer Function
     # Add License

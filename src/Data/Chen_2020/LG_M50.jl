@@ -98,12 +98,28 @@ end
     Outs::Int64 = 21
 end
 
+@with_kw mutable struct TransferFun
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    # tfst_temp = Array{String}(undef,0,1)
+    # t1 = Array{String}(undef,0,1)
+    # t2 = Array{String}(undef,0,1)
+    # tfst::Function = (tfs,tfst_temp,t1,t2,tfst!) ->
+    # for i in 1:size(tfs[:,1],1)
+    #     for j in 1:size(tfs[i,3],1)
+    #         t1 = "$(tfs[i,1])"
+    #         t2 = [t2; t1]
+    #     end
+    #     tfst = [tfst_temp; t2]
+    # end
+end
+
 @with_kw mutable struct Cell
     Const::Constants
     Neg::Negative
     Pos::Positive
     Sep::Seperator
     RA::RealisationAlgorthim
+    Transfer::TransferFun
 end
 
-CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
+CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(), TransferFun())

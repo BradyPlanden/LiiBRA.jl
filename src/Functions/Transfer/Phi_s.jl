@@ -45,7 +45,7 @@ Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
 ϕ_tf = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
 D = @. @fastmath -Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞)))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-D_term = "-$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
+D_term = "@. -$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
 #D_check = @. ((-2+z)*z*Electrode.L)/(2*CellData.Const.CC_A*σ_eff)
 zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Const.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
@@ -54,7 +54,7 @@ res0 = zeros(length(z))
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
    D = -D
-   D_term = "$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
+   D_term = "@. $(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
    if Debug == 1
       println("D:Phi_s:Pos:",D)
       println("D_check:Phi_s:Pos:",D_check)
