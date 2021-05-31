@@ -131,8 +131,12 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
 
         #Flux
         j0_CC_neg = findmax(((CellData.Neg.cs_max+Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[1]^(1-CellData.Neg.α)))*k_neg)[1]
+        println("j0_CC_neg:",size(j0_CC_neg))
+        display("text/plain", j0_CC_neg)
+
+        println("FluxNegInd:", FluxNegInd[1])
         j0_neg = @. findmax(((Cse_Neg^CellData.Neg.α)*(Ce[i,1:2]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)*k_neg)[1]
-        η0[i,:] = @. asinh((y[i,FluxNegInd[1]]/(2*j0_CC_neg)))*(Tk[i]*2*R/F)
+        η0[i,:] .= @. asinh((y[i,FluxNegInd[1]]/(2*j0_CC_neg)))*(Tk[i]*2*R/F)
         η_neg[i,:] = @. (Tk[i]*2*R/F)/asinh(y[i,FluxNegInd]/(2*j0_neg[i,:]))
 
         j0_CC_pos = findmax(((CellData.Pos.cs_max+Cse_Pos[1])^(1-CellData.Pos.α))*((Cse_Pos[1]^CellData.Pos.α)*(Ce[1]^(1-CellData.Pos.α)))*k_pos)[1] 
