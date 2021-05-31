@@ -35,6 +35,6 @@ Nfft, f, s = Impulse()
 A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData,s,f)
 #save("$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt) #Switch to jld2
 
-Tk = ones(100)*25
-Iapp = ones(100)
+Tk = ones(101)*298.15
+Iapp = ones(101)*-0.1
 CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)

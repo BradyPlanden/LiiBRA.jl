@@ -7,7 +7,7 @@ using Parameters
         tpf::Function = ce -> -0.1287*ce^3+0.4106*ce^2-0.4717*ce+0.4492 #Transference Number Function
         De::Float64 = 1.0e-11   #Inital Electrolyte Diffusivity
         Def::Function = ce -> 8.794e-11*ce^2-3.972e-10*ce+4.862e-10 #Electrolyte Diffusivity Function
-    SOC::Float64 = 0.0
+    SOC::Float64 = 1.
     ce0::Float64 = 2000
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
