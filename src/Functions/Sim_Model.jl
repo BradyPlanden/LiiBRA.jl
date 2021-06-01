@@ -120,10 +120,10 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
 
         #SS Output
         y[i,:] = C*x[i,:]+D*Iapp[i]
-        println("y:",size(y))
         display("text/plain", x[i,:])
+        println("\n")
         display("text/plain", y[i,:])
-
+        println("\n")
         #Concentrations
         Cse_Neg[i,:] = @. θ_neg[i]*CellData.Neg.cs_max + y[i,CseNegInd]  
         Cse_Pos[i,:] = @. θ_pos[i]*CellData.Pos.cs_max + y[i,CsePosInd] 
@@ -133,12 +133,12 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         #Potentials
         Uocp_Neg = CellData.Const.Uocp("Neg",θ_neg[i])
         Uocp_Pos = CellData.Const.Uocp("Pos",θ_pos[i])
-        println("ϕ_seNegInd[1]:",ϕ_seNegInd[1])
-        println("Uocp_Neg:",Uocp_Neg)
-        println("y[i, ϕ_seNegInd[1]]:",y[i, ϕ_seNegInd[1]])
+        # println("ϕ_seNegInd[1]:",ϕ_seNegInd[1])
+        # println("Uocp_Neg:",Uocp_Neg)
+        # println("y[i, ϕ_seNegInd[1]]:",y[i, ϕ_seNegInd[1]])
         ϕ_se_neg_0[i] = y[i, ϕ_seNegInd[1]] + Uocp_Neg #Location 0
         ϕ_ẽ1[i,:] = y[i,ϕ_ẽInd]
-        ϕ_ẽ2 = @. ((Tk[i]*2*R)/F)*(log(Ce[i,:]/Ce[1])*(1-CellData.Const.t_plus))
+        ϕ_ẽ2 = @. ((Tk[i]*2*R*(1-CellData.Const.t_plus))/F)*(log(Ce[i,:]/Ce[1]))
         ϕ_e = @. [0; ϕ_ẽ1[i,:]]+ϕ_ẽ2-ϕ_se_neg_0[i]
 
         #Flux
@@ -154,15 +154,18 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         ηL[i] = asinh(y[i,FluxPosInd[1]])/(2*j0_CC_pos)*(Tk[i]*2*R/F)
         η_pos[i,:] = @. (Tk[i]*2*R/F)/asinh((y[i,FluxPosInd]/(2*j0_pos)))
 
-        println("(2*j0_CC_pos)",(2*j0_CC_pos))
-        println("asinh(y[i,FluxPosInd[1]])",asinh(y[i,FluxPosInd[1]]))
-        println("(Tk[i]*2*R/F)",(Tk[i]*2*R/F))
-        println("ηL[i,:]", ηL[i,:])
-        println("η0[i,:]", η0[i,:])
-        println("j0_CC_pos",j0_CC_pos)
         #Cell Voltage
         Cell_V[i] = @. (Uocp_Pos-Uocp_Neg) + (ηL[i]-η0[i]) + (ϕ_ẽ1[i,end]+ϕ_ẽ2[end]) + (CellData.Pos.RFilm*j0[i]-CellData.Neg.RFilm*j0[i])*F
         println("Cell_V:",Cell_V[i])
+        println("Uocp:",Uocp_Pos)
+        println("Uocp_Neg:",Uocp_Pos)
+        println("ηL[i]:",ηL[i])
+        println("η0[i]:",η0[i])
+        println("ϕ_ẽ1[i,end]:",ϕ_ẽ1[i,end])
+        println("ϕ_ẽ2[end]:",ϕ_ẽ2[end])
+        println("CellData.Pos.RFilm*j0[i]:",CellData.Pos.RFilm*j0[i])
+        println("CellData.Neg.RFilm*j0[i]):",CellData.Neg.RFilm*j0[i])
+        println("")
         #ϕ_s
         ϕ_s_neg = y[i,ϕ_sNegInd]
         ϕ_s_pos = @. y[i,ϕ_sPosInd] + Cell_V[i]

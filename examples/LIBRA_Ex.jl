@@ -13,11 +13,11 @@ end
 
 @inline function DRA_loop(CellData,s,f)
     A_DRA = B_DRA = C_DRA = D_DRA = Dtt = tuple()
-    for Temp in 5.0:5.0:5.0
+    for Temp in 25.0:25.0:25.0
         CellData.Const.T = 273.15+Temp
         Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/R
         CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
-            for SOC in 0:0.05:0.0
+            for SOC in 1.:1.:1.
                 CellData.Const.SOC = SOC
                 A, B, C, D, Dtt = DRA(CellData,s,f)
                 A_DRA = flatten(A_DRA,A)
@@ -36,5 +36,5 @@ A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData,s,f)
 #save("$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt) #Switch to jld2
 
 Tk = ones(101)*298.15
-Iapp = ones(101)*-0.1
+Iapp = ones(101)*0.1
 CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)

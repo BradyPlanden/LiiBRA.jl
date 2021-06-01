@@ -52,7 +52,7 @@ end
     k_ref::Float64 = 2.16e-11
     D1::Float64 = 1.0   #Init Value
     D1f::Function = De -> De * ϵ_e^De_brug #Effective Diffusivity
-    as::Float64 = 3*ϵ_s/Rs # Specific interfacial surf. area
+    as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
 end
 
 @with_kw mutable struct Positive
@@ -75,7 +75,7 @@ end
     RFilm::Float64 = 0
     D3::Float64 = 1.0   #Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
-    as::Float64 = 3*ϵ_s/Rs # Specific interfacial surf. area
+    as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
 end
 
 @with_kw mutable struct Seperator
@@ -93,9 +93,9 @@ end
     M::Int64 = 5 # Model order
     N::Int64 = 1 # Inputs
     Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24
-    H1::Array{Int64,1} = 0:2000 #4000 #4612
-    H2::Array{Int64,1} = 0:2000 #4000 #4612
-    Outs::Int64 = 21
+    H1::Array{Int64,1} = 0:3000 #4000 #4612
+    H2::Array{Int64,1} = 0:3000 #4000 #4612
+    Outs::Int64 = 25
 end
 
 @with_kw mutable struct TransferFun
