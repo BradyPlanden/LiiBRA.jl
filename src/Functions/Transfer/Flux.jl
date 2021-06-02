@@ -38,25 +38,24 @@ cs0 = cs_max * θ
 j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α
 
 #Resistances
-Rct = R*CellData.Const.T /(j0*F^2)
-Rtot = Rct + Electrode.RFilm
+Rtot = R*CellData.Const.T /(j0*F^2) + Electrode.RFilm
 
-#∂Uocp_Def = UOCP(θ_Def)
+#∂Uocp_Def
 ∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/cs_max
 
 #Condensing Variable
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β))))
-ν_∞ = @. @fastmath Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
+ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function
-j_tf = @. @fastmath ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
 D = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
 D_term = "@. $ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
 zero_tf =ones(2)*1/(CellData.Const.CC_A*as*F*Electrode.L)
 j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 
-if Def == "Pos" #Double check this implementation
+if Def == "Pos"
     j_tf = -j_tf
     D = -D
     D_term = "@. -$ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"

@@ -21,7 +21,6 @@
     D = Array{Float64}(undef,0,1)
     Dtt = Array{String}(undef,0,1)
     C_Aug = Array{Float64}(undef,0,1)
-    #DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
     # tf__ = Array{Float64}(undef,0,length(s))
@@ -43,7 +42,6 @@
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
         nR = size(stpsum,1)
         samplingtf = Array{Float64}(undef,nR,length(OrgT))
-        #dsTf = Array{Float64}(undef,nR,length(OrgT))
 
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
             for Output in 1:nR
@@ -57,7 +55,6 @@
             D = [D; Di]
             Dtt = [Dtt; Dti]
             C_Aug = [C_Aug; res0]
-           #DC_Gain = [DC_Gain; tf[:,1]]
             i = i+1
 
         if Debug == 1

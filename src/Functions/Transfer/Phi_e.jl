@@ -25,8 +25,8 @@ dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
 θ_pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
 
 #Beta's
-βn = CellData.Neg.Rs.*sqrt.(s./CellData.Neg.Ds)
-βp = CellData.Pos.Rs.*sqrt.(s./CellData.Pos.Ds)
+βn = @. CellData.Neg.Rs*sqrt(s/CellData.Neg.Ds)
+βp = @. CellData.Pos.Rs*sqrt(s/CellData.Pos.Ds)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -43,12 +43,9 @@ cs0_pos = cs_max_pos * θ_pos
 j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
 j0_pos = κ_pos*(ce0*cs_max_pos*cs0_pos)^(1-α_pos)*cs0_pos^α_pos
 
-#Resistances
-Rct_neg = R*CellData.Const.T/(j0_neg*F^2)
-Rtot_neg = Rct_neg + CellData.Neg.RFilm
-
-Rct_pos = R*CellData.Const.T/(j0_pos*F^2)
-Rtot_pos = Rct_pos + CellData.Pos.RFilm
+#Resistances 
+Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
+Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 #OCP derivative
 ∂Uocp_pos = CellData.Const.∂Uocp("Pos",θ_pos)/cs_max_pos

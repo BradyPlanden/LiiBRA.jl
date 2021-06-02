@@ -52,7 +52,6 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 λ = roots(CellData.RA.M+1)
 λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
 
-
 #Create all k's
 in1 = @. sqrt(λ*CellData.Neg.ϵ_e/D1)
 in2 = @. sqrt(λ*CellData.Sep.ϵ_e/D2)
@@ -82,8 +81,7 @@ k4 = @. k1*k4_s
 k5 = @. k1*k5_s
 k6 = @. k1*k6_s
 
-j_Neg = @. k1*ζ*ν_n.*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh.(ν_n))*sin.(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos.(Bound_Neg_1)).*sinh.(ν_n).*ν_n) ./(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2 +ν_n.^2).*sinh.(ν_n))
-#j_Neg = @. (((κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*ν_n)*(k1*ζ*Bound_Neg_1*sin(Bound_Neg_1)))/(sinh(ν_n)*CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2+ν_n^2))) + (((κ_eff_Neg+σ_eff_Neg*cosh(Bound_Neg_1))*ν_n^2)*(k1*ζ))/(CC_A*(κ_eff_Neg+σ_eff_Neg)*((Bound_Neg_1^2+ν_n^2)))
+j_Neg = @. k1*ζ*ν_n*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*sin(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos(Bound_Neg_1))*sinh.(ν_n)*ν_n)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2 +ν_n^2)*sinh(ν_n))
 zero_tf_neg = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
 j_Neg[:,findall(s.==0)] .= zero_tf_neg[:,findall(s.==0)]
 
@@ -100,11 +98,11 @@ j_Pos6 = @. (k6*ζ*(σ_eff_Pos*sin(Bound_Pos_0)+κ_eff_Pos*sin(Bound_Pos_1))*ν_
 
 j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6 =#
 
-j_Pos = @. @fastmath -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
-zero_tf = @. @fastmath -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
+j_Pos = @. -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
+zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
 j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
-C_e =  ((j_Neg + j_Pos)./(s.+λ))
+C_e =  @. ((j_Neg + j_Pos)/(s+λ))
 
 i=Int64(1)
 ψ = fill(0.0,length(z),length(λ))
@@ -118,7 +116,6 @@ for loop in 1:length(λ)
         else
             ψ[i,loop] = k3[loop]*cos(in2[loop]*x)+k4[loop]*sin(in2[loop]*x) # separator
         end
-    
     i = i+1
     end
 end
