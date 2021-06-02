@@ -5,7 +5,7 @@ using Parameters
     T_ref::Float64 = 298.15
     t_plus::Float64 = 0.363
     De::Float64 = 7.5e-11
-    SOC::Float64 = 0.0
+    SOC::Float64 = 1.
     ce0::Float64 = 2000
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
@@ -23,7 +23,7 @@ using Parameters
 
     ∂Uocp::Function = (Electrode,θ) -> 
         if Electrode == "Neg"
-            ∂Uocp = @. 4.19829+0.0565661*tanh(-14.5546*x+8.60942)-0.0275479*(1/(0.998432-θ)^0.492465-1.90111)-0.157123*exp(-0.04738*θ^8)+0.810239*exp(-40*(θ-0.133875))
+            ∂Uocp = @. 4.19829+0.0565661*tanh(-14.5546*θ+8.60942)-0.0275479*(1/(0.998432-θ)^0.492465-1.90111)-0.157123*exp(-0.04738*θ^8)+0.810239*exp(-40*(θ-0.133875))
         else
             ∂Uocp = @. -32.4096*exp(-40*(-0.133875+θ))-0.0135664/((0.998432-θ)^1.49247)+0.0595559*exp(-0.04738*θ^8)*θ^7-0.823297*(sech(8.60942-14.5546*θ))^2
         end
@@ -95,12 +95,28 @@ end
     Outs::Int64 = 21
 end
 
+@with_kw mutable struct TransferFun
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 128e-6, 204e-6, 394e-6], Number[128e-6, 204e-6, 394e-6], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    # tfst_temp = Array{String}(undef,0,1)
+    # t1 = Array{String}(undef,0,1)
+    # t2 = Array{String}(undef,0,1)
+    # tfst::Function = (tfs,tfst_temp,t1,t2,tfst!) ->
+    # for i in 1:size(tfs[:,1],1)
+    #     for j in 1:size(tfs[i,3],1)
+    #         t1 = "$(tfs[i,1])"
+    #         t2 = [t2; t1]
+    #     end
+    #     tfst = [tfst_temp; t2]
+    # end
+end
+
 @with_kw mutable struct Cell
     Const::Constants
     Neg::Negative
     Pos::Positive
     Sep::Seperator
     RA::RealisationAlgorthim
+    Transfer::TransferFun
 end
 
-CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim())
+CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(), TransferFun())

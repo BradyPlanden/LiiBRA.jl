@@ -1,7 +1,7 @@
 using LIBRA, JLD
 
 #Cell Definition
-CellTyp = "LG_M50_1"
+CellTyp = "LG_M50"
 #include("Data/Chen_2020/LG_M50.jl")
 
 @inline function Impulse() # Create s Vector 

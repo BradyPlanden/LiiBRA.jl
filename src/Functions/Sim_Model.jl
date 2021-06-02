@@ -157,8 +157,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         #Cell Voltage
         Cell_V[i] = @. (Uocp_Pos-Uocp_Neg) + (ηL[i]-η0[i]) + (ϕ_ẽ1[i,end]+ϕ_ẽ2[end]) + (CellData.Pos.RFilm*j0[i]-CellData.Neg.RFilm*j0[i])*F
         println("Cell_V:",Cell_V[i])
-        println("Uocp:",Uocp_Pos)
-        println("Uocp_Neg:",Uocp_Pos)
+        println("Uocp_Pos:",Uocp_Pos)
+        println("Uocp_Neg:",Uocp_Neg)
         println("ηL[i]:",ηL[i])
         println("η0[i]:",η0[i])
         println("ϕ_ẽ1[i,end]:",ϕ_ẽ1[i,end])

@@ -21,7 +21,7 @@
     D = Array{Float64}(undef,0,1)
     Dtt = Array{String}(undef,0,1)
     C_Aug = Array{Float64}(undef,0,1)
-    DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
+    #DC_Gain = Array{Float64}(undef,CellData.RA.Tlen,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
     # tf__ = Array{Float64}(undef,0,length(s))
@@ -57,8 +57,8 @@
             D = [D; Di]
             Dtt = [Dtt; Dti]
             C_Aug = [C_Aug; res0]
-            DC_Gain = [DC_Gain; tf[:,1]]
-            i = i + 1
+           #DC_Gain = [DC_Gain; tf[:,1]]
+            i = i+1
 
         if Debug == 1
             println("jk:",jk, "\n")

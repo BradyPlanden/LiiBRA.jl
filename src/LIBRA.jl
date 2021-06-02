@@ -15,6 +15,7 @@ include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 include("Data/Chen_2020/LG_M50.jl")
+#include("Data/Doyle_94/Doyle_94.jl")
 
 const CellTyp = "LG_M50"
 const ϵ1,ϵ2,ϵ3 = CellData.Neg.ϵ_e, CellData.Sep.ϵ_e, CellData.Pos.ϵ_e        # Porosities

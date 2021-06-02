@@ -61,7 +61,7 @@ end
         Ds::Float64 = 1.48e-15   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
     Ea_Ds::Float64 = 0.0
-        ϵ_s::Float64 = 66.5     #Active Material Volume Fraction
+        ϵ_s::Float64 = 0.665     #Active Material Volume Fraction
         ϵ_e::Float64 = 0.335    # Porosity of positive electrode
         De_brug::Float64 = 1.5
         κ_brug::Float64 = 1.5
