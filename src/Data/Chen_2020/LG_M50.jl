@@ -12,7 +12,6 @@ using Parameters
     dln::Float64 = 3.0
     Ea_κ::Float64 = 0.0
     Ea_De::Float64 = 0.0
-        Lnegsep::Float64 = 0.0  #Init Value
         CC_A::Float64 = 0.1027  #Electrode Plate Area 
     κ::Float64 = 1.0
     κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
@@ -48,8 +47,7 @@ end
         cs_max::Float64 = 29583
         α::Float64 = 0.5
         k_norm::Float64 = 6.48e-7
-    RFilm::Float64 = 0.0
-    k_ref::Float64 = 2.16e-11
+    RFilm::Float64 = 0.
     D1::Float64 = 1.0   #Init Value
     D1f::Function = De -> De * ϵ_e^De_brug #Effective Diffusivity
     as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
@@ -72,7 +70,7 @@ end
         cs_max::Float64 = 51765
         α::Float64 = 0.5
         k_norm::Float64 = 3.42e-6
-    RFilm::Float64 = 0
+    RFilm::Float64 = 0.
     D3::Float64 = 1.0   #Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
     as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area

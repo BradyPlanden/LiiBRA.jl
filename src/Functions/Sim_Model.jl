@@ -107,16 +107,10 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         ν_neg = CellData.Neg.L*sqrt((3*(CellData.Neg.ϵ_s/CellData.Neg.Rs)*(1/κ_eff_Neg+1/σ_eff_Neg))/Rtot_neg)
         ν_pos = CellData.Pos.L*sqrt((3*(CellData.Pos.ϵ_s/CellData.Pos.Rs)*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos)
 
-
         #Relinearise dependent on ν, σ, κ
         #Call from CellData? List of functions composed from ROM creation?
         #D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
-        Dtemp = Array{Float64}(undef,0,1)
-        D = Array{Float64}(undef,0,1)
-        for j in 1:length(Dtt)
-            Dtemp = eval(Meta.parse(Dtt[j]))
-            D = [D; Dtemp]
-        end
+        #D = D_Linear(Dtt,ν_neg,ν_pos)
 
         #SS Output
         y[i,:] = C*x[i,:]+D*Iapp[i]
@@ -176,6 +170,17 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
 
     end
     return Cell_V
+end
+
+function D_Linear(Dtt,ν_neg, ν_pos)
+    Dtemp = Array{Float64}(undef,0,1)
+    D = Array{Float64}(undef,0,1)
+    global ν_neg
+    for j in 1:length(Dtt)
+        Dtemp = eval(Meta.parse(Dtt[j]))
+        D = [D; Dtemp]
+    end
+    return D
 end
 
 # println("j0_CC_neg:",length(j0_CC_neg))

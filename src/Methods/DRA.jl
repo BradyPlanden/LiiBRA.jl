@@ -47,7 +47,6 @@
             for Output in 1:nR
                 spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
-                #dsTf[Output,:] = diff(samplingtf[Output,:], dims=2)
             end
 
             dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
@@ -151,5 +150,5 @@
         #  display("text/plain", D)
     #end
 
-return A_Final, B_Final, C_Final, D, Dtt
+return A_Final, B_Final, C_Final, D, Dtt, puls
 end
