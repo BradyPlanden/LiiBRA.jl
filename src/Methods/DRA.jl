@@ -108,11 +108,10 @@
     F = svds(Hank1; nsv=CellData.RA.M)[1]
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-
         S_ = sqrt(diagm(F.S))
         Observibility = (@view F.U[:,1:CellData.RA.M])*S_
         Control = S_*(@view F.V[:,1:CellData.RA.M])'
-        @fastmath A = Observibility\Hank2/Control #High compute line
+        A = Observibility\Hank2/Control #High compute line
 
         eigA = eigvals(A)
         E = diagm([1;eigA])
@@ -120,7 +119,6 @@
 
         B = @view Control[:,1:CellData.RA.N]
         C = @view Observibility[1:size(puls,1),:]
-
 
         # Transform A,B,C matrices to final form
         C = C.*SFactor[ones(Int64,size(C,1)),:]

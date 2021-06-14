@@ -8,9 +8,8 @@ using Parameters
         De::Float64 = 1.0e-11   #Inital Electrolyte Diffusivity
         Def::Function = ce -> 8.794e-11*ce^2-3.972e-10*ce+4.862e-10 #Electrolyte Diffusivity Function
     SOC::Float64 = 1.
-    ce0::Float64 = 2000
+    ce0::Float64 = 1000
     dln::Float64 = 3.0
-    Ea_κ::Float64 = 0.0
     Ea_De::Float64 = 0.0
         CC_A::Float64 = 0.1027  #Electrode Plate Area 
     κ::Float64 = 1.0
@@ -31,7 +30,7 @@ using Parameters
 end
 
 @with_kw mutable struct Negative
-        L::Float64 = 85.2e-6
+        L::Float64 = 85.2e-6    #Electrode Length
         Rs::Float64 = 5.86e-6   # Particle radius [m]
         Ds::Float64 = 1.74e-15   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
@@ -40,13 +39,14 @@ end
         ϵ_e::Float64 = 0.25    # Porosity of negative electrode
         De_brug::Float64 = 1.5
         κ_brug::Float64 = 1.5
-        σ::Float64 = 215
+        σ::Float64 = 215    #Solid Phase Electronic Conductivity
         σ_brug::Float64 = 1.5
         θ_100::Float64 = 0.9014
         θ_0::Float64 = 0.0279
         cs_max::Float64 = 29583
         α::Float64 = 0.5
         k_norm::Float64 = 6.48e-7
+        Ea_κ::Float64 = 35000   #Activation Energy
     RFilm::Float64 = 0.
     D1::Float64 = 1.0   #Init Value
     D1f::Function = De -> De * ϵ_e^De_brug #Effective Diffusivity
@@ -54,7 +54,7 @@ end
 end
 
 @with_kw mutable struct Positive
-        L::Float64 = 75.6e-6
+        L::Float64 = 75.6e-6    #Electrode Length
         Rs::Float64 = 5.22e-6    # Particle radius [m]
         Ds::Float64 = 1.48e-15   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.0
@@ -63,17 +63,18 @@ end
         ϵ_e::Float64 = 0.335    # Porosity of positive electrode
         De_brug::Float64 = 1.5
         κ_brug::Float64 = 1.5
-        σ::Float64 = 0.18
+        σ::Float64 = 0.18   #Solid Phase Electronic Conductivity
         σ_brug::Float64 = 1.5
         θ_100::Float64 = 0.2661
         θ_0::Float64 = 0.9084
         cs_max::Float64 = 51765
         α::Float64 = 0.5
         k_norm::Float64 = 3.42e-6
+        Ea_κ::Float64 = 17800   #Activation Energy
     RFilm::Float64 = 0.
     D3::Float64 = 1.0   #Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
-    as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
+    as::Float64 = 3.0*ϵ_s/Rs #Specific interfacial surf. area
 end
 
 @with_kw mutable struct Seperator
