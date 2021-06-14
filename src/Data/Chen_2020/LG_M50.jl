@@ -10,6 +10,7 @@ using Parameters
     SOC::Float64 = 1.
     ce0::Float64 = 1000
     dln::Float64 = 3.0
+    Ea_κ = 0.
     Ea_De::Float64 = 0.0
         CC_A::Float64 = 0.1027  #Electrode Plate Area 
     κ::Float64 = 1.0
