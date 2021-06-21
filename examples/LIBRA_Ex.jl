@@ -38,6 +38,6 @@ A_DRA, B_DRA, C_DRA, D_DRA, Dtt, puls = DRA_loop(CellData,s,f)
 # plot(collect(eachrow(puls[10:11,:])),xlim = [-10,4000],ylim=[-0.04,0.04])
 #plot(puls[7,:])
 
-# Tk = ones(101)*298.15
-# Iapp = ones(101)*0.1
-# CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+Tk = ones(101)*298.15
+Iapp = ones(101)*0.1
+CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)

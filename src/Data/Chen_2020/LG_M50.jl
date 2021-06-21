@@ -1,20 +1,20 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    T::Float64 = 298.15
-    T_ref::Float64 = 298.15
-        t_plus::Float64 = 0.2594 #Inital Transference Number
-        tpf::Function = ce -> -0.1287*ce^3+0.4106*ce^2-0.4717*ce+0.4492 #Transference Number Function
-        De::Float64 = 1.0e-11   #Inital Electrolyte Diffusivity
-        Def::Function = ce -> 8.794e-11*ce^2-3.972e-10*ce+4.862e-10 #Electrolyte Diffusivity Function
-    SOC::Float64 = 1.
-    ce0::Float64 = 1000
-    dln::Float64 = 3.0
+    T::Float64 = 298.15 # Cell Temperature
+    T_ref::Float64 = 298.15 # Reference Temperature
+        t_plus::Float64 = 0.2594 # Inital Transference Number
+        tpf::Function = ce -> -0.1287*ce^3+0.4106*ce^2-0.4717*ce+0.4492 # Transference Number Function - Requires ce in dm-3
+        De::Float64 = 1.0e-11   # Inital Electrolyte Diffusivity
+        Def::Function = ce -> 8.794e-11*ce^2-3.972e-10*ce+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
+    SOC::Float64 = 1. # Initial State of Charge
+    ce0::Float64 = 1000 # Initial Electrolyte Concentration
+    dln::Float64 = 3.
     Ea_κ = 0.
-    Ea_De::Float64 = 0.0
+    Ea_De::Float64 = 0.
         CC_A::Float64 = 0.1027  #Electrode Plate Area 
-    #κ::Float64 = 1.0
-    #κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
+        κ::Float64 = 1.
+        κf::Function = ce -> 0.1297*ce^3-2.51*ce^1.5+3.329*ce #Requires ce in dm-3
     Uocp::Function = (Electrode, θ) ->
         if Electrode == "Neg"
             Uocp = @. 1.97938*2.7182818284^(-39.3631*θ) + 0.2482 - 0.0909*tanh(29.8538*(θ - 0.1234)) - 0.04478*tanh(14.9159*(θ - 0.2769)) - 0.0205*tanh(30.4444*(θ - 0.6103))
@@ -31,86 +31,75 @@ using Parameters
 end
 
 @with_kw mutable struct Negative
-        L::Float64 = 85.2e-6    #Electrode Length
-        Rs::Float64 = 5.86e-6   # Particle radius [m]
-        Ds::Float64 = 1.74e-15   # Solid diffusivity [m^2/s]
-    Ea_σ::Float64 = 0.0     # Activation Energy Solid Conductivity
-    Ea_Ds::Float64 = 0.0    # Activation Energy Solid Diffusivity
+        L::Float64 = 85.2e-6    # Negative Electrode Length
+        Rs::Float64 = 5.86e-6   # Particle Radius [m]
+        Ds::Float64 = 1.74e-15   # Solid Diffusivity [m^2/s]
+    Ea_σ::Float64 = 0.     # Activation Energy Solid Conductivity
+    Ea_Ds::Float64 = 0.    # Activation Energy Solid Diffusivity
         ϵ_s::Float64 = 0.75     # Active Material Volume Fraction
-        ϵ_e::Float64 = 0.25     # Porosity of negative electrode
-        De_brug::Float64 = 1.5
-        κ_brug::Float64 = 1.5
-        σ::Float64 = 215    #Solid Phase Electronic Conductivity
-        σ_brug::Float64 = 1.5
-        θ_100::Float64 = 0.9014
-        θ_0::Float64 = 0.0279
-        cs_max::Float64 = 29583
-        α::Float64 = 0.5
+        ϵ_e::Float64 = 0.25     # Porosity of Negative Electrode
+        De_brug::Float64 = 1.5  # Bruggeman Diffusion Exponent
+        κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
+        σ::Float64 = 215    # Solid Phase Conductivity
+        σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
+        θ_100::Float64 = 0.9014 # Theta @ 100% Lithium Concentration
+        θ_0::Float64 = 0.0279   # Theta @ 0% Lithium Concentration
+        cs_max::Float64 = 29583 # Max Electrode Concentration
+        α::Float64 = 0.5    # Alpha Factor
         k_norm::Float64 = 6.48e-7
-        Ea_κ::Float64 = 35000   #Activation Energy
-    RFilm::Float64 = 0.
-    D1::Float64 = 1.0   #Init Value
-    D1f::Function = De -> De * ϵ_e^De_brug #Effective Diffusivity
-    as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
+        Ea_κ::Float64 = 35000   # Activation Energy
+    RFilm::Float64 = 0. # Film Resistance
+    D1::Float64 = 1.   # Init Value
+    D1f::Function = De -> De * ϵ_e^De_brug # Effective Diffusivity
+    as::Float64 = 3.0*ϵ_s/Rs # Specific Interfacial Surf. Area
 end
 
 @with_kw mutable struct Positive
-        L::Float64 = 75.6e-6    #Electrode Length
+        L::Float64 = 75.6e-6    # Positive Electrode Length
         Rs::Float64 = 5.22e-6    # Particle radius [m]
         Ds::Float64 = 1.48e-15   # Solid diffusivity [m^2/s]
-    Ea_σ::Float64 = 0.0
-    Ea_Ds::Float64 = 0.0
-        ϵ_s::Float64 = 0.665     #Active Material Volume Fraction
+    Ea_σ::Float64 = 0.
+    Ea_Ds::Float64 = 0.
+        ϵ_s::Float64 = 0.665    # Active Material Volume Fraction
         ϵ_e::Float64 = 0.335    # Porosity of positive electrode
-        De_brug::Float64 = 1.5
-        κ_brug::Float64 = 1.5
-        σ::Float64 = 0.18   #Solid Phase Electronic Conductivity
-        σ_brug::Float64 = 1.5
-        θ_100::Float64 = 0.2661
-        θ_0::Float64 = 0.9084
-        cs_max::Float64 = 51765
-        α::Float64 = 0.5
+        De_brug::Float64 = 1.5  # Bruggeman Diffusivity Exponent
+        κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
+        σ::Float64 = 0.18   # Solid Phase Conductivity
+        σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
+        θ_100::Float64 = 0.2661 # Theta @ 100% Lithium Concentration
+        θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
+        cs_max::Float64 = 51765 # Max Electrode Concentration
+        α::Float64 = 0.5    # Alpha Factor
         k_norm::Float64 = 3.42e-6
-        Ea_κ::Float64 = 17800   #Activation Energy
-    RFilm::Float64 = 0.
-    D3::Float64 = 1.0   #Init Value
+        Ea_κ::Float64 = 17800   # Activation Energy
+    RFilm::Float64 = 0. # Film Resistance
+    D3::Float64 = 1.   # Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
-    as::Float64 = 3.0*ϵ_s/Rs #Specific interfacial surf. area
+    as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
 end
 
 @with_kw mutable struct Seperator
-        L::Float64 = 12e-6
+        L::Float64 = 12e-6  # Seperator Length
         ϵ_e::Float64 = 0.47    # Porosity of separator
-        De_brug::Float64 = 1.5
-        κ_brug::Float64 = 1.5
-        D2::Float64 = 1.0   #Init Value
+        De_brug::Float64 = 1.5  # Bruggeman Diffusivity Factor
+        κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Factor
+        D2::Float64 = 1.   # Init Value
         D2f::Function = De -> De * ϵ_e^De_brug
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 2
-    SamplingT::Float64 = 1
-    M::Int64 = 5 # Model order
-    N::Int64 = 1 # Inputs
-    Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24
-    H1::Array{Int64,1} = 0:3000 #4000 #4612
-    H2::Array{Int64,1} = 0:3000 #4000 #4612
-    Outs::Int64 = 25
+    Fs::Float64 = 2.    # Sampling Frequency of Transfer Functions
+    SamplingT::Float64 = 1.     # Final Model Sampling Time
+    M::Int64 = 5    # Model Order
+    N::Int64 = 1    # Number of Inputs
+    Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
+    H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 2
+    Outs::Int64 = 25    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
     tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
-    # tfst_temp = Array{String}(undef,0,1)
-    # t1 = Array{String}(undef,0,1)
-    # t2 = Array{String}(undef,0,1)
-    # tfst::Function = (tfs,tfst_temp,t1,t2,tfst!) ->
-    # for i in 1:size(tfs[:,1],1)
-    #     for j in 1:size(tfs[i,3],1)
-    #         t1 = "$(tfs[i,1])"
-    #         t2 = [t2; t1]
-    #     end
-    #     tfst = [tfst_temp; t2]
-    # end
 end
 
 @with_kw mutable struct Cell
