@@ -1,7 +1,7 @@
 using LIBRA, JLD, Plots
 
 #Cell Definition
-CellTyp = "LG_M50"
+CellTyp = "Doyle_94"
 #include("Data/Chen_2020/LG_M50.jl")
 
 @inline function Impulse() # Create s Vector 
@@ -35,9 +35,9 @@ Nfft, f, s = Impulse()
 A_DRA, B_DRA, C_DRA, D_DRA, Dtt, puls = DRA_loop(CellData,s,f)
 #save("$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt) #Switch to jld2
 
-plot(collect(eachrow(puls[10:11,:])),xlim = [-10,4000],ylim=[-0.04,0.04])
+# plot(collect(eachrow(puls[10:11,:])),xlim = [-10,4000],ylim=[-0.04,0.04])
 #plot(puls[7,:])
 
-Tk = ones(101)*298.15
-Iapp = ones(101)*0.1
-CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+# Tk = ones(101)*298.15
+# Iapp = ones(101)*0.1
+# CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
