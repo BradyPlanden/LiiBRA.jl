@@ -1,7 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    T::Float64 = 273.15
+    T::Float64 = 298.15
     T_ref::Float64 = 298.15
         t_plus::Float64 = 0.2594 #Inital Transference Number
         tpf::Function = ce -> -0.1287*ce^3+0.4106*ce^2-0.4717*ce+0.4492 #Transference Number Function
@@ -13,8 +13,8 @@ using Parameters
     Ea_κ = 0.
     Ea_De::Float64 = 0.0
         CC_A::Float64 = 0.1027  #Electrode Plate Area 
-    κ::Float64 = 1.0
-    κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
+    #κ::Float64 = 1.0
+    #κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
     Uocp::Function = (Electrode, θ) ->
         if Electrode == "Neg"
             Uocp = @. 1.97938*2.7182818284^(-39.3631*θ) + 0.2482 - 0.0909*tanh(29.8538*(θ - 0.1234)) - 0.04478*tanh(14.9159*(θ - 0.2769)) - 0.0205*tanh(30.4444*(θ - 0.6103))
@@ -34,10 +34,10 @@ end
         L::Float64 = 85.2e-6    #Electrode Length
         Rs::Float64 = 5.86e-6   # Particle radius [m]
         Ds::Float64 = 1.74e-15   # Solid diffusivity [m^2/s]
-    Ea_σ::Float64 = 0.0
-    Ea_Ds::Float64 = 0.0
-        ϵ_s::Float64 = 0.75     #Active Material Volume Fraction
-        ϵ_e::Float64 = 0.25    # Porosity of negative electrode
+    Ea_σ::Float64 = 0.0     # Activation Energy Solid Conductivity
+    Ea_Ds::Float64 = 0.0    # Activation Energy Solid Diffusivity
+        ϵ_s::Float64 = 0.75     # Active Material Volume Fraction
+        ϵ_e::Float64 = 0.25     # Porosity of negative electrode
         De_brug::Float64 = 1.5
         κ_brug::Float64 = 1.5
         σ::Float64 = 215    #Solid Phase Electronic Conductivity
