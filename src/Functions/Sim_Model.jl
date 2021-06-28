@@ -123,6 +123,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         Cse_Pos[i,:] = @. θ_pos[i]*CellData.Pos.cs_max + y[i,CsePosInd] 
         Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
         println("Cse_Neg:",Cse_Neg)
+        println("Cse_Pos:",Cse_Pos)
         
         #Potentials
         Uocp_Neg = CellData.Const.Uocp("Neg",θ_neg[i])
