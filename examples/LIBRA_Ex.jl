@@ -1,7 +1,7 @@
 using LIBRA, JLD, Plots
 
 #Cell Definition
-CellTyp = "Doyle_94"
+#CellTyp = "Doyle_94"
 #include("Data/Chen_2020/LG_M50.jl")
 
 @inline function Impulse() # Create s Vector 

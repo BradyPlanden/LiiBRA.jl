@@ -93,8 +93,8 @@ end
     M::Int64 = 5    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 2
+    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 25    # Number of Outputs
 end
 

@@ -134,7 +134,6 @@ i=Int64(1)
       println("D_term:", D_term)
  end
 res0 = zeros(length(z))
-println("Ltot:",Ltot)
 
 return ϕ_tf, D, res0, D_term
 

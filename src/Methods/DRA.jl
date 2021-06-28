@@ -120,7 +120,6 @@
         B = @view Control[:,1:CellData.RA.N]
         C = @view Observibility[1:size(puls,1),:]
 
-        println("SFactor",size(SFactor))
         # Transform A,B,C matrices to final form
         C = C.*SFactor[:,ones(Int64,size(C,2))]
         if C_Aug == 0

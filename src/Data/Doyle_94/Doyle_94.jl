@@ -89,8 +89,8 @@ end
     M::Int64 = 5 # Model order
     N::Int64 = 1 # Inputs
     Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24
-    H1::Array{Int64,1} = 0:2000 #4000 #4612
-    H2::Array{Int64,1} = 0:2000 #4000 #4612
+    H1::Array{Int64,1} = 0:4000 #4000 #4612
+    H2::Array{Int64,1} = 0:4000 #4000 #4612
     Outs::Int64 = 21
 end
 
