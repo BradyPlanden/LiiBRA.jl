@@ -91,6 +91,7 @@
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
     puls .= puls./SFactor
+   # println("puls:",size(puls))
    
     #Hankel Formation, perform svd to determine the highest order singular values
     Puls_L = size(puls,1)
@@ -148,5 +149,5 @@
         #  display("text/plain", D)
     #end
 
-return A_Final, B_Final, C_Final, D, Dtt, puls
+return A_Final, B_Final, C_Final, D, Dtt
 end

@@ -36,6 +36,7 @@ cs0_pos = cs_max_pos * θ_pos
 j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
 j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
 
+
 #Resistances
 Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
 Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm

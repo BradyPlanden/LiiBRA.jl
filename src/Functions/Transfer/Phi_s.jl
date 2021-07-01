@@ -33,7 +33,8 @@ cs0 = Electrode.cs_max * θ
 #Current Flux Density
 κ = Electrode.k_norm/Electrode.cs_max/CellData.Const.ce0^(1-Electrode.α)
 j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
-
+println("κ:",κ)
+println("j0:",j0)
 #Resistance
 Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
