@@ -5,8 +5,8 @@ using LIBRA, JLD, Plots
 #include("Data/Chen_2020/LG_M50.jl")
 
 @inline function Impulse() # Create s Vector 
-    #Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
-    Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+    Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+    #Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
     f = 0:Nfft-1
     s = ((2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft))'
     return Nfft,f,s
@@ -20,7 +20,8 @@ end
         CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
             for i in 1:1
                 #CellData.RA.Tlen += 2000 
-                Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+                #Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+                Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
                 f = 0:Nfft-1
                 s = ((2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft))'
                 #println("Tlen:",CellData.RA.Tlen)
@@ -47,6 +48,6 @@ A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData)
 # plot(collect(eachrow(puls[10:11,:])),xlim = [-10,4000],ylim=[-0.04,0.04])
 #plot(puls[7,:])
 
-# Tk = ones(101)*298.15
-# Iapp = ones(101)*0.1
-# CellV = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+Tk = ones(101)*298.15
+Iapp = ones(101)*0.1
+CellV, jNeg, jPos, y, x = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)

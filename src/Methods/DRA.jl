@@ -50,6 +50,7 @@
             end
 
             dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
+            println("dsTf:",dsTf[:,4], "\n")
             puls = [puls; dsTf[:,2:end]]
             D = [D; Di]
             Dtt = [Dtt; Dti]
@@ -121,8 +122,13 @@
         B = @view Control[:,1:CellData.RA.N]
         C = @view Observibility[1:size(puls,1),:]
 
+        println("C:")
+        display("text/plain",C)
+
         # Transform A,B,C matrices to final form
         C = C.*SFactor[:,ones(Int64,size(C,2))]
+        println("C:")
+        display("text/plain",C)
         if C_Aug == 0
             A_Final = A
             B_Final = diagm([eigA])'*B

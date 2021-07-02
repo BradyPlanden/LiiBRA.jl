@@ -27,6 +27,7 @@ using Parameters
         else
             ∂Uocp = @. -32.4096*exp(-40*(-0.133875+θ))-0.0135664/((0.998432-θ)^1.49247)+0.0595559*exp(-0.04738*θ^8)*θ^7-0.823297*(sech(8.60942-14.5546*θ))^2
         end
+    Ce_M::Int64 = 4
 end
 @with_kw mutable struct Negative
     L::Float64 = 1.28e-4
@@ -87,9 +88,9 @@ end
     Fs::Float64 = 10     #Pulse Sampling Frequency
     SamplingT::Float64 = 0.5    #Final Sampling Time Step
     M::Int64 = 5 # Model order
-    Tlen::Int64 = 18000 #131072 #65536 #1048576 #2097152 #262144 #32768 #24
-    H1::Array{Int64,1} = 0:2500 #4000 #4612
-    H2::Array{Int64,1} = 0:2500 #4000 #4612
+    Tlen::Int64 = 65536 #14400 #131072 #1048576 #2097152 #262144 #32768 #24
+    H1::Array{Int64,1} = 0:3000 #4000 #4612
+    H2::Array{Int64,1} = 0:3000 #4000 #4612
     N::Int64 = 1 # Number of Inputs
     Outs::Int64 = 21    #Number of Outputs
 end
