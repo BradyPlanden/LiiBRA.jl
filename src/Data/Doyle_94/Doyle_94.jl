@@ -45,7 +45,7 @@ end
     θ_0::Float64 = 0.05
     cs_max::Float64 = 26390
     α::Float64 = 0.5
-    k_norm::Float64 = 2.2842e-05
+    k_norm::Float64 = 2.28421166145003e-05
     RFilm::Float64 = 0.
     D1::Float64 = 1.   #Init Value
     D1f::Function = De -> De * ϵ_e^De_brug #Effective Diffusivity
@@ -65,10 +65,10 @@ end
     σ_brug::Float64 = 1.0
     σ::Float64 = 3.8
     θ_100::Float64 = 0.17
-    θ_0::Float64 = 0.762
+    θ_0::Float64 = 0.762004800037954
     cs_max::Float64 = 22860
     α::Float64 = 0.5
-    k_norm::Float64 = 2.2073e-5
+    k_norm::Float64 = 2.20728263615611e-05
     RFilm::Float64 = 0
     D3::Float64 = 1.0   #Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
@@ -76,7 +76,7 @@ end
 end
 
 @with_kw mutable struct Seperator
-    L::Float64 = 7.6e-5
+    L::Float64 = 7.60e-5
     ϵ_e::Float64 = 0.724    # Porosity of separator
     De_brug::Float64 = 1.5
     κ_brug::Float64 = 1.5

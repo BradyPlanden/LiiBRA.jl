@@ -170,5 +170,5 @@
         #  display("text/plain", D)
     #end
 
-return A, B, C, D, Dtt, tf__
+return A, B, C, D, Dtt, tf__, Hank1, Hank2, puls
 end
