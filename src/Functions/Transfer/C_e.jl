@@ -126,12 +126,12 @@ for loop in 1:length(λ)
     i = i+1
     end
 end
-
+println("ψ:",ψ)
 C_e = ψ*C_e
 D =  zeros(length(z))
 D_term = "zeros(length($z))"
 res0 = zeros(length(z))
-println("C_e[10]:",C_e[:,1])
+println("C_e[10]:",C_e[:,4])
 return C_e, D, res0, D_term
 end
 

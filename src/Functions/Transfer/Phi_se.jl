@@ -44,18 +44,21 @@ j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α
 Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
 ∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
-res0 = @. (-3*(∂Uocp_elc)/(as*F*Electrode.L*CC_A*Rs))/s # residual for pole removal
+res0 = @. -3*∂Uocp_elc/(as*F*Electrode.L*CC_A*Rs) # residual for pole removal
 
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 ϕ_tf = @. Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
-ϕ_tf = @. ϕ_tf - res0
+ϕ_tf = @. ϕ_tf - res0./s
 
 zero_tf = @. (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*Electrode.L) + (5*as*Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*Electrode.L)
 D = @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 D_term = "@. $(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
+println("res0:", res0)
+println("ϕ_tf:", ϕ_tf[:,1])
+println("zero_tf:", zero_tf)
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf

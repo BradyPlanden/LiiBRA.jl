@@ -23,7 +23,7 @@
     C_Aug = Array{Float64}(undef,0,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
-    # tf__ = Array{Float64}(undef,0,length(s))
+     tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
     #D_term = Array{Float64}(undef,0,1)
@@ -38,7 +38,9 @@
             tf, Di, res0, Dti = run(CellData,s,CellData.Transfer.tfs[i,3]) #high compute line
         end
 
-        jk = CellData.RA.Fs.*real(ifft(tf,2)') # inverse fourier transform tranfser function response
+        #tf = reverse!(tf, dims=2)
+        jk = CellData.RA.Fs*real(ifft(tf,2)') # inverse fourier transform tranfser function response
+        println("jk:",jk[4,:], "\n")
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
         nR = size(stpsum,1)
         samplingtf = Array{Float64}(undef,nR,length(OrgT))
@@ -48,10 +50,11 @@
                 spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
             end
-
-            dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
-            println("dsTf:",dsTf[:,4], "\n")
-            puls = [puls; dsTf[:,2:end]]
+            println("tf:",tf[:,4], "\n")
+            println("stpsum:",stpsum[:,4], "\n")
+            println("samplingtf:",samplingtf[:,4], "\n")
+            #dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
+            puls = [puls; diff(samplingtf, dims=2)]
             D = [D; Di]
             Dtt = [Dtt; Dti]
             C_Aug = [C_Aug; res0]
@@ -64,7 +67,7 @@
             println("D:",D)
             println("nR:",nR)
         end
-
+        tf__ = [tf__; tf]
         if DRA_Debug == 1
             # stpsum__ = [stpsum__; stpsum]
             # tf__ = [tf__; tf]
@@ -72,8 +75,8 @@
             # testifft__ = [testifft__ testifft]
         end
     end
-
-    puls = reverse!(puls, dims=2)
+    println("puls:",puls[:,4], "\n")
+    #puls = reverse!(puls, dims=2)
 
     if DRA_Debug == 1
         println("tf__:",size(tf__))
@@ -91,8 +94,11 @@
 
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
-    puls .= puls./SFactor
-   # println("puls:",size(puls))
+    puls .= puls./SFactor[:,ones(Int64,size(puls,2))]
+    println("SFactor:",SFactor, "\n")
+
+    println("puls:")
+    display("text/plain",puls)
    
     #Hankel Formation, perform svd to determine the highest order singular values
     Puls_L = size(puls,1)
@@ -107,20 +113,29 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    F = svds(Hank1; nsv=CellData.RA.M)[1]
-
+    #F = svds(Hank1; nsv=CellData.RA.M)[1]
+    U,S,V = tsvd(Hank1, CellData.RA.M)
+    println("Hankel1[1:5,4]:",Hank1[1:5,4])
+    println("S:",S)
+    println("V:",V[4,:])
+    println("U:",U[4,:])
     # Create Observibility and Control Matrices -> Create A, B, and C 
-        S_ = sqrt(diagm(F.S))
-        Observibility = (@view F.U[:,1:CellData.RA.M])*S_
-        Control = S_*(@view F.V[:,1:CellData.RA.M])'
-        A = Observibility\Hank2/Control #High compute line
+        S_ = sqrt(diagm(S))
+        Observibility = (@view U[:,1:CellData.RA.M])*S_
+        Control = S_*(@view V[:,1:CellData.RA.M])'
+        A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
+        A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
+        println("Control:",Control[:,4])
+        println("A:")
+        display("text/plain",A)
 
         eigA = eigvals(A)
+        println("eigA:",eigA)
         E = diagm([1;eigA])
-        Ei = E'
 
         B = @view Control[:,1:CellData.RA.N]
         C = @view Observibility[1:size(puls,1),:]
+        println("B",B)
 
         println("C:")
         display("text/plain",C)
@@ -129,18 +144,18 @@
         C = C.*SFactor[:,ones(Int64,size(C,2))]
         println("C:")
         display("text/plain",C)
-        if C_Aug == 0
-            A_Final = A
-            B_Final = diagm([eigA])'*B
-            C_Final = C*diagm([eigA])
-        else
-            A_Final = E
-            B_Final = Ei*[CellData.RA.SamplingT; B]
-            C_Final = [C_Aug C]*E
-        end
+        # if C_Aug == 0
+        #     A_Final = A
+        #     B_Final = diagm([eigA])'*B
+        #     C_Final = C*diagm([eigA])
+        # else
+        #     A_Final = E
+             B = [CellData.RA.SamplingT; B]
+             C = [C_Aug C]
+        # end
         #Scale C and tansform B to improve real-time linearisation performance
-        C_Final = C_Final.*B_Final'
-        B_Final = ones(size(B_Final))
+        C = C.*B'
+        B = ones(size(B))
         
         #  println("A_Final:")
         #  display("text/plain", A_Final)
@@ -155,5 +170,5 @@
         #  display("text/plain", D)
     #end
 
-return A_Final, B_Final, C_Final, D, Dtt
+return A, B, C, D, Dtt, tf__
 end

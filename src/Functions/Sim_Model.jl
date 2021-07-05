@@ -53,6 +53,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     ηL = Array{Float64}(undef,tlength,1) .= 0.
     η_pos = Array{Float64}(undef,tlength,size(FluxPosInd,1)) .= 0.
     ϕ_ẽ1 = Array{Float64}(undef,tlength,size(ϕ_ẽInd,1)) .= 0.
+    ϕ_ẽ2 = Array{Float64}(undef,tlength,size(ϕ_ẽInd,1)) .= 0.
     ϕ_se_neg_0 = Array{Float64}(undef,tlength,1) .= 0. #Replace with length of ϕ_seNegInd @ zero
     jNeg = Array{Float64}(undef,tlength,2) .= 0. 
     j0 = Array{Float64}(undef,tlength,1) .= 0. 
@@ -116,7 +117,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         #D = D_Linear(Dtt,ν_neg,ν_pos)
 
         #SS Output
-        y[i,:] = C*x[i,:]+D*Iapp[i]
+        y[i,:] = C*x[i,:] + D*Iapp[i]
         # display("text/plain", x[i,:])
         # println("\n")
         # display("text/plain", y[i,:])
@@ -175,8 +176,9 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         #Update States
         x[i+1,:] = A*x[i,:] + B*Iapp[i]
 
+
     end
-    return Cell_V, jNeg, jPos, y, x
+    return Cell_V, jNeg, jPos, y, x, η0, ηL, ϕ_ẽ1, ϕ_ẽ2
 end
 
 function D_Linear(Dtt,ν_neg, ν_pos)
