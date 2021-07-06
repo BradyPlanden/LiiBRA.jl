@@ -56,9 +56,6 @@ zero_tf = @. (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*Ele
 D = @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 D_term = "@. $(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-println("res0:", res0)
-println("ϕ_tf:", ϕ_tf[:,1])
-println("zero_tf:", zero_tf)
 
 if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf

@@ -6,8 +6,6 @@ Electrolyte Concentration Transfer Function
     # Locations to be computed
     # Sampling Frequency
 """
-println("s[10]:",s[10])
-println("s:",size(s))
 
 ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable
 CC_A = CellData.Const.CC_A   # Current-collector area [m^2]
@@ -37,8 +35,7 @@ cs0_pos = cs_max_pos * θ_pos
 κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
 j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
 j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
-println("j0_neg:",j0_neg)
-println("j0_neg:",j0_pos)
+
 #Resistances
 Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
 Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
@@ -55,7 +52,6 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 R_ce = roots(CellData.Const.Ce_M+1)
 λ = R_ce[2:end]
 #λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
-println("λ:",λ)
 #Create all k's
 in1 = @. sqrt(λ*CellData.Neg.ϵ_e/D1)
 in2 = @. sqrt(λ*CellData.Sep.ϵ_e/D2)
@@ -84,11 +80,6 @@ k3 = @. k1*k3_s
 k4 = @. k1*k4_s
 k5 = @. k1*k5_s
 k6 = @. k1*k6_s
-println("k1:",k1)
-println("k3:",k3)
-println("k4:",k4)
-println("k5:",k5)
-println("k6:",k6)
 
 j_Neg = @. k1*ζ*ν_n*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*sin(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos(Bound_Neg_1))*sinh(ν_n)*ν_n)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2+ν_n^2)*sinh(ν_n))
 zero_tf_neg = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
@@ -126,12 +117,12 @@ for loop in 1:length(λ)
     i = i+1
     end
 end
-println("ψ:",ψ)
+
 C_e = ψ*C_e
 D =  zeros(length(z))
 D_term = "zeros(length($z))"
 res0 = zeros(length(z))
-println("C_e[10]:",C_e[:,4])
+
 return C_e, D, res0, D_term
 end
 
