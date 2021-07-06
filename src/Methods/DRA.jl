@@ -113,16 +113,11 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    #F = svds(Hank1; nsv=CellData.RA.M)[1]
-    U,S,V = tsvd(Hank1, CellData.RA.M)
-    println("Hankel1[1:5,4]:",Hank1[1:5,4])
-    println("S:",S)
-    println("V:",V[4,:])
-    println("U:",U[4,:])
+    F = svds(Hank1; nsv=CellData.RA.M)[1]
     # Create Observibility and Control Matrices -> Create A, B, and C 
-        S_ = sqrt(diagm(S))
-        Observibility = (@view U[:,1:CellData.RA.M])*S_
-        Control = S_*(@view V[:,1:CellData.RA.M])'
+        S_ = sqrt(diagm(F.S))
+        Observibility = (@view F.U[:,1:CellData.RA.M])*S_
+        Control = S_*(@view F.V[:,1:CellData.RA.M])'
         A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
         A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
         println("Control:",Control[:,4])

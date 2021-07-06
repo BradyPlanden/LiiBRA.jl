@@ -1,7 +1,7 @@
 module LIBRA
 
-using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Dierckx, Arpack, Printf, JLD, TSVD #, PROPACK
-
+using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW
+using Dierckx, Arpack, Printf, JLD, PROPACK
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
 export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellTyp, Sim_Model
 
