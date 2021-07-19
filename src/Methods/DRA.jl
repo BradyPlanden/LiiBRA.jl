@@ -89,7 +89,7 @@
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
     puls .= puls./SFactor[:,ones(Int64,size(puls,2))]
-   
+    
     #Hankel Formation, perform svd to determine the highest order singular values
     Puls_L = size(puls,1)
     Hank1 = Array{Float64}(undef,length(CellData.RA.H1)*Puls_L,length(CellData.RA.H2))
@@ -103,19 +103,19 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    F = svds(Hank1; nsv=CellData.RA.M)[1]
+    T = svds(Hank1; nsv=CellData.RA.M)[1]
     # Create Observibility and Control Matrices -> Create A, B, and C 
-        S_ = sqrt(diagm(F.S))
-        Observibility = (@view F.U[:,1:CellData.RA.M])*S_
-        Control = S_*(@view F.V[:,1:CellData.RA.M])'
+        S_ = sqrt(diagm(T.S))
+        Observibility = (T.U[:,1:CellData.RA.M])*S_
+        Control = S_*(T.V[:,1:CellData.RA.M])'
         A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
         A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
 
         # eigA = eigvals(A)
         # E = diagm([1;eigA])
 
-        B = @view Control[:,1:CellData.RA.N]
-        C = @view Observibility[1:size(puls,1),:]
+        B = Control[:,1:CellData.RA.N]
+        C = Observibility[1:size(puls,1),:]
 
         # Transform A,B,C matrices to final form
         C = C.*SFactor[:,ones(Int64,size(C,2))]
@@ -146,5 +146,5 @@
         #  display("text/plain", D)
     #end
 
-return A, B, C, D, Dtt
+return A, B, C, D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V
 end
