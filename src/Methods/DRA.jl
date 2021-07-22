@@ -103,9 +103,10 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    T = svds(Hank1; nsv=CellData.RA.M)[1]
+    #T = svds(Hank1; nsv=CellData.RA.M)[1]
+    T = svd(Hank1)
     # Create Observibility and Control Matrices -> Create A, B, and C 
-        S_ = sqrt(diagm(T.S))
+        S_ = sqrt(diagm(T.S[1:CellData.RA.M]))
         Observibility = (T.U[:,1:CellData.RA.M])*S_
         Control = S_*(T.V[:,1:CellData.RA.M])'
         A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
@@ -128,10 +129,16 @@
         #     A_Final = E
              B = [CellData.RA.SamplingT; B]
              C = [C_Aug C]
+        sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
+        ss_A = sys.A
+        ss_B = sys.B
+        ss_C = sys.C
+        ss_D = sys.D
+
         # end
         #Scale C and tansform B to improve real-time linearisation performance
-        C = C.*B'
-        B = ones(size(B))
+        ss_C = ss_C.*ss_B'
+        ss_B = ones(size(ss_B))
         
         #  println("A_Final:")
         #  display("text/plain", A_Final)
@@ -146,5 +153,5 @@
         #  display("text/plain", D)
     #end
 
-return A, B, C, D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V
+return ss_A, ss_B, ss_C, ss_D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V
 end
