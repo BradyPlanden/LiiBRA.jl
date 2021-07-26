@@ -62,8 +62,10 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     Cell_V = Array{Float64}(undef,tlength,1) .= 0.
 
     #Defining SOC
-    θ_neg[1] = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
-    θ_pos[1] = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
+    SOC_Neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
+    SOC_Pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
+    θ_neg[1] = SOC_Neg
+    θ_pos[1] = SOC_Pos
 
     #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
@@ -123,8 +125,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         # display("text/plain", y[i,:])
         # println("\n")
         #Concentrations
-        Cse_Neg[i,:] = @. θ_neg[i]*CellData.Neg.cs_max + y[i,CseNegInd]  
-        Cse_Pos[i,:] = @. θ_pos[i]*CellData.Pos.cs_max + y[i,CsePosInd] 
+        Cse_Neg[i,:] = @. SOC_Neg*CellData.Neg.cs_max + y[i,CseNegInd]  
+        Cse_Pos[i,:] = @. SOC_Pos*CellData.Pos.cs_max + y[i,CsePosInd] 
         Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
         # println("Cse_Neg:",Cse_Neg)
         # println("Cse_Pos:",Cse_Pos)
