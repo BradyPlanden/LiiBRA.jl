@@ -41,9 +41,9 @@ Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 ∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
-ν_∞ = @. Electrode.L*sqrt(as/κ_eff+as/σ_eff)/(Rtot))
+ν_∞ = @. Electrode.L*sqrt((as/κ_eff+as/σ_eff)/(Rtot))
 
-ϕ_tf = @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh(z-1)*ν))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
+ϕ_tf = @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh((z-1)*ν)))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
 D = @. (-Electrode.L*(κ_eff*(cosh(ν_∞)-cosh(z-1)*ν_∞))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞))))/(CellData.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
 D_term = "@. -$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
 zero_tf = @. Electrode.L*(z-2)*z/(2*CellData.Const.CC_A*σ_eff)
@@ -56,10 +56,13 @@ if Def == "Pos"
    D_term = "@. $(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
    if Debug == 1
       println("D:Phi_s:Pos:",D)
-      println("D_check:Phi_s:Pos:",D_check)
-      #println("z:Phi_s:Pos:",z)
+      println("zero_tf:Phi_s:Pos:",zero_tf)
+      println("zero_tf:Phi_s:Pos:",ϕ_tf[1:5])
+      println("z:Phi_s:Pos:",z)
       println("ν_∞:Phi_s:Pos:",ν_∞)
-      #println("ν:Phi_s:Pos:",ν)
+      println("as:Phi_s:Pos:",as)
+      println("L:Phi_s:Pos:",Electrode.L)
+      println("ν:Phi_s:Pos:",ν[1:5])
       println("θ:Phi_s:Pos:",θ)
       println("κ:Phi_s:Pos:",κ)
       println("Rtot:Phi_s:Pos:",Rtot)

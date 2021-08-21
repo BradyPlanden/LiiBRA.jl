@@ -34,8 +34,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
     FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
 
-    csegain_neg = C[CseNegInd[1],1]
-    csegain_pos = C[CsePosInd[1],1]
+    csegain_neg = C[CseNegInd[1][1],end]
+    csegain_pos = C[CsePosInd[1][1],end]
 
     #Determine time span and allocate arrays
     tlength = size(Iapp,1)
@@ -70,10 +70,10 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
     #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
     for i in 1:tlength-1
-        cs_neg_avg = x[i,end]*csegain_neg+θ_neg[i]*CellData.Neg.cs_max < 0. ? 0. : x[i,end]*csegain_neg+θ_neg[i]*CellData.Neg.cs_max #Zero if < 0
-        cs_pos_avg = x[i,end]*csegain_pos+θ_pos[i]*CellData.Pos.cs_max < 0. ? 0. : x[i,end]*csegain_pos+θ_pos[i]*CellData.Pos.cs_max #Zero if < 0
+        cs_neg_avg = x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max < 0. ? 0. : x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max #Zero if < 0
+        cs_pos_avg = x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max < 0. ? 0. : x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max #Zero if < 0
 
-        # println("cs_neg_avg:", cs_neg_avg)
+        println("cs_neg_avg:", cs_neg_avg)
 
         θ_neg[i+1] = cs_neg_avg/CellData.Neg.cs_max
         θ_pos[i+1] = cs_pos_avg/CellData.Pos.cs_max
