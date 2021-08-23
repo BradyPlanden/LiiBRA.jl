@@ -88,7 +88,7 @@ end
     Fs::Float64 = 2     #Pulse Sampling Frequency
     SamplingT::Float64 = 1    #Final Sampling Time Step
     M::Int64 = 5 # Model order
-    Tlen::Int64 = 65536 #36000 #65536 #14400 #131072 #1048576 #2097152 #262144 #32768 #24
+    Tlen::Int64 = 131072 #36000 #65536 #14400 #131072 #1048576 #2097152 #262144 #32768 #24
     H1::Array{Int64,1} = 0:2000 #4000 #4612
     H2::Array{Int64,1} = 0:2000 #4000 #4612
     N::Int64 = 1 # Number of Inputs

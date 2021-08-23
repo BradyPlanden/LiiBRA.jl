@@ -116,16 +116,11 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
 
         #SS Output
         y[i,:] = C*x[i,:] + D*Iapp[i]
-        # display("text/plain", x[i,:])
-        # println("\n")
-        # display("text/plain", y[i,:])
-        # println("\n")
+
         #Concentrations
         Cse_Neg[i,:] = @. SOC_Neg*CellData.Neg.cs_max + y[i,CseNegInd]
         Cse_Pos[i,:] = @. SOC_Pos*CellData.Pos.cs_max + y[i,CsePosInd]
         Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
-        # println("Cse_Neg:",Cse_Neg)
-        # println("Cse_Pos:",Cse_Pos)
         
         #Potentials
         Uocp_Neg[i] = CellData.Const.Uocp("Neg",Cse_Neg[i,1]/CellData.Neg.cs_max)
@@ -162,14 +157,13 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         # println("ϕ_ẽ2[end]:",ϕ_ẽ2[end])
         # println("CellData.Pos.RFilm:",CellData.Pos.RFilm)
         # println("CellData.Neg.RFilm*j0[i]):",CellData.Neg.RFilm*j0[i])
+
         #ϕ_s
         ϕ_s_neg = y[i,ϕ_sNegInd]
         ϕ_s_pos = @. y[i,ϕ_sPosInd] + Cell_V[i]
 
-
         #Update States
         x[i+1,:] = A*x[i,:] + B*Iapp[i]
-
 
     end
     return Cell_V, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos
@@ -185,6 +179,3 @@ function D_Linear(Dtt,ν_neg, ν_pos)
     end
     return D
 end
-
-# println("j0_CC_neg:",length(j0_CC_neg))
-# display("text/plain", j0_CC_neg)

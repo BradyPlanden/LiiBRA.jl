@@ -23,7 +23,7 @@
     C_Aug = Array{Float64}(undef,0,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
-    tf__ = Array{Float64}(undef,0,length(s))
+    #tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
     #D_term = Array{Float64}(undef,0,1)
@@ -49,7 +49,6 @@
                 spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
             end
-            #dsTf = [Array{Float64}(undef,size(samplingtf,1)) diff(samplingtf, dims=2)]
             puls = [puls; diff(samplingtf, dims=2)]
             D = [D; Di]
             Dtt = [Dtt; Dti]
@@ -63,7 +62,7 @@
             println("D:",D)
             println("nR:",nR)
         end
-        tf__ = [tf__; tf]
+
         if DRA_Debug == 1
             # stpsum__ = [stpsum__; stpsum]
             # tf__ = [tf__; tf]
@@ -104,54 +103,28 @@
 
     #Truncated SVD of Hank1 Matrix
     #T = svds(Hank1; nsv=CellData.RA.M)[1]
-    T = svd(Hank1)
+    U,S,V = tsvd(Hank1, k=CellData.RA.M)   
+
     # Create Observibility and Control Matrices -> Create A, B, and C 
-        S_ = sqrt(diagm(T.S[1:CellData.RA.M]))
-        Observibility = (T.U[:,1:CellData.RA.M])*S_
-        Control = S_*(T.V[:,1:CellData.RA.M])'
-        A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
-        A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
+    S_ = sqrt(diagm(S[1:CellData.RA.M]))
+    Observibility = (@view U[:,1:CellData.RA.M])*S_
+    Control = S_*(@view V[:,1:CellData.RA.M])'
+    
+    A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
+    A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
+    
+    B = [CellData.RA.SamplingT; Control[:,1:CellData.RA.N]]
+    C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]
+    
 
-        # eigA = eigvals(A)
-        # E = diagm([1;eigA])
+    #  Final State-Space Form
+    sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
+    ss_B = sys.B
+    ss_C = sys.C
 
-        B = Control[:,1:CellData.RA.N]
-        C = Observibility[1:size(puls,1),:]
-
-        # Transform A,B,C matrices to final form
-        C = C.*SFactor[:,ones(Int64,size(C,2))]
-
-        # if C_Aug == 0
-        #     A_Final = A
-        #     B_Final = diagm([eigA])'*B
-        #     C_Final = C*diagm([eigA])
-        # else
-        #     A_Final = E
-             B = [CellData.RA.SamplingT; B]
-             C = [C_Aug C]
-        sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
-        ss_A = sys.A
-        ss_B = sys.B
-        ss_C = sys.C
-        ss_D = sys.D
-
-        # end
-        #Scale C and tansform B to improve real-time linearisation performance
-        ss_C = ss_C.*ss_B'
-        ss_B = ones(size(ss_B))
+    #Scale C and tansform B to improve real-time linearisation performance
+    ss_C = ss_C.*ss_B'
+    ss_B = ones(size(ss_B))
         
-        #  println("A_Final:")
-        #  display("text/plain", A_Final)
-
-        #  println("B_Final:")
-        #  display("text/plain", B_Final)
-
-        #  println("C_Final:")
-        #  display("text/plain", C_Final)
-
-        #  println("D_Final:")
-        #  display("text/plain", D)
-    #end
-
-return ss_A, ss_B, ss_C, ss_D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, tf__
+return sys.A, ss_B, ss_C, sys.D, Dtt#, puls, Hank1, Hank2, T.S, T.U, T.V, tf__
 end
