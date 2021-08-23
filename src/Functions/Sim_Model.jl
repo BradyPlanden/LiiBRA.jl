@@ -128,8 +128,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         # println("Cse_Pos:",Cse_Pos)
         
         #Potentials
-        Uocp_Neg[i] = CellData.Const.Uocp("Neg",θ_neg[i])
-        Uocp_Pos[i] = CellData.Const.Uocp("Pos",θ_pos[i])
+        Uocp_Neg[i] = CellData.Const.Uocp("Neg",Cse_Neg[i,1]/CellData.Neg.cs_max)
+        Uocp_Pos[i] = CellData.Const.Uocp("Pos",Cse_Pos[i,1]/CellData.Pos.cs_max)
         ϕ_se_neg_0[i] = y[i, ϕ_seNegInd[1]] + Uocp_Neg[i] #Location 0
         ϕ_ẽ1[i,:] = y[i,ϕ_ẽInd]
         ϕ_ẽ2 = @. ((Tk[i]*2*R*(1-CellData.Const.t_plus))/F)*(log(Ce[i,:]/Ce[i,1]))
