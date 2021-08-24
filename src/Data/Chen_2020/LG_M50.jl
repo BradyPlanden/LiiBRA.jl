@@ -13,7 +13,7 @@ using Parameters
     #dln::Float64 = 3.
     Ea_κ = 0.
     Ea_De::Float64 = 0.
-        CC_A::Float64 =  1 #0.1027  #Electrode Plate Area 
+        CC_A::Float64 =  0.1027  #Electrode Plate Area 
         κ::Float64 = 0.9487
         κf::Function = ce -> 0.1297*(ce/1000)^3-2.51*(ce/1000)^1.5+3.329*(ce/1000) #Requires ce in dm-3
     Uocp::Function = (Electrode, θ) ->

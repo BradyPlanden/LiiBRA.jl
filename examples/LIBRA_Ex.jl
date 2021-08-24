@@ -49,5 +49,5 @@ A_DRA, B_DRA, C_DRA, D_DRA, Dtt = DRA_loop(CellData)
 #----------Simulate Model -----------------#
 Tk = ones(110)*298.15
 Iapp = [ones(10)*0.; ones(10)*5.; ones(40)*0.; ones(10)*-5; ones(40)*0.]
-CellV, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+CellV, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos, Ce = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
 plot(CellV[1:end-1])

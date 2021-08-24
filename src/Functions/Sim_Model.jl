@@ -172,7 +172,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         x[i+1,:] = A*x[i,:] + B*Iapp[i]
 
     end
-    return Cell_V, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos
+    return Cell_V, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos, Ce
 end
 
 function D_Linear(Dtt,ν_neg, ν_pos)
