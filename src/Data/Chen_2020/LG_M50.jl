@@ -1,6 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
+    CellTyp::String = "LG_M50"
     T::Float64 = 298.15 # Cell Temperature
     T_ref::Float64 = 298.15 # Reference Temperature
         t_plus::Float64 = 0.2594 # Inital Transference Number
@@ -12,7 +13,7 @@ using Parameters
     #dln::Float64 = 3.
     Ea_κ = 0.
     Ea_De::Float64 = 0.
-        CC_A::Float64 = 0.1027  #Electrode Plate Area 
+        CC_A::Float64 =  1 #0.1027  #Electrode Plate Area 
         κ::Float64 = 0.9487
         κf::Function = ce -> 0.1297*(ce/1000)^3-2.51*(ce/1000)^1.5+3.329*(ce/1000) #Requires ce in dm-3
     Uocp::Function = (Electrode, θ) ->
@@ -28,6 +29,7 @@ using Parameters
         else
             ∂Uocp = @. 279.9800214(tanh(15.789*θ - 4.9214313)^2) + 0.79239064(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336(tanh(15.9308*θ - 4.9704096)^2))
         end
+    Ce_M::Int64 = 4
 end
 
 @with_kw mutable struct Negative
@@ -46,7 +48,7 @@ end
         θ_0::Float64 = 0.0279   # Theta @ 0% Lithium Concentration
         cs_max::Float64 = 33133 # Max Electrode Concentration
         α::Float64 = 0.5    # Alpha Factor
-        k_norm::Float64 = 2.12e-10 #6.48e-7 #Initial Reaction Rate
+        k_norm::Float64 = 6.48e-7 #2.12e-10 #Initial Reaction Rate
         Ea_κ::Float64 = 0. #35000   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D1::Float64 = 1.   # Init Value
@@ -70,7 +72,7 @@ end
         θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
         cs_max::Float64 = 63104 # Max Electrode Concentration
         α::Float64 = 0.5    # Alpha Factor
-        k_norm::Float64 = 1.12e-9 #3.42e-6 #Initial Reaction Rate
+        k_norm::Float64 = 3.42e-6 #1.12e-9  #Initial Reaction Rate
         Ea_κ::Float64 = 0. #17800   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D3::Float64 = 1.   # Init Value
@@ -88,8 +90,8 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 2.    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 1.     # Final Model Sampling Time
+    Fs::Float64 = 2    # Sampling Frequency of Transfer Functions
+    SamplingT::Float64 = 1     # Final Model Sampling Time
     M::Int64 = 5    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
@@ -111,4 +113,4 @@ end
     Transfer::TransferFun
 end
 
-CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(), TransferFun())
+CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(),TransferFun())

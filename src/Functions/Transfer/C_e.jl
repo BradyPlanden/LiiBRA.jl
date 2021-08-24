@@ -36,6 +36,16 @@ cs0_pos = cs_max_pos * θ_pos
 j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
 j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
 
+if CellData.Const.CellTyp == "Doyle_94"
+    κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-CellData.Pos.α)
+    κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
+    j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
+    j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
+ else
+    j0_neg = CellData.Neg.k_norm*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
+    j0_pos = CellData.Pos.k_norm*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
+ end
+
 #Resistances
 Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
 Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
@@ -50,6 +60,7 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 
 R_ce = roots(CellData.Const.Ce_M+1)
+println("R_ce:",R_ce)
 λ = R_ce[2:end]
 #λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
 #Create all k's

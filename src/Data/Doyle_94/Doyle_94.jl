@@ -1,6 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
+    CellTyp::String = "Doyle_94"
     T::Float64 = 298.15
     T_ref::Float64 = 298.15
     t_plus::Float64 = 0.363

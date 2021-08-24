@@ -136,6 +136,12 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         jPos[i,:] = y[i,FluxPosInd]
         jL[i] = y[i,FluxPosInd[1]]
 
+        println("Cse_Neg:", Cse_Neg[i,1])
+        println("Ce:", Ce[i,:])
+        println("j0:", j0[i])
+        # println("Uocp_Neg:", Uocp_Neg[i])
+        # println("Uocp_Pos:", Uocp_Pos[i])
+
         j0_CC_neg[i] = findmax([eps(); (k_neg*(CellData.Neg.cs_max-Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))])[1]
         j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
         η0[i] = (Tk[i]*2*R)/F*asinh(j0[i])/(2*j0_CC_neg[i])

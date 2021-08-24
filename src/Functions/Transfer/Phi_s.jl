@@ -31,8 +31,12 @@ comb_cond_eff = κ_eff+σ_eff #combining into single variable
 cs0 = Electrode.cs_max * θ
 
 #Current Flux Density
-κ = Electrode.k_norm/Electrode.cs_max/CellData.Const.ce0^(1-Electrode.α)
-j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
+if CellData.Const.CellTyp == "Doyle_94"
+   κ = Electrode.k_norm/Electrode.cs_max/CellData.Const.ce0^(1-Electrode.α)
+   j0 = κ*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
+else
+   j0 = Electrode.k_norm*(CellData.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
+end
 
 #Resistance
 Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm

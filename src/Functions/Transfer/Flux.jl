@@ -34,8 +34,12 @@ cs0 = cs_max * θ
 α = Electrode.α
 
 #Current Flux Density
-κ = Electrode.k_norm/Electrode.cs_max/ce0^(1-α)
-j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α
+if CellData.Const.CellTyp == "Doyle_94"
+    κ = Electrode.k_norm/Electrode.cs_max/ce0^(1-α)
+    j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α
+else
+    j0 = Electrode.k_norm*(ce0*(cs_max-cs0))^(1-α)*cs0^α
+end
 
 #Resistances
 Rtot = R*CellData.Const.T /(j0*F^2) + Electrode.RFilm

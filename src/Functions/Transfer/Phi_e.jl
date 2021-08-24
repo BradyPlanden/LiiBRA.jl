@@ -38,10 +38,15 @@ cs0_pos = cs_max_pos * θ_pos
 α_pos = CellData.Pos.α
 
 #Current Flux Density
-κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-α_neg)
-κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-α_pos)
-j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
-j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-α_pos)*cs0_pos^α_pos
+if CellData.Const.CellTyp == "Doyle_94"
+   κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-α_neg)
+   κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-α_pos)
+   j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
+   j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-α_pos)*cs0_pos^α_pos
+else
+   j0_neg = CellData.Neg.k_norm*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
+   j0_pos = CellData.Pos.k_norm*(ce0*(cs_max_pos-cs0_pos))^(1-α_pos)*cs0_pos^α_pos
+end
 
 #Resistances 
 Rtot_neg = R*CellData.Const.T/(j0_neg*F^2) + CellData.Neg.RFilm
