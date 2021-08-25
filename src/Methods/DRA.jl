@@ -23,7 +23,7 @@
     C_Aug = Array{Float64}(undef,0,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
-    #tf__ = Array{Float64}(undef,0,length(s))
+    tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
     #D_term = Array{Float64}(undef,0,1)
@@ -62,7 +62,7 @@
             println("D:",D)
             println("nR:",nR)
         end
-
+        tf__ = [tf__; tf]
         if DRA_Debug == 1
             # stpsum__ = [stpsum__; stpsum]
             # tf__ = [tf__; tf]
@@ -126,5 +126,5 @@
     ss_C = ss_C.*ss_B'
     ss_B = ones(size(ss_B))
         
-return sys.A, ss_B, ss_C, sys.D, Dtt#, puls, Hank1, Hank2, T.S, T.U, T.V, tf__
+return sys.A, ss_B, ss_C, sys.D, Dtt, puls, Hank1, Hank2, S, U, V, tf__
 end

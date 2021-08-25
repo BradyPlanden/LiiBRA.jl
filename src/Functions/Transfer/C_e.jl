@@ -60,7 +60,6 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 
 R_ce = roots(CellData.Const.Ce_M+1)
-println("R_ce:",R_ce)
 λ = R_ce[2:end]
 #λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
 #Create all k's

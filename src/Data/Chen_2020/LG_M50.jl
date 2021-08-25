@@ -8,7 +8,7 @@ using Parameters
         tpf::Function = ce -> -0.1287*(ce/1000)^3+0.4106*(ce/1000)^2-0.4717*(ce/1000)+0.4492 # Transference Number Function - Requires ce in dm-3
         De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity
         Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
-    SOC::Float64 = 1. # Initial State of Charge
+    SOC::Float64 = 0.5 # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
     Ea_κ = 0.
@@ -35,7 +35,7 @@ end
 @with_kw mutable struct Negative
         L::Float64 = 85.2e-6    # Negative Electrode Length
         Rs::Float64 = 5.86e-6   # Particle Radius [m]
-        Ds::Float64 = 3.3e-14   # Solid Diffusivity [m^2/s]
+        Ds::Float64 = 3.3e-13   # Solid Diffusivity [m^2/s]
     Ea_σ::Float64 = 0.     # Activation Energy Solid Conductivity
     Ea_Ds::Float64 = 0.    # Activation Energy Solid Diffusivity
         ϵ_s::Float64 = 0.75     # Active Material Volume Fraction
@@ -59,7 +59,7 @@ end
 @with_kw mutable struct Positive
         L::Float64 = 75.6e-6    # Positive Electrode Length
         Rs::Float64 = 5.22e-6    # Particle radius [m]
-        Ds::Float64 = 4e-15   # Solid diffusivity [m^2/s]
+        Ds::Float64 = 4e-14   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0.
     Ea_Ds::Float64 = 0.
         ϵ_s::Float64 = 0.665    # Active Material Volume Fraction
@@ -90,18 +90,20 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 2    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 1     # Final Model Sampling Time
+    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions
+    SamplingT::Float64 = 2     # Final Model Sampling Time
     M::Int64 = 5    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
+    Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
+    H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 25    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
     tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+
 end
 
 @with_kw mutable struct Cell
