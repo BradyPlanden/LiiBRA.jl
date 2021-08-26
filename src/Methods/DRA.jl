@@ -23,7 +23,7 @@
     C_Aug = Array{Float64}(undef,0,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
-    tf__ = Array{Float64}(undef,0,length(s))
+    #tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
     #D_term = Array{Float64}(undef,0,1)
@@ -39,13 +39,13 @@
         end
 
         #tf = reverse!(tf, dims=2)
+        #c = plan_ifft(tf,2)
+        #jk = CellData.RA.Fs*real((c*tf)') # inverse fourier transform tranfser function response
         jk = CellData.RA.Fs*real(ifft(tf,2)') # inverse fourier transform tranfser function response
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
-        nR = size(stpsum,1)
-        samplingtf = Array{Float64}(undef,nR,length(OrgT))
-
+        samplingtf = Array{Float64}(undef,size(stpsum,1),length(OrgT))
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
-            for Output in 1:nR
+            for Output in 1:size(stpsum,1)
                 spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
             end
@@ -62,7 +62,7 @@
             println("D:",D)
             println("nR:",nR)
         end
-        tf__ = [tf__; tf]
+
         if DRA_Debug == 1
             # stpsum__ = [stpsum__; stpsum]
             # tf__ = [tf__; tf]
@@ -102,20 +102,28 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    #T = svds(Hank1; nsv=CellData.RA.M)[1]
-    U,S,V = tsvd(Hank1, k=CellData.RA.M)   
+    T = svds(Hank1; nsv=CellData.RA.M)[1]
+    #U,S,V = tsvd(Hank1, k=CellData.RA.M)   
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-    S_ = sqrt(diagm(S[1:CellData.RA.M]))
-    Observibility = (@view U[:,1:CellData.RA.M])*S_
-    Control = S_*(@view V[:,1:CellData.RA.M])'
+    S_ = sqrt(diagm(T.S[1:CellData.RA.M]))
+    Observibility = (@view T.U[:,1:CellData.RA.M])*S_
+    Control = S_*(@view T.V[:,1:CellData.RA.M])'
     
     A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
     A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
     
+    #Error check
+    # if any(i -> i>1, eigvals(A))
+    #     println("Oscilating System")
+    # end
+
+    # if any(i -> i>1, eigvals(A))
+    #     println("Unstable System")
+    # end
+    
     B = [CellData.RA.SamplingT; Control[:,1:CellData.RA.N]]
     C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]
-    
 
     #  Final State-Space Form
     sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
@@ -124,7 +132,7 @@
 
     #Scale C and tansform B to improve real-time linearisation performance
     ss_C = ss_C.*ss_B'
-    ss_B = ones(size(ss_B))
+    ss_B = ones(size(ss_B)) 
         
-return sys.A, ss_B, ss_C, sys.D, Dtt#, puls, Hank1, Hank2, S, U, V, tf__
+return real(sys.A), real(ss_B), real(ss_C), real(sys.D)#, Dtt, puls, Hank1, Hank2, S, U, V, tf__
 end
