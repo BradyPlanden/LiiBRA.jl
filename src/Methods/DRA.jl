@@ -126,5 +126,5 @@
     ss_C = ss_C.*ss_B'
     ss_B = ones(size(ss_B))
         
-return sys.A, ss_B, ss_C, sys.D, Dtt, puls, Hank1, Hank2, S, U, V, tf__
+return sys.A, ss_B, ss_C, sys.D, Dtt#, puls, Hank1, Hank2, S, U, V, tf__
 end
