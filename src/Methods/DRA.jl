@@ -126,13 +126,21 @@
     C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]
 
     #  Final State-Space Form
-    sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
-    ss_B = sys.B
-    ss_C = sys.C
+    d, S = eigen(A)
+    A = Diagonal(d)
+    B = S\B
+    C = C*S
+    # sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
+    # ss_B = sys.B
+    # ss_C = sys.C
 
     #Scale C and tansform B to improve real-time linearisation performance
-    ss_C = ss_C.*ss_B'
-    ss_B = ones(size(ss_B)) 
+    # ss_C = ss_C.*ss_B'
+    # ss_B = ones(size(ss_B)) 
+
+    C = C.*B'
+    #B = ones(size(B))
         
-return real(sys.A), real(ss_B), real(ss_C), real(sys.D)#, Dtt, puls, Hank1, Hank2, S, U, V, tf__
+#return real(sys.A), real(ss_B), real(ss_C), real(sys.D), Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug#, tf__
+return A, B, C, D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug#, tf__
 end

@@ -9,21 +9,21 @@ using LIBRA#, Plots
 end
 
 @inline function DRA_loop(CellData)
-    #A_DRA = B_DRA = C_DRA = D_DRA = Dtt = puls = Hank1 = Hank2 = S = U = V = tf__ = tuple()
-    A_DRA = B_DRA = C_DRA = D_DRA = tuple()
+    A_DRA = B_DRA = C_DRA = D_DRA = Dtt = puls = Hank1 = Hank2 = S = U = V = SFactor = C_Aug = tuple()
+    #A_DRA = B_DRA = C_DRA = D_DRA = tuple()
     for Temp in 25.0:25.0:25.0
         CellData.Const.T = 273.15+Temp
         Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/R
         CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
             for i in 1:1
-                Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
-                #Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+                #Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
+                Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
                 f = 0:Nfft-1
                 s = transpose(((2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft)))
                 for SOC in 0.8:0.8:0.8
                     CellData.Const.SOC = SOC
-                    #A, B, C, D, Dtt, puls, Hank1, Hank2, S, U, V, tf__ = DRA(CellData,s,f)
-                    A, B, C, D = DRA(CellData,s,f)
+                    A, B, C, D, Dtt, puls, Hank1, Hank2, S, U, V, SFactor, C_Aug = DRA(CellData,s,f)
+                    #A, B, C, D = DRA(CellData,s,f)
                     A_DRA = flatten(A_DRA,A)
                     B_DRA = flatten(B_DRA,B)
                     C_DRA = flatten(C_DRA,C)
@@ -32,14 +32,14 @@ end
             end
     end
 
-return A_DRA, B_DRA, C_DRA, D_DRA#, puls, Hank1, Hank2, S, U, V, tf__
+return A_DRA, B_DRA, C_DRA, D_DRA, Dtt, puls, Hank1, Hank2, S, U, V, SFactor, C_Aug#, tf__
 end
 
 #----------Generate Model -----------------#
 #TransferFuns = TransferFun()
 #Nfft, f, s = Impulse()
-A_DRA, B_DRA, C_DRA, D_DRA = DRA_loop(CellData)
-#A_DRA, B_DRA, C_DRA, D_DRA, Dtt, puls, Hank1, Hank2, S, U, V, tf__ = DRA_loop(CellData)
+#A_DRA, B_DRA, C_DRA, D_DRA = DRA_loop(CellData)
+A_DRA, B_DRA, C_DRA, D_DRA, Dtt, puls, Hank1, Hank2, S, U, V, SFactor, C_Aug = DRA_loop(CellData)
 #save("$CellTyp.jld", "CellData", CellData, "A_DRA", A_DRA, "B_DRA", B_DRA, "C_DRA", C_DRA, "D_DRA", D_DRA, "Dtt", Dtt) #Switch to jld2
 
 
