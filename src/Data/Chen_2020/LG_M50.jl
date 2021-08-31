@@ -90,18 +90,17 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 2     # Final Model Sampling Time
+    Fs::Float64 = 2    # Sampling Frequency of Transfer Functions
+    SamplingT::Float64 = 1     # Final Model Sampling Time
     M::Int64 = 5    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
+    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 25    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
     tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
 
 end
