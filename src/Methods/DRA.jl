@@ -142,5 +142,5 @@
     B = ones(size(B))
         
 #return real(sys.A), real(ss_B), real(ss_C), real(sys.D), Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug#, tf__
-return real(A), real(B), real(C), D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug, S#, tf__
+return real(A), real(B), real(C), D#, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug, S#, tf__
 end
