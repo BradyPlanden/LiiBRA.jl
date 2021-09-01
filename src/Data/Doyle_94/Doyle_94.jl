@@ -13,7 +13,7 @@ using Parameters
     Ea_De::Float64 = 0.
     CC_A::Float64 = 1.0 
     k_ref::Float64 = 2.16e-11
-    κ::Float64 = 1.0
+    κ::Float64 = 1.
     κf::Function = ce -> 4.1253e-2+500.7*ce*(1e-6)-4.7212e5*ce^2*1e-12+1.5094e8*ce^3*(1e-18)-1.6018e10*ce^4*1e-24
     Uocp::Function = (Electrode, θ) ->
         if Electrode == "Neg"
@@ -81,7 +81,7 @@ end
     ϵ_e::Float64 = 0.724    # Porosity of separator
     De_brug::Float64 = 1.5
     κ_brug::Float64 = 1.5
-    D2::Float64 = 1.0   #Init Value
+    D2::Float64 = 1.   #Init Value
     D2f::Function = De -> De * ϵ_e^De_brug
 end
 

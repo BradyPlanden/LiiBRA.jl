@@ -77,8 +77,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         cs_neg_avg = x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max < 0. ? 0. : x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max #Zero if < 0
         cs_pos_avg = x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max < 0. ? 0. : x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max #Zero if < 0
 
-        θ_neg[i+1] = cs_neg_avg/CellData.Neg.cs_max
-        θ_pos[i+1] = cs_pos_avg/CellData.Pos.cs_max
+        θ_neg[i] = cs_neg_avg/CellData.Neg.cs_max
+        θ_pos[i] = cs_pos_avg/CellData.Pos.cs_max
         Cell_SOC = (θ_neg[i]-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
         jeq_neg = CellData.Neg.k_norm*sqrt(cs_neg_avg*(CellData.Const.ce0*(CellData.Neg.cs_max-cs_neg_avg)))
@@ -143,12 +143,12 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
 
         j0_CC_neg[i] = findmax([eps(); (k_neg*(CellData.Neg.cs_max-Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))])[1]
         #j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
-        η0[i] = (Tk[i]*2*R)/F*asinh(j0[i])/(2*j0_CC_neg[i])
+        η0[i] = Tk[i]*2*R/F*asinh((j0[i])/(2*j0_CC_neg[i]))
         #η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh(jNeg[i,:])/(2*j0_neg)
 
-        j0_CC_pos[i] = findmax([eps(); (k_pos*(CellData.Pos.cs_max-Cse_Pos[i,1])^(1-CellData.Pos.α))*((Cse_Pos[i,1]^CellData.Pos.α)*(Ce[1]^(1-CellData.Pos.α)))])[1] 
+        j0_CC_pos[i] = findmax([eps(); (k_pos*(CellData.Pos.cs_max-Cse_Pos[i,1])^(1-CellData.Pos.α))*((Cse_Pos[i,1]^CellData.Pos.α)*(Ce[i,end]^(1-CellData.Pos.α)))])[1] 
         #j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
-        ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i])/(2*j0_CC_pos[i])
+        ηL[i] = (Tk[i]*2*R)/F*asinh((jL[i])/(2*j0_CC_pos[i]))
         #η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh((jPos[i,:]))/(2*j0_pos)
 
         #Cell Voltage

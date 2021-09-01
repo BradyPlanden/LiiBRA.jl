@@ -103,7 +103,7 @@
 
     #Truncated SVD of Hank1 Matrix
     T = svds(Hank1; nsv=CellData.RA.M)[1]
-    #U,S,V = tsvd(Hank1, k=CellData.RA.M)   
+    #U,S,V = tsvd(Hank1, k=CellData.RA.M)
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
     S_ = sqrt(diagm(T.S[1:CellData.RA.M]))
@@ -139,8 +139,8 @@
     # ss_B = ones(size(ss_B)) 
 
     C = C.*B'
-    #B = ones(size(B))
+    B = ones(size(B))
         
 #return real(sys.A), real(ss_B), real(ss_C), real(sys.D), Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug#, tf__
-return A, B, C, D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug#, tf__
+return real(A), real(B), real(C), D, Dtt, puls, Hank1, Hank2, T.S, T.U, T.V, SFactor, C_Aug, S#, tf__
 end
