@@ -1,4 +1,4 @@
-function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
+function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
     """ 
     Simulation of generated reduced-order models
     # Add License
@@ -6,12 +6,18 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         # Locations to be computed
         # Sampling Frequency
     """
-        #Selecting SS Models
+    #Determine time span and allocate arrays
+    tlength = size(Iapp,1)
+
+    CellV_= Array{Float64}(undef,tlength,0)
+    Ce_= Array{Float64}(undef,tlength,0)
+
+    #Selecting SS Models
     for γ in 1:4
-        A = A[γ]
-        B = B[γ]
-        C = C[γ]
-        D = D[γ]
+        A = A0[γ]
+        B = B0[γ]
+        C = C0[γ]
+        D = D0[γ]
 
         #Capturing Indices
         tfstr = Array{String}(undef,0,1)
@@ -38,9 +44,6 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         csegain_neg = C[CseNegInd[1][1],end]
         csegain_pos = C[CsePosInd[1][1],end]
 
-        #Determine time span and allocate arrays
-        tlength = size(Iapp,1)
-
         #Memory Allocation
         θ_neg = Array{Float64}(undef,tlength,1) .= 0.
         θ_pos = Array{Float64}(undef,tlength,1) .= 0.
@@ -66,6 +69,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
         Uocp_Pos = Array{Float64}(undef,tlength,1) .= 0.
         Cell_V = Array{Float64}(undef,tlength,1) .= 0.
 
+
         #Defining SOC
         SOC_Neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
         SOC_Pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
@@ -78,12 +82,21 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
             cs_neg_avg = x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max < 0. ? 0. : x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max #Zero if < 0
             cs_pos_avg = x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max < 0. ? 0. : x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max #Zero if < 0
 
+            #Reaction Rates
+            if CellData.Const.CellTyp == "Doyle_94"
+                k_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/CellData.Const.ce0^(1-CellData.Neg.α)
+                k_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/CellData.Const.ce0^(1-CellData.Pos.α)
+            else
+                k_neg = CellData.Neg.k_norm
+                k_pos = CellData.Pos.k_norm
+            end
+            
             θ_neg[i] = cs_neg_avg/CellData.Neg.cs_max
             θ_pos[i] = cs_pos_avg/CellData.Pos.cs_max
             Cell_SOC = (θ_neg[i]-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
-            jeq_neg = CellData.Neg.k_norm*sqrt(cs_neg_avg*(CellData.Const.ce0*(CellData.Neg.cs_max-cs_neg_avg)))
-            jeq_pos = CellData.Pos.k_norm*sqrt(cs_pos_avg*(CellData.Const.ce0*(CellData.Pos.cs_max-cs_pos_avg)))
+            jeq_neg = k_neg*sqrt(cs_neg_avg*CellData.Const.ce0*(CellData.Neg.cs_max-cs_neg_avg))
+            jeq_pos = k_pos*sqrt(cs_pos_avg*CellData.Const.ce0*(CellData.Pos.cs_max-cs_pos_avg))
             javg_neg = Iapp[i]/(CellData.Neg.ϵ_s*(3*F*CellData.Neg.L*CellData.Const.CC_A)/CellData.Neg.Rs)
             javg_pos = Iapp[i]/(CellData.Pos.ϵ_s*(3*F*CellData.Pos.L*CellData.Const.CC_A)/CellData.Pos.Rs)
 
@@ -98,28 +111,19 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
             σ_eff_Neg = σ_neg*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
             σ_eff_Pos = σ_pos*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
             
-            #Reaction Rates
-            if CellData.Const.CellTyp == "Doyle_94"
-                k_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/CellData.Const.ce0^(1-CellData.Neg.α)
-                k_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/CellData.Const.ce0^(1-CellData.Pos.α)
-            else
-                k_neg = CellData.Neg.k_norm
-                k_pos = CellData.Pos.k_norm
-            end
 
             #Resistances
             Rtot_neg = (Tk[i]*R)/(F^2*sqrt(jeq_neg^2+(javg_neg^2/4)))+CellData.Neg.RFilm
             Rtot_pos = (Tk[i]*R)/(F^2*sqrt(jeq_pos^2+(javg_pos^2/4)))+CellData.Pos.RFilm
 
             #Condensing Variable
-            ν_neg = CellData.Neg.L*sqrt((3*(CellData.Neg.ϵ_s/CellData.Neg.Rs)*(1/κ_eff_Neg+1/σ_eff_Neg))/Rtot_neg)
-            ν_pos = CellData.Pos.L*sqrt((3*(CellData.Pos.ϵ_s/CellData.Pos.Rs)*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos)
+            ν_neg = @. CellData.Neg.L*sqrt((CellData.Neg.as*(1/κ_eff_Neg+1/σ_eff_Neg))/Rtot_neg)
+            ν_pos = @. CellData.Pos.L*sqrt((CellData.Pos.as*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos)
 
             #Relinearise dependent on ν, σ, κ
             #Call from CellData? List of functions composed from ROM creation?
             #D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
-            #D = D_Linear(Dtt,ν_neg,ν_pos)
-
+            D = D_Linear(CellData.Transfer.tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos)
             #SS Output
             y[i,:] = C*x[i,:] + D*Iapp[i]
 
@@ -162,17 +166,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A,B,C,D)
             #Update States
             x[i+1,:] = A*x[i,:] + B*Iapp[i]
         end
-    end
-    return Cell_V, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos, Ce
-end
-
-function D_Linear(Dtt,ν_neg, ν_pos)
-    Dtemp = Array{Float64}(undef,0,1)
-    D = Array{Float64}(undef,0,1)
-    global ν_neg
-    for j in 1:length(Dtt)
-        Dtemp = eval(Meta.parse(Dtt[j]))
-        D = [D; Dtemp]
-    end
-    return D
+        CellV_ = [CellV_ Cell_V]
+        Ce_ = [Ce_ Ce]
+    end 
+    return CellV_, Ce_# jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos
 end
