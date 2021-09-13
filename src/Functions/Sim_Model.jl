@@ -11,6 +11,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
 
     CellV_= Array{Float64}(undef,tlength,0)
     Ce_= Array{Float64}(undef,tlength,0)
+    j0_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
     for γ in 1:4
@@ -79,6 +80,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
         for i in 1:tlength-1
+            CellData.Const.De = 
+            
             cs_neg_avg = x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max < 0. ? 0. : x[i,end] * csegain_neg + SOC_Neg * CellData.Neg.cs_max #Zero if < 0
             cs_pos_avg = x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max < 0. ? 0. : x[i,end] * csegain_pos + SOC_Pos * CellData.Pos.cs_max #Zero if < 0
 
@@ -168,6 +171,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         end
         CellV_ = [CellV_ Cell_V]
         Ce_ = [Ce_ Ce]
+        j0_ = [j0_ j0]
     end 
-    return CellV_, Ce_# jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos
+    return CellV_, Ce_, j0_# jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos
 end

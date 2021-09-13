@@ -1,7 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    CellTyp::String = "Doyle_94"
+    CellTyp::String = "LG_M50"
     T::Float64 = 298.15 # Cell Temperature
     T_ref::Float64 = 298.15 # Reference Temperature
     t_plus::Float64 = 0.2594 # Inital Transference Number
