@@ -22,7 +22,7 @@ end
                 Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
                 f = 0:Nfft-1
                 s = transpose(((2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft)))
-                for SOC in 0.8:0.8:0.8
+                for SOC in 0.5:0.5:0.5
                     CellData.Const.SOC = SOC
                     #A, B, C, D, Dtt, puls, Hank1, Hank2, TS, U, V, SFactor, C_Aug, S = DRA(CellData,s,f)
                     A, B, C, D, Dt = DRA(CellData,s,f)
@@ -53,7 +53,7 @@ Iapp = [ones(20)*0.; ones(20)*9.45; ones(80)*0.; ones(20)*-5; ones(80)*0.]
 #Iapp = [ones(100)*10; ones(100)*0]
 time = 0:0.5:109
 #CellV, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos, Ce = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
-CellV, Ce, j0 = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+CellV, Ce, j0, RtotNeg = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
 # plot(time,CellV[1:end-1], legend=:topright,color=:blue,label="Voltage",bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Voltage [V]")
 # plot!(twinx(),time,Iapp[1:end-1],legend=:bottomright,color=:red,label="Current", left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Current [A]")
 # plot!(title = "LG M50 - HPPC @ 80% SOC", xlabel = "Time [s]")

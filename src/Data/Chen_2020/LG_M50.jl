@@ -49,7 +49,7 @@ end
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
     k_norm::Float64 = 6.48e-7 #2.12e-10 #Initial Reaction Rate
-    Ea_κ::Float64 = 0. #35000   # Activation Energy
+    Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D1::Float64 = 1.   # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug # Effective Diffusivity
@@ -73,7 +73,7 @@ end
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
     k_norm::Float64 = 3.42e-6 #1.12e-9  #Initial Reaction Rate
-    Ea_κ::Float64 = 0. #17800   # Activation Energy
+    Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D3::Float64 = 1.   # Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
