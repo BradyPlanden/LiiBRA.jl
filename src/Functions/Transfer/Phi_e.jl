@@ -44,8 +44,8 @@ if CellData.Const.CellTyp == "Doyle_94"
    j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-α_neg)*cs0_neg^α_neg
    j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-α_pos)*cs0_pos^α_pos
 else
-   j0_neg = CellData.Neg.k_norm*cs_max_neg*(ce0*(cs0_neg/cs_max_neg*(1-cs0_neg/cs_max_neg)))^(1-CellData.Neg.α)
-   j0_pos = CellData.Pos.k_norm*cs_max_pos*(ce0*(cs0_pos/cs_max_pos*(1-cs0_pos/cs_max_pos)))^(1-CellData.Pos.α)
+   @show j0_neg = CellData.Neg.k_norm*cs_max_neg*(ce0*(cs0_neg/cs_max_neg*(1-cs0_neg/cs_max_neg)))^(1-CellData.Neg.α)
+   @show j0_pos = CellData.Pos.k_norm*cs_max_pos*(ce0*(cs0_pos/cs_max_pos*(1-cs0_pos/cs_max_pos)))^(1-CellData.Pos.α)
 end
 
 #Resistances 

@@ -41,7 +41,7 @@ if CellData.Const.CellTyp == "Doyle_94"
    κ = Electrode.k_norm/Electrode.cs_max/ce0^(1-α)
    j0 = κ*(ce0*(cs_max-cs0))^(1-α)*cs0^α
 else
-   j0 = Electrode.k_norm*cs_max*(ce0*(cs0/cs_max*(1-cs0/cs_max)))^(1-α)
+   @show j0 = Electrode.k_norm*cs_max*(ce0*(cs0/cs_max*(1-cs0/cs_max)))^(1-α)
 end
 
 #Resistance

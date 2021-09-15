@@ -12,10 +12,21 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
     CellV_= Array{Float64}(undef,tlength,0)
     Ce_= Array{Float64}(undef,tlength,0)
     j0_ = Array{Float64}(undef,tlength,0)
-    RtotNeg_ = Array{Float64}(undef,tlength,1) .= 0.
+    RtotNeg_ = Array{Float64}(undef,tlength,0)
+    ϕ_ẽ1_ = Array{Float64}(undef,tlength,0)
+    ϕ_ẽ2_ = Array{Float64}(undef,tlength,0)
+    Uocp_Neg_ = Array{Float64}(undef,tlength,0)
+    Uocp_Pos_ = Array{Float64}(undef,tlength,0)
+    η0_ = Array{Float64}(undef,tlength,0)
+    η_neg_ = Array{Float64}(undef,tlength,0)
+    ηL_ = Array{Float64}(undef,tlength,0)
+    η_pos_ = Array{Float64}(undef,tlength,0)
+    ϕ_e_ = Array{Float64}(undef,tlength,0)
+    jNeg_ = Array{Float64}(undef,tlength,0)
+    jPos_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
-    for γ in 1:4
+    for γ in 1:1
         A = A0[γ]
         B = B0[γ]
         C = C0[γ]
@@ -59,7 +70,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         ηL = Array{Float64}(undef,tlength,1) .= 0.
         η_pos = Array{Float64}(undef,tlength,size(FluxPosInd,1)) .= 0.
         ϕ_ẽ1 = Array{Float64}(undef,tlength,size(ϕ_ẽInd,1)) .= 0.
-        ϕ_ẽ2 = Array{Float64}(undef,tlength,size(ϕ_ẽInd,1)) .= 0.
+        ϕ_ẽ2 = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
         ϕ_se_neg_0 = Array{Float64}(undef,tlength,1) .= 0. #Replace with length of ϕ_seNegInd @ zero
         jNeg = Array{Float64}(undef,tlength,2) .= 0. 
         j0 = Array{Float64}(undef,tlength,1) .= 0. 
@@ -71,6 +82,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         Uocp_Neg = Array{Float64}(undef,tlength,1) .= 0.
         Uocp_Pos = Array{Float64}(undef,tlength,1) .= 0.
         Cell_V = Array{Float64}(undef,tlength,1) .= 0.
+        ϕ_e = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
 
 
         #Defining SOC
@@ -96,8 +108,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
                 jeq_pos = CellData.Pos.k_norm*CellData.Pos.cs_max*(CellData.Const.ce0*(cs_pos_avg/CellData.Pos.cs_max*(1-cs_pos_avg/CellData.Pos.cs_max)))^(1-CellData.Pos.α)
             end
             
-            θ_neg[i] = cs_neg_avg/CellData.Neg.cs_max
-            θ_pos[i] = cs_pos_avg/CellData.Pos.cs_max
+            θ_neg[i+1] = cs_neg_avg/CellData.Neg.cs_max
+            θ_pos[i+1] = cs_pos_avg/CellData.Pos.cs_max
             Cell_SOC = (θ_neg[i]-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
 
@@ -141,8 +153,8 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             Uocp_Pos[i] = CellData.Const.Uocp("Pos",Cse_Pos[i,1]/CellData.Pos.cs_max)
             ϕ_se_neg_0[i] = y[i, ϕ_seNegInd[1]] + Uocp_Neg[i] #Location 0
             ϕ_ẽ1[i,:] = y[i,ϕ_ẽInd]
-            ϕ_ẽ2 = @. ((Tk[i]*2*R*(1-CellData.Const.t_plus))/F)*(log(Ce[i,:]/Ce[i,1]))
-            ϕ_e = @. [0; ϕ_ẽ1[i,:]]+ϕ_ẽ2-ϕ_se_neg_0[i]
+            ϕ_ẽ2[i,:] = @. ((Tk[i]*2*R*(1-CellData.Const.t_plus))/F)*(log(Ce[i,:]/Ce[i,1]))
+            ϕ_e[i,:] = @. [0; ϕ_ẽ1[i,:]]+ϕ_ẽ2[i,:]-ϕ_se_neg_0[i]
 
             #Flux
             jNeg[i,:] = y[i,FluxNegInd]
@@ -152,28 +164,28 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
 
             if CellData.Const.CellTyp == "Doyle_94"
                 j0_CC_neg[i] = findmax([eps(); (k_neg*(CellData.Neg.cs_max-Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))])[1]
-                #j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
-                η0[i] = Tk[i]*2*R/F*asinh((j0[i])/(2*j0_CC_neg[i]))
-                #η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh(jNeg[i,:])/(2*j0_neg)
+                j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
+                η0[i] = Tk[i]*2*R/F*asinh(j0[i]/(2*j0_CC_neg[i]))
+                η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh((jNeg[i,:])/(2*j0_neg))
 
                 j0_CC_pos[i] = findmax([eps(); (k_pos*(CellData.Pos.cs_max-Cse_Pos[i,1])^(1-CellData.Pos.α))*((Cse_Pos[i,1]^CellData.Pos.α)*(Ce[i,end]^(1-CellData.Pos.α)))])[1] 
-                #j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
-                ηL[i] = (Tk[i]*2*R)/F*asinh((jL[i])/(2*j0_CC_pos[i]))
-                #η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh((jPos[i,:]))/(2*j0_pos)
+                j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
+                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i]/(2*j0_CC_pos[i]))
+                η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh(jPos[i,:]/(2*j0_pos))
             else
                 j0_CC_neg[i] = findmax([eps(); CellData.Neg.k_norm*CellData.Neg.cs_max*(Ce[i,1]*(Cse_Neg[i,1]/CellData.Neg.cs_max*(1-Cse_Neg[i,1]/CellData.Neg.cs_max)))^(1-CellData.Neg.α)])[1]
                 #j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
-                η0[i] = Tk[i]*2*R/F*asinh((j0[i])/(2*j0_CC_neg[i]))
-                #η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh(jNeg[i,:])/(2*j0_neg)
+                η0[i] = Tk[i]*2*R/F*asinh(j0[i]/(2*j0_CC_neg[i]))
+                η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh(jNeg[i,:]/(2*j0_neg[i]))
                 
                 j0_CC_pos[i] = findmax([eps(); CellData.Pos.k_norm*CellData.Pos.cs_max*(Ce[i,end]*(Cse_Pos[i,1]/CellData.Pos.cs_max*(1-Cse_Pos[i,1]/CellData.Pos.cs_max)))^(1-CellData.Pos.α)])[1] 
                 #j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
-                ηL[i] = (Tk[i]*2*R)/F*asinh((jL[i])/(2*j0_CC_pos[i]))
-                #η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh((jPos[i,:]))/(2*j0_pos)
+                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i]/(2*j0_CC_pos[i]))
+                η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh(jPos[i,:]/(2*j0_pos[i]))
             end
 
             #Cell Voltage
-            Cell_V[i] = @. (Uocp_Pos[i]-Uocp_Neg[i]) + (ηL[i]-η0[i]) + (ϕ_ẽ1[i,end]+ϕ_ẽ2[end]) + (CellData.Pos.RFilm*jL[i]-CellData.Neg.RFilm*j0[i])*F 
+            Cell_V[i] = @. (Uocp_Pos[i]-Uocp_Neg[i]) + (ηL[i]-η0[i]) + (ϕ_ẽ1[i,end]+ϕ_ẽ2[i,end]) + (CellData.Pos.RFilm*jL[i]-CellData.Neg.RFilm*j0[i])*F 
 
             #ϕ_s
             ϕ_s_neg = y[i,ϕ_sNegInd]
@@ -184,8 +196,18 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         end
         CellV_ = [CellV_ Cell_V]
         Ce_ = [Ce_ Ce]
-        j0_ = [j0_ j0_CC_neg]
+        jNeg_ = jNeg
+        jPos_ = jPos
         RtotNeg_ = [RtotNeg_ Rtot_neg]
+        η0_ = [η0_ η0]
+        η_neg_ = η_neg
+        ηL_ = [ηL_ ηL]
+        η_pos_ = η_pos
+        ϕ_ẽ1_ = ϕ_ẽ1
+        ϕ_ẽ2_ = ϕ_ẽ2
+        ϕ_e_ = ϕ_e
+        Uocp_Neg_ = [Uocp_Neg_ Uocp_Neg]
+        Uocp_Pos_ = [Uocp_Pos_ Uocp_Pos]
     end 
-    return CellV_, Ce_, j0_, RtotNeg_# jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos
+    return CellV_, Ce_, jNeg_, jPos_, RtotNeg_, η0_, ηL_, η_neg_, η_pos_, ϕ_ẽ1_, ϕ_ẽ2_, Uocp_Neg_, Uocp_Pos_, ϕ_e_
 end

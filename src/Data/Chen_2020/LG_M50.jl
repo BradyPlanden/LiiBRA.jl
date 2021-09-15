@@ -48,7 +48,7 @@ end
     θ_0::Float64 = 0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 6.48e-7 #2.12e-10 #Initial Reaction Rate
+    k_norm::Float64 = 6.8973799e-13 #6.48e-7 #2.12e-10 #Initial Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D1::Float64 = 1.   # Init Value
@@ -72,7 +72,7 @@ end
     θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 = 3.640283886203905e-12 #3.42e-6 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D3::Float64 = 1.   # Init Value
@@ -90,13 +90,13 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 2    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 1     # Final Model Sampling Time
-    M::Int64 = 5    # Model Order
+    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions
+    SamplingT::Float64 = 2     # Final Model Sampling Time
+    M::Int64 = 10    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
+    H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 25    # Number of Outputs
 end
 
@@ -104,7 +104,6 @@ end
     tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
 
 end
-
 @with_kw mutable struct Cell
     Const::Constants
     Neg::Negative

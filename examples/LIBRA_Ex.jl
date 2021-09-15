@@ -15,7 +15,7 @@ end
         CellData.Const.T = 273.15+Temp
         Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/R
         CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
-            for i in 2000:500:3500
+            for i in 3000:500:3000
                 CellData.RA.H1 = 0:i
                 CellData.RA.H2 = 0:i
                 #Nfft = ceil(2^(log2(CellData.RA.Fs*CellData.RA.Tlen)))
@@ -53,7 +53,7 @@ Iapp = [ones(20)*0.; ones(20)*9.45; ones(80)*0.; ones(20)*-5; ones(80)*0.]
 #Iapp = [ones(100)*10; ones(100)*0]
 time = 0:0.5:109
 #CellV, jNeg, jPos, y, x, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, j0, jL, j0_CC_neg, j0_CC_pos, Uocp_Neg, Uocp_Pos, Cse_Neg, Cse_Pos, Ce = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
-CellV, Ce, j0, RtotNeg = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
+CellV, Ce, jNeg, jPos, RtotNeg, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e = Sim_Model(CellData,Dtt,Iapp,Tk,A_DRA,B_DRA,C_DRA,D_DRA)
 # plot(time,CellV[1:end-1], legend=:topright,color=:blue,label="Voltage",bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Voltage [V]")
 # plot!(twinx(),time,Iapp[1:end-1],legend=:bottomright,color=:red,label="Current", left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Current [A]")
 # plot!(title = "LG M50 - HPPC @ 80% SOC", xlabel = "Time [s]")
