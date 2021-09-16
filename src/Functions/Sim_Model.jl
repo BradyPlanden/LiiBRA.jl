@@ -64,7 +64,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         y = Array{Float64}(undef,tlength,size(C,1)) .= 0.
         Cse_Neg = Array{Float64}(undef,tlength,size(CseNegInd,1)) .= 0.
         Cse_Pos = Array{Float64}(undef,tlength,size(CsePosInd,1)) .= 0.
-        Ce = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
+        Ce = Array{Float64}(undef,tlength,size(CeInd,1)) .= CellData.Const.ce0
         η0 = Array{Float64}(undef,tlength,1) .= 0.
         η_neg = Array{Float64}(undef,tlength,size(FluxNegInd,1)) .= 0.
         ηL = Array{Float64}(undef,tlength,1) .= 0.
@@ -117,17 +117,17 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             javg_pos = -Iapp[i]/(CellData.Pos.as*F*CellData.Pos.L*CellData.Const.CC_A)
 
             Arr_Factor = ((1/CellData.Const.T_ref)-(1/Tk[i]))/R
-            κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
+            κneg = CellData.Const.κf(mean(Ce[i,1:2]))*exp(CellData.Const.Ea_κ*Arr_Factor) 
+            κpos = CellData.Const.κf(mean(Ce[i,5:6]))*exp(CellData.Const.Ea_κ*Arr_Factor) # Parameterise
+            κsep = CellData.Const.κf(mean(Ce[i,3:4]))*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_neg = CellData.Neg.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_pos = CellData.Pos.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
-            κ_eff_Neg = κ*(CellData.Neg.ϵ_e^(CellData.Neg.κ_brug))
-            κ_eff_Sep = κ*(CellData.Sep.ϵ_e^(CellData.Sep.κ_brug))
-            κ_eff_Pos = κ*(CellData.Pos.ϵ_e^(CellData.Pos.κ_brug))
-
+            κ_eff_Neg = κneg*(CellData.Neg.ϵ_e^(CellData.Neg.κ_brug))
+            κ_eff_Sep = κsep*(CellData.Sep.ϵ_e^(CellData.Sep.κ_brug))
+            κ_eff_Pos = κpos*(CellData.Pos.ϵ_e^(CellData.Pos.κ_brug))
             σ_eff_Neg = σ_neg*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
             σ_eff_Pos = σ_pos*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
             
-
             #Resistances
             Rtot_neg[i] = (Tk[i]*R)/(F^2*sqrt(jeq_neg^2+(javg_neg^2/4)))+CellData.Neg.RFilm
             Rtot_pos = (Tk[i]*R)/(F^2*sqrt(jeq_pos^2+(javg_pos^2/4)))+CellData.Pos.RFilm
