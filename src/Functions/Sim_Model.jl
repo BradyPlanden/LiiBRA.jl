@@ -138,8 +138,11 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
 
             #Relinearise dependent on ν, σ, κ
             #Call from CellData? List of functions composed from ROM creation?
-            #D = D_fun(CellData, ν_neg, ν_pos, σ_eff_Neg, σ_eff_Pos, κ_eff_Neg, κ_eff_Sep, κ_eff_Pos) #Calling D linearisation functions
-            D = D_Linear(CellData.Transfer.tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos)
+            D = D_Linear(CellData.Transfer.tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+            # if i>0 && i<25
+            #     @show D
+            # end
+
             #SS Output
             y[i,:] = C*x[i,:] + D*Iapp[i]
 
@@ -153,7 +156,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             Uocp_Pos[i] = CellData.Const.Uocp("Pos",Cse_Pos[i,1]/CellData.Pos.cs_max)
             ϕ_se_neg_0[i] = y[i, ϕ_seNegInd[1]] + Uocp_Neg[i] #Location 0
             ϕ_ẽ1[i,:] = y[i,ϕ_ẽInd]
-            ϕ_ẽ2[i,:] = @. ((Tk[i]*2*R*(1-CellData.Const.t_plus))/F)*(log(Ce[i,:]/Ce[i,1]))
+            ϕ_ẽ2[i,:] = @. ((Tk[i]*2*R*(1-CellData.Const.tpf(Ce[i,:])))/F)*(log(Ce[i,:]/Ce[i,1]))
             ϕ_e[i,:] = @. [0; ϕ_ẽ1[i,:]]+ϕ_ẽ2[i,:]-ϕ_se_neg_0[i]
 
             #Flux
@@ -165,22 +168,22 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             if CellData.Const.CellTyp == "Doyle_94"
                 j0_CC_neg[i] = findmax([eps(); (k_neg*(CellData.Neg.cs_max-Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))])[1]
                 j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
-                η0[i] = Tk[i]*2*R/F*asinh(j0[i]/(2*j0_CC_neg[i]))
+                η0[i] = Tk[i]*2*R/F*asinh(j0[i])/(2*j0_CC_neg[i])
                 η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh((jNeg[i,:])/(2*j0_neg))
 
                 j0_CC_pos[i] = findmax([eps(); (k_pos*(CellData.Pos.cs_max-Cse_Pos[i,1])^(1-CellData.Pos.α))*((Cse_Pos[i,1]^CellData.Pos.α)*(Ce[i,end]^(1-CellData.Pos.α)))])[1] 
                 j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
-                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i]/(2*j0_CC_pos[i]))
+                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i])/(2*j0_CC_pos[i])
                 η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh(jPos[i,:]/(2*j0_pos))
             else
                 j0_CC_neg[i] = findmax([eps(); CellData.Neg.k_norm*CellData.Neg.cs_max*(Ce[i,1]*(Cse_Neg[i,1]/CellData.Neg.cs_max*(1-Cse_Neg[i,1]/CellData.Neg.cs_max)))^(1-CellData.Neg.α)])[1]
                 j0_neg = @. findmax([eps(); (CellData.Neg.k_norm*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
-                η0[i] = Tk[i]*2*R/F*asinh(j0[i]/(2*j0_CC_neg[i]))
+                η0[i] = Tk[i]*2*R/F*asinh(j0[i])/(2*j0_CC_neg[i])
                 η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh(jNeg[i,:]/(2*j0_neg))
                 
                 j0_CC_pos[i] = findmax([eps(); CellData.Pos.k_norm*CellData.Pos.cs_max*(Ce[i,end]*(Cse_Pos[i,1]/CellData.Pos.cs_max*(1-Cse_Pos[i,1]/CellData.Pos.cs_max)))^(1-CellData.Pos.α)])[1] 
                 j0_pos = @. findmax([eps(); (CellData.Pos.k_norm*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
-                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i]/(2*j0_CC_pos[i]))
+                ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i])/(2*j0_CC_pos[i])
                 η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh(jPos[i,:]/(2*j0_pos))
             end
 

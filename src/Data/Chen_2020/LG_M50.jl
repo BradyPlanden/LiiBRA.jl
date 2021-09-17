@@ -1,7 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    CellTyp::String = "LG_M50"
+    CellTyp::String = "Doyle_94"
     T::Float64 = 298.15 # Cell Temperature
     T_ref::Float64 = 298.15 # Reference Temperature
     t_plus::Float64 = 0.2594 # Inital Transference Number
@@ -48,7 +48,7 @@ end
     θ_0::Float64 = 0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 6.8973799e-13 #6.48e-7 #2.12e-10 #Initial Reaction Rate
+    k_norm::Float64 = 4.1580e-8 #6.48e-7 #6.8973799e-13 #2.12e-10 #Initial Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D1::Float64 = 1.   # Init Value
@@ -72,7 +72,7 @@ end
     θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 3.640283886203905e-12 #3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 =  3.5954e-7 #3.42e-6 #3.640283886203905e-12 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0. # Film Resistance
     D3::Float64 = 1.   # Init Value
@@ -95,8 +95,8 @@ end
     M::Int64 = 10    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 2
+    H1::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 25    # Number of Outputs
 end
 
