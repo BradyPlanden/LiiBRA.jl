@@ -12,20 +12,21 @@ using Parameters
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
     Ea_κ = 0.
-    Ea_De::Float64 = 0.
+    Ea_De::Float64 = 0
     CC_A::Float64 =  0.1027  #Electrode Plate Area 
     κ::Float64 = 0.9487
     κf::Function = ce -> 0.1297*(ce/1000)^3-2.51*(ce/1000)^1.5+3.329*(ce/1000) #Requires ce in dm-3
     Uocp::Function = (Electrode, θ) ->
         if Electrode == "Neg"
-            Uocp = @. 1.97938*2.7182818284^(-39.3631*θ) + 0.2482 - 0.0909*tanh(29.8538*(θ - 0.1234)) - 0.04478*tanh(14.9159*(θ - 0.2769)) - 0.0205*tanh(30.4444*(θ - 0.6103))
+            Uocp = @. 1.97938*2.7182818284*exp(-39.3631*θ) + 0.2482 - 0.0909*tanh(29.8538*(θ - 0.1234)) - 0.04478*tanh(14.9159*(θ - 0.2769)) - 0.0205*tanh(30.4444*(θ - 0.6103))
         else
             Uocp = @. -0.8090*θ + 4.4875 - 0.0428*tanh(18.5138*(θ - 0.5542)) - 17.7326*tanh(15.7890*(θ - 0.3117)) + 17.5842*tanh(15.9308*(θ - 0.3120))
         end
 
     ∂Uocp::Function = (Electrode,θ) -> 
         if Electrode == "Neg"
-            ∂Uocp = @. 0.667934002(tanh(14.9159*θ - 4.13021271)^2) + 2.71371042(tanh(29.8538*θ - 3.68395892)^2) + 0.6241102(tanh(30.4444*θ - 18.58021732)^2) - 4.005754622 - (77.91453287630758(2.7182818284^(-39.3631*θ)))
+            #∂Uocp = @. 0.667934002(tanh(14.9159*θ - 4.13021271)^2) + 2.71371042(tanh(29.8538*θ - 3.68395892)^2) + 0.6241102(tanh(30.4444*θ - 18.58021732)^2) - 4.005754622 - (77.91453287630758(2.7182818284^(-39.3631*θ)))
+            ∂Uocp = @. -0.62411*((sech(18.5802 - 30.4444*θ))^2 + 4.34813*(sech(3.68396 - 29.8538*θ))^2 + 1.07022*(sech(4.13021 - 14.9159*θ))^2) - 211.794*exp(-39.3631*θ)
         else
             ∂Uocp = @. 279.9800214(tanh(15.789*θ - 4.9214313)^2) + 0.79239064(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336(tanh(15.9308*θ - 4.9704096)^2))
         end
@@ -36,8 +37,8 @@ end
     L::Float64 = 85.2e-6    # Negative Electrode Length
     Rs::Float64 = 5.86e-6   # Particle Radius [m]
     Ds::Float64 = 3.3e-14   # Solid Diffusivity [m^2/s]
-    Ea_σ::Float64 = 0.     # Activation Energy Solid Conductivity
-    Ea_Ds::Float64 = 0.    # Activation Energy Solid Diffusivity
+    Ea_σ::Float64 = 0     # Activation Energy Solid Conductivity
+    Ea_Ds::Float64 = 0    # Activation Energy Solid Diffusivity
     ϵ_s::Float64 = 0.75     # Active Material Volume Fraction
     ϵ_e::Float64 = 0.25     # Porosity of Negative Electrode
     De_brug::Float64 = 1.5  # Bruggeman Diffusion Exponent
@@ -50,7 +51,7 @@ end
     α::Float64 = 0.5    # Alpha Factor
     k_norm::Float64 = 4.1580e-8 #6.48e-7 #6.8973799e-13 #2.12e-10 #Initial Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
-    RFilm::Float64 = 0. # Film Resistance
+    RFilm::Float64 = 0 # Film Resistance
     D1::Float64 = 1.   # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug # Effective Diffusivity
     as::Float64 = 3.0*ϵ_s/Rs # Specific Interfacial Surf. Area
@@ -60,8 +61,8 @@ end
     L::Float64 = 75.6e-6    # Positive Electrode Length
     Rs::Float64 = 5.22e-6    # Particle radius [m]
     Ds::Float64 = 4e-15   # Solid diffusivity [m^2/s]
-    Ea_σ::Float64 = 0.
-    Ea_Ds::Float64 = 0.
+    Ea_σ::Float64 = 0
+    Ea_Ds::Float64 = 0
     ϵ_s::Float64 = 0.665    # Active Material Volume Fraction
     ϵ_e::Float64 = 0.335    # Porosity of positive electrode
     De_brug::Float64 = 1.5  # Bruggeman Diffusivity Exponent
@@ -74,8 +75,8 @@ end
     α::Float64 = 0.5    # Alpha Factor
     k_norm::Float64 =  3.5954e-7 #3.42e-6 #3.640283886203905e-12 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
-    RFilm::Float64 = 0. # Film Resistance
-    D3::Float64 = 1.   # Init Value
+    RFilm::Float64 = 0 # Film Resistance
+    D3::Float64 = 1   # Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
     as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
 end
@@ -85,7 +86,7 @@ end
     ϵ_e::Float64 = 0.47    # Porosity of separator
     De_brug::Float64 = 1.5  # Bruggeman Diffusivity Factor
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Factor
-    D2::Float64 = 1.   # Init Value
+    D2::Float64 = 1   # Init Value
     D2f::Function = De -> De * ϵ_e^De_brug
 end
 
