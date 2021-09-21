@@ -28,7 +28,7 @@ using Parameters
             #∂Uocp = @. 0.667934002(tanh(14.9159*θ - 4.13021271)^2) + 2.71371042(tanh(29.8538*θ - 3.68395892)^2) + 0.6241102(tanh(30.4444*θ - 18.58021732)^2) - 4.005754622 - (77.91453287630758(2.7182818284^(-39.3631*θ)))
             ∂Uocp = @. -0.62411*((sech(18.5802 - 30.4444*θ))^2 + 4.34813*(sech(3.68396 - 29.8538*θ))^2 + 1.07022*(sech(4.13021 - 14.9159*θ))^2) - 211.794*exp(-39.3631*θ)
         else
-            ∂Uocp = @. 279.9800214(tanh(15.789*θ - 4.9214313)^2) + 0.79239064(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336(tanh(15.9308*θ - 4.9704096)^2))
+            ∂Uocp = @. 279.9800214*(tanh(15.789*θ - 4.9214313)^2) + 0.79239064*(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336*(tanh(15.9308*θ - 4.9704096)^2))
         end
     Ce_M::Int64 = 4
 end
@@ -49,7 +49,7 @@ end
     θ_0::Float64 = 0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 4.1580e-8 #6.48e-7 #6.8973799e-13 #2.12e-10 #Initial Reaction Rate
+    k_norm::Float64 =  6.48e-6 # 7.226781E-06 #6.8973799e-13 #4.1580e-8 #2.12e-10 #Initial Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D1::Float64 = 1.   # Init Value
@@ -73,7 +73,7 @@ end
     θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 =  3.5954e-7 #3.42e-6 #3.640283886203905e-12 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 =  7.2642728E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D3::Float64 = 1   # Init Value
@@ -92,17 +92,17 @@ end
 
 @with_kw mutable struct RealisationAlgorthim
     Fs::Float64 = 4    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 2     # Final Model Sampling Time
+    SamplingT::Float64 = 0.5     # Final Model Sampling Time
     M::Int64 = 10    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
     H1::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 2
-    Outs::Int64 = 25    # Number of Outputs
+    Outs::Int64 = 21    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-04, 1.73E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 8.52E-05, 9.72E-05, 1.728E-04], Number[8.52E-05, 9.72E-05, 1.728E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
 
 end
 @with_kw mutable struct Cell
