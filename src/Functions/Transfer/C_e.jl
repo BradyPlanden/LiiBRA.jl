@@ -33,13 +33,13 @@ cs0_pos = cs_max_pos * θ_pos
 #Current Flux Density
 
 if CellData.Const.CellTyp == "Doyle_94"
-    @show κ_pos = CellData.Pos.k_norm/(CellData.Pos.cs_max*ce0^(1-CellData.Pos.α))
-    @show κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
-    @show j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
-    @show j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
+    κ_pos = CellData.Pos.k_norm/(CellData.Pos.cs_max*ce0^(1-CellData.Pos.α))
+    κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
+    j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
+    j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
  else
-    @show j0_neg = CellData.Neg.k_norm*(ce0*(cs0_neg/cs_max_neg*(1-cs0_neg/cs_max_neg)))^(1-CellData.Neg.α)
-    @show j0_pos = CellData.Pos.k_norm*(ce0*(cs0_pos/cs_max_pos*(1-cs0_pos/cs_max_pos)))^(1-CellData.Pos.α)
+    j0_neg = CellData.Neg.k_norm*(ce0*(cs0_neg/cs_max_neg*(1-cs0_neg/cs_max_neg)))^(1-CellData.Neg.α)
+    j0_pos = CellData.Pos.k_norm*(ce0*(cs0_pos/cs_max_pos*(1-cs0_pos/cs_max_pos)))^(1-CellData.Pos.α)
  end
 
 #Resistances

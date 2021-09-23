@@ -73,9 +73,9 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
         ϕ_ẽ1 = Array{Float64}(undef,tlength,size(ϕ_ẽInd,1)) .= 0.
         ϕ_ẽ2 = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
         ϕ_se_neg_0 = Array{Float64}(undef,tlength,1) .= 0. #Replace with length of ϕ_seNegInd @ zero
-        jNeg = Array{Float64}(undef,tlength,2) .= 0. 
+        jNeg = Array{Float64}(undef,tlength,size(FluxNegInd,1)) .= 0. 
         j0 = Array{Float64}(undef,tlength,1) .= 0. 
-        jPos = Array{Float64}(undef,tlength,2) .= 0.
+        jPos = Array{Float64}(undef,tlength,size(FluxPosInd,1)) .= 0.
         jL = Array{Float64}(undef,tlength,1) .= 0. 
         j0_CC_neg = Array{Float64}(undef,tlength,1) .= 0.
         Rtot_neg = Array{Float64}(undef,tlength,1) .= 0.
@@ -127,9 +127,9 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             javg_pos = Iapp[i]/(CellData.Pos.as*F*CellData.Pos.L*CellData.Const.CC_A)
 
             Arr_Factor = ((1/CellData.Const.T_ref)-(1/Tk[i]))/R
-            κneg = CellData.Const.κf(mean(Ce[i,1:2]))*exp(CellData.Const.Ea_κ*Arr_Factor) 
+            κneg = CellData.Const.κf(mean(Ce[i,1:3]))*exp(CellData.Const.Ea_κ*Arr_Factor) 
             κpos = CellData.Const.κf(mean(Ce[i,3:4]))*exp(CellData.Const.Ea_κ*Arr_Factor) # Parameterise
-            κsep = CellData.Const.κf(mean(Ce[i,2:3]))*exp(CellData.Const.Ea_κ*Arr_Factor)
+            κsep = CellData.Const.κf(mean(Ce[i,4:6]))*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_neg = CellData.Neg.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_pos = CellData.Pos.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
             κ_eff_Neg = κneg*(CellData.Neg.ϵ_e^(CellData.Neg.κ_brug))
@@ -160,7 +160,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             Cse_Neg[i,:] = (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd]) > [CellData.Neg.cs_max,CellData.Neg.cs_max]  ? [CellData.Neg.cs_max,CellData.Neg.cs_max] : (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd])
             Cse_Pos[i,:] = (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd]) > [CellData.Pos.cs_max,CellData.Pos.cs_max] ? [CellData.Pos.cs_max,CellData.Pos.cs_max] : (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd])
             Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
-            
+        
             #Potentials
             Uocp_Neg[i] = CellData.Const.Uocp("Neg",Cse_Neg[i,1]/CellData.Neg.cs_max)
             Uocp_Pos[i] = CellData.Const.Uocp("Pos",Cse_Pos[i,1]/CellData.Pos.cs_max)
@@ -175,14 +175,15 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
             jPos[i,:] = y[i,FluxPosInd]
             jL[i] = y[i,FluxPosInd[1]]
 
+
             if CellData.Const.CellTyp == "Doyle_94"
                 j0_CC_neg[i] = findmax([eps(); (k_neg*(CellData.Neg.cs_max-Cse_Neg[i,1])^(1-CellData.Neg.α))*((Cse_Neg[i,1]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))])[1]
-                j0_neg = @. findmax([eps(); (k_neg*(Cse_Neg[i,:]^CellData.Neg.α)*(Ce[i,1]^(1-CellData.Neg.α)))*(CellData.Neg.cs_max-Cse_Neg[i,:])^(1-CellData.Neg.α)])[1]
+                j0_neg = findmax([ones(size(Cse_Neg,2))*eps() (k_neg.*(Cse_Neg[i,:].^CellData.Neg.α).*(Ce[i,1].^(1-CellData.Neg.α))).*(CellData.Neg.cs_max.-Cse_Neg[i,:]).^(1-CellData.Neg.α)], dims=2)[1]
                 η0[i] = Tk[i]*2*R/F*asinh(j0[i]/(2*j0_CC_neg[i]))
                 η_neg[i,:] = @. (Tk[i]*2*R)/F*asinh((jNeg[i,:])/(2*j0_neg))
 
                 j0_CC_pos[i] = findmax([eps(); (k_pos*(CellData.Pos.cs_max-Cse_Pos[i,1])^(1-CellData.Pos.α))*((Cse_Pos[i,1]^CellData.Pos.α)*(Ce[i,end]^(1-CellData.Pos.α)))])[1] 
-                j0_pos = @. findmax([eps(); (k_pos*(Cse_Pos[i,:]^CellData.Pos.α)*(Ce[i,1]^(1-CellData.Pos.α)))*(CellData.Pos.cs_max-Cse_Pos[i,:])^(1-CellData.Pos.α)])[1]
+                j0_pos = findmax([ones(size(Cse_Pos,2))*eps() (k_pos.*(Cse_Pos[i,:].^CellData.Pos.α).*(Ce[i,1].^(1-CellData.Pos.α))).*(CellData.Pos.cs_max.-Cse_Pos[i,:]).^(1-CellData.Pos.α)], dims=2)[1]
                 ηL[i] = (Tk[i]*2*R)/F*asinh(jL[i]/(2*j0_CC_pos[i]))
                 η_pos[i,:] = @. (Tk[i]*2*R)/F*asinh(jPos[i,:]/(2*j0_pos))
             else

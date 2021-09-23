@@ -30,7 +30,7 @@ using Parameters
         else
             ∂Uocp = @. 279.9800214*(tanh(15.789*θ - 4.9214313)^2) + 0.79239064*(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336*(tanh(15.9308*θ - 4.9704096)^2))
         end
-    Ce_M::Int64 = 4
+    Ce_M::Int64 = 6
 end
 
 @with_kw mutable struct Negative
@@ -73,7 +73,7 @@ end
     θ_0::Float64 = 0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 =  7.2642728E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 =  9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D3::Float64 = 1   # Init Value
@@ -91,18 +91,18 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions
-    SamplingT::Float64 = 0.5     # Final Model Sampling Time
+    Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
+    SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 10    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length
-    H1::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:3500 #4000 #4612     # Hankel Dimensions 2
-    Outs::Int64 = 21    # Number of Outputs
+    Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s]
+    H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 2
+    Outs::Int64 = 31    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 8.52E-05, 9.72E-05, 1.728E-04], Number[8.52E-05, 9.72E-05, 1.728E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[0,0.5,1], Number[1],Number[0,0.5,1],Number[0,0.5,1],Number[0,0.5,1],Number[1],Number[0,0.5,1],Number[0,0.5,1]]]
 
 end
 @with_kw mutable struct Cell
