@@ -148,7 +148,7 @@ function Sim_Model(CellData,Dtt,Iapp,Tk,A0,B0,C0,D0)
 
             #Relinearise dependent on ν, σ, κ
             #Call from CellData? List of functions composed from ROM creation?
-            D = D_Linear(CellData.Transfer.tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+            D = D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
             # if i>0 && i<25
             #     @show D
             # end

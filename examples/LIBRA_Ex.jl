@@ -1,6 +1,9 @@
 using LIBRA, Plots
 plotly()
 
+CellType = "Chen_2020/LG_M50.jl"
+include(joinpath(dirname(pathof(LIBRA)), "Data", CellType))
+
 @inline function DRA_loop(CellData)
     #A_DRA = B_DRA = C_DRA = D_DRA = Dtt = puls = Hank1 = Hank2 = TS = U = V = SFactor = C_Aug = S = tuple()
     A_DRA = B_DRA = C_DRA = D_DRA = Dtt = tuple()

@@ -31,6 +31,11 @@ using Parameters
             ∂Uocp = @. 279.9800214*(tanh(15.789*θ - 4.9214313)^2) + 0.79239064*(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336*(tanh(15.9308*θ - 4.9704096)^2))
         end
     Ce_M::Int64 = 6
+    D1::Float64 = 1.0
+    D2::Float64 = 1.0
+    D3::Float64 = 1.0
+    Ltot::Float64 = 0.
+    Lnegsep::Float64 = 0.
 end
 
 @with_kw mutable struct Negative
@@ -115,3 +120,7 @@ end
 end
 
 CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(),TransferFun())
+CellData.Const.Lnegsep, CellData.Const.Ltot = CellData.Neg.L+CellData.Sep.L,CellData.Neg.L+CellData.Sep.L+CellData.Pos.L
+CellData.Const.D1 = CellData.Const.De*CellData.Neg.ϵ_e^CellData.Neg.De_brug
+CellData.Const.D2 = CellData.Const.De*CellData.Sep.ϵ_e^CellData.Sep.De_brug
+CellData.Const.D3 = CellData.Const.De*CellData.Pos.ϵ_e^CellData.Pos.De_brug

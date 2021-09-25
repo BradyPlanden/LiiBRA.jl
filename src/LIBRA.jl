@@ -1,11 +1,10 @@
 module LIBRA
 
-using Roots, UnitSystems, Parameters, LinearAlgebra, FFTW, Statistics
-using Dierckx, Arpack, Printf, JLD, PROPACK, Infiltrator
+using UnitSystems, Parameters, LinearAlgebra, FFTW, Statistics
+using Dierckx, Arpack, Infiltrator
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellTyp, Sim_Model, D_Linear
+export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellDef, Sim_Model, D_Linear, _bisection
 
-include("LIBRATypes.jl")
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
 include("Functions/Transfer/Flux.jl")
@@ -14,21 +13,16 @@ include("Functions/Transfer/Phi_e.jl")
 include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
-include("Data/Chen_2020/LG_M50.jl")
-#include("Data/Doyle_94/Doyle_94.jl")
-
-const ϵ1,ϵ2,ϵ3 = CellData.Neg.ϵ_e, CellData.Sep.ϵ_e, CellData.Pos.ϵ_e        # Porosities
-const D1,D2,D3  = CellData.Const.De*ϵ1^CellData.Neg.De_brug, CellData.Const.De*ϵ2^CellData.Sep.De_brug, CellData.Const.De*ϵ3^CellData.Pos.De_brug   #Effective diffusivities
-const Lneg, Lpos, Lnegsep, Ltot = CellData.Neg.L, CellData.Pos.L, CellData.Neg.L+CellData.Sep.L,CellData.Neg.L+CellData.Sep.L+CellData.Pos.L
 
 const F,R = faraday(Metric), universal(SI2019)     # Faraday Constant / Universal Gas Constant
 const Debug = 0 #Print Variables for Debugging    
 
-function D_Linear(tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+function D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
     D = Array{Float64}(undef,0,1)
     Dt = Array{Float64}(undef,0,1)
     D_ = Array{Float64}(undef,5,1)
     q = Int64(1)
+    tfs = CellData.Transfer.tfs
     for i in 1:size(tfs,1)
         if tfs[i,1] == C_e
             Dt =  zeros(length(tfs[i,3]))
@@ -40,7 +34,7 @@ function D_Linear(tfs, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_ef
                 elseif pt <= CellData.Neg.L + CellData.Sep.L + eps()
                 D_[q] = @. (CellData.Neg.L - pt)/(CellData.Const.CC_A*κ_eff_Sep) + (CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg))/(CellData.Const.CC_A*(κ_eff_Neg+σ_eff_Neg)*ν_neg) #Lee. Eqn. 4.23 @ ∞
                 else
-                D_[q] = @. -CellData.Sep.L/(CellData.Const.CC_A*κ_eff_Sep) + CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg)/(CellData.Const.CC_A*(σ_eff_Neg+ κ_eff_Neg)*ν_neg) + (CellData.Pos.L*(-σ_eff_Pos*cosh(ν_pos) + σ_eff_Pos*cosh((Ltot-pt)*ν_pos/CellData.Pos.L) +  κ_eff_Pos*(cosh((pt-CellData.Neg.L-CellData.Sep.L)*ν_pos/CellData.Pos.L)-1)) - (pt-CellData.Neg.L-CellData.Sep.L)*κ_eff_Pos*sinh(ν_pos)*ν_pos)/(CellData.Const.CC_A*κ_eff_Pos*(κ_eff_Pos+σ_eff_Pos)*ν_pos*sinh(ν_pos))
+                D_[q] = @. -CellData.Sep.L/(CellData.Const.CC_A*κ_eff_Sep) + CellData.Neg.L*((1-σ_eff_Neg/κ_eff_Neg)*tanh(ν_neg/2)-ν_neg)/(CellData.Const.CC_A*(σ_eff_Neg+ κ_eff_Neg)*ν_neg) + (CellData.Pos.L*(-σ_eff_Pos*cosh(ν_pos) + σ_eff_Pos*cosh((CellData.Const.Ltot-pt)*ν_pos/CellData.Pos.L) +  κ_eff_Pos*(cosh((pt-CellData.Neg.L-CellData.Sep.L)*ν_pos/CellData.Pos.L)-1)) - (pt-CellData.Neg.L-CellData.Sep.L)*κ_eff_Pos*sinh(ν_pos)*ν_pos)/(CellData.Const.CC_A*κ_eff_Pos*(κ_eff_Pos+σ_eff_Pos)*ν_pos*sinh(ν_pos))
                 end
                 Dt = [Dt; D_[q]]
                 q = q+1
@@ -85,5 +79,51 @@ flatten(a) = (a,)
 flatten(a::Tuple, b...) = tuple(a..., flatten(b...)...)
 flatten(a, b...) = tuple(a, flatten(b...)...)
 flatten_tuple(x::Tuple) = flatten(x...)
+
+
+"""
+    bisection(f, a, b; fa = f(a), fb = f(b), ftol, wtol)
+
+Bisection algorithm for finding the root ``f(x) ≈ 0`` within the initial bracket
+`[a,b]`.
+
+Returns a named tuple
+
+`(x = x, fx = f(x), isroot = ::Bool, iter = ::Int, ismaxiter = ::Bool)`.
+
+Terminates when either
+
+1. `abs(f(x)) < ftol` (`isroot = true`),
+2. the width of the bracket is `≤wtol` (`isroot = false`),
+3. `maxiter` number of iterations is reached. (`isroot = false, maxiter = true`).
+
+which are tested for in the above order. Therefore, care should be taken not to make `wtol` too large.
+
+"""
+function bisection(f,CellData, a::Real, b::Real; fa::Real = f(a), fb::Real = f(b),
+                   ftol = √eps(), wtol = 0, maxiter = 100)
+    @assert fa * fb ≤ 0 "initial values don't bracket zero"
+    @assert isfinite(a) && isfinite(b)
+    _bisection(f, CellData, float.(promote(a, b, fa, fb, ftol, wtol))..., maxiter)
+end
+
+function _bisection(f,CellData, a, b, fa, fb, ftol, wtol, maxiter)
+    iter = 0
+    abs(fa) < ftol && return (x = a, fx = fa, isroot = true, iter = iter, ismaxiter = false)
+    abs(fb) < ftol && return (x = b, fx = fb, isroot = true, iter = iter, ismaxiter = false)
+    while true
+        iter += 1
+        m = middle(a, b)
+        fm = f(CellData,m)
+        abs(fm) < ftol && return (x = m, fx = fm, isroot = true, iter = iter, ismaxiter = false)
+        abs(b-a) ≤ wtol && return (x = m, fx = fm, isroot = false, iter = iter, ismaxiter = false)
+        if fa * fm > 0
+            a, fa = m, fm
+        else
+            b, fb = m, fm
+        end
+        iter == maxiter && return (x = m, fx = fm, isroot = false, iter = iter, ismaxiter = true)
+    end
+end
 
 end # module

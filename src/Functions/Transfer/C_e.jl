@@ -55,26 +55,26 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 ν_p =  @. CellData.Pos.L*sqrt((CellData.Pos.as/σ_eff_Pos+CellData.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
 
 
-R_ce = roots(CellData.Const.Ce_M+1)
+R_ce = roots(CellData,CellData.Const.Ce_M+1)
 λ = R_ce[2:end]
 #λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
 #Create all k's
-in1 = @. sqrt(λ*CellData.Neg.ϵ_e/D1)
-in2 = @. sqrt(λ*CellData.Sep.ϵ_e/D2)
-in3 = @. sqrt(λ*CellData.Pos.ϵ_e/D3)
+in1 = @. sqrt(λ*CellData.Neg.ϵ_e/CellData.Const.D1)
+in2 = @. sqrt(λ*CellData.Sep.ϵ_e/CellData.Const.D2)
+in3 = @. sqrt(λ*CellData.Pos.ϵ_e/CellData.Const.D3)
 
 Bound_Neg_1 = CellData.Neg.L * in1
 Bound_Sep_0 = CellData.Neg.L * in2
 Bound_Sep_1 = (CellData.Neg.L+CellData.Sep.L) * in2
 Bound_Pos_0 = (CellData.Neg.L+CellData.Sep.L) * in3
-Bound_Pos_1 = Ltot * in3
+Bound_Pos_1 = (CellData.Neg.L+CellData.Sep.L+CellData.Pos.L) * in3
 Bound_Pos_2 = CellData.Pos.L * in3
 
 #Scaled coefficients
-k3_s = @. cos(Bound_Neg_1)*cos(Bound_Sep_0) + D1*in1*sin(Bound_Neg_1)*sin(Bound_Sep_0)/(D2*in2)
-k4_s = @. cos(Bound_Neg_1)*sin(Bound_Sep_0) - D1*in1*cos(Bound_Sep_0)*sin(Bound_Neg_1)/(D2*in2)
-k5_s = @. k3_s*(cos(Bound_Sep_1)*cos(Bound_Pos_0)+D2*in2*sin(Bound_Sep_1)*sin(Bound_Pos_0)/(D3*in3))+k4_s*(sin(Bound_Sep_1)*cos(Bound_Pos_0)-D2*in2*cos(Bound_Sep_1)*sin(Bound_Pos_0)/(D3*in3))
-k6_s = @. k3_s*(cos(Bound_Sep_1)*sin(Bound_Pos_0)-D2*in2*sin(Bound_Sep_1)*cos(Bound_Pos_0)/(D3*in3))+k4_s*(sin(Bound_Sep_1)*sin(Bound_Pos_0)+D2*in2*cos(Bound_Sep_1)*cos(Bound_Pos_0)/(D3*in3))
+k3_s = @. cos(Bound_Neg_1)*cos(Bound_Sep_0) + CellData.Const.D1*in1*sin(Bound_Neg_1)*sin(Bound_Sep_0)/(CellData.Const.D2*in2)
+k4_s = @. cos(Bound_Neg_1)*sin(Bound_Sep_0) - CellData.Const.D1*in1*cos(Bound_Sep_0)*sin(Bound_Neg_1)/(CellData.Const.D2*in2)
+k5_s = @. k3_s*(cos(Bound_Sep_1)*cos(Bound_Pos_0)+CellData.Const.D2*in2*sin(Bound_Sep_1)*sin(Bound_Pos_0)/(CellData.Const.D3*in3))+k4_s*(sin(Bound_Sep_1)*cos(Bound_Pos_0)-CellData.Const.D2*in2*cos(Bound_Sep_1)*sin(Bound_Pos_0)/(CellData.Const.D3*in3))
+k6_s = @. k3_s*(cos(Bound_Sep_1)*sin(Bound_Pos_0)-CellData.Const.D2*in2*sin(Bound_Sep_1)*cos(Bound_Pos_0)/(CellData.Const.D3*in3))+k4_s*(sin(Bound_Sep_1)*sin(Bound_Pos_0)+CellData.Const.D2*in2*cos(Bound_Sep_1)*cos(Bound_Pos_0)/(CellData.Const.D3*in3))
 
 #Solving for k1:
 Int_ψ1 = @. CellData.Neg.ϵ_e*(2*Bound_Neg_1+sin(2*Bound_Neg_1))/(4*in1)
@@ -115,7 +115,7 @@ for loop in 1:length(λ)
     for x in z #Eigen Weighting
         if x < CellData.Neg.L+eps()
             ψ[i,loop] = k1[loop]*cos(in1[loop]*x) #negative electrode
-        elseif x > Lnegsep-eps()
+        elseif x > (CellData.Neg.L+CellData.Sep.L)-eps()
             ψ[i,loop] = k5[loop]*cos(in3[loop]*x)+k6[loop]*sin(in3[loop]*x) # postive electrode
         else
             ψ[i,loop] = k3[loop]*cos(in2[loop]*x)+k4[loop]*sin(in2[loop]*x) # separator
@@ -127,20 +127,19 @@ end
 C_e = ψ*C_e
 D =  zeros(length(z))
 D_term = "zeros(length($z))"
-@infiltrate cond = true
 res0 = zeros(length(z))
 
 return C_e, D, res0, D_term
 end
 
-function roots(roots_n) #Change these functions to be inclusive of CellData struct -> one input for roots
+function roots(CellData,roots_n) #Change these functions to be inclusive of CellData struct -> one input for roots
     root = Float64[0]
     i = 0.00001
     ∇ = 0.00001
     if(roots_n > 1)
         while length(root) <= roots_n-1
-            if flambda(i-∇)*flambda(i)<0
-            push!(root, find_zero(flambda,(i-∇,i)))
+            if flambda(CellData,(i-∇))*flambda(CellData,i)<0
+            push!(root, _bisection(flambda,CellData,(i-∇),i,(i-∇),i,√eps(),0,100)[1])
             end
         i = i+∇
         end
@@ -148,7 +147,16 @@ function roots(roots_n) #Change these functions to be inclusive of CellData stru
     return root
 end
 
-function flambda(λ)
+function flambda(CellData,λ)
+    ϵ1 = CellData.Neg.ϵ_e
+    ϵ2 = CellData.Sep.ϵ_e
+    ϵ3 = CellData.Pos.ϵ_e
+    D1 = CellData.Const.D1
+    D2 = CellData.Const.D2
+    D3 = CellData.Const.D3
+    Lneg = CellData.Neg.L
+    Lnegsep = CellData.Const.Lnegsep
+    Ltot = CellData.Neg.L+CellData.Sep.L+CellData.Pos.L
     k1 = Float64(1)
     sle1 = sqrt(λ*ϵ1/D1)
     sle2 = sqrt(λ*ϵ2/D2)
