@@ -1,7 +1,6 @@
 @inline function Flux(CellData,s,z,Def)
     """ 
     Flux Transfer Function
-    # Add License
     # Add Ins and Outs
         # Cell Data 
         # Frequency Vector 

@@ -1,7 +1,6 @@
 @inline function C_se(CellData,s,z,Def)
     """ 
-    Flux Transfer Function
-    # Add License
+    Concentration Solid-Electrolyte Transfer Function
     # Add Ins and Outs
         # Cell Data 
         # Frequency Vector 

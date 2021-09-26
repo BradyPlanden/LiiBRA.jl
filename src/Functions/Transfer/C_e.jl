@@ -1,7 +1,6 @@
 @inline function C_e(CellData,s,z)
 """ 
 Electrolyte Concentration Transfer Function
-# Add License
 # Add Ins and Outs
     # Locations to be computed
     # Sampling Frequency

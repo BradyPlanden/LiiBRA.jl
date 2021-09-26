@@ -1,7 +1,6 @@
 @inline function Phi_se(CellData,s,z,Def)
     """ 
-    Solid Potential Transfer Function
-    # Add License
+    Solid-Electrolyte Potential Transfer Function
     # Add Ins and Outs
         # Cell Data 
         # Frequency Vector 

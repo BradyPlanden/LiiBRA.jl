@@ -3,7 +3,8 @@ module LIBRA
 using UnitSystems, Parameters, LinearAlgebra, FFTW, Statistics
 using Dierckx, Arpack, Infiltrator
 import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA, RealisationAlgorthim, TransferFun, flatten, R, F, CellDef, Sim_Model, D_Linear, _bisection
+export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
+export RealisationAlgorthim, TransferFun, flatten, R, F, CellDef, Sim_Model, D_Linear, _bisection, cell
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -14,7 +15,7 @@ include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 
-const F,R = faraday(Metric), universal(SI2019)     # Faraday Constant / Universal Gas Constant
+const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant
 const Debug = 0 #Print Variables for Debugging    
 
 function D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
@@ -124,6 +125,17 @@ function _bisection(f,CellData, a, b, fa, fb, ftol, wtol, maxiter)
         end
         iter == maxiter && return (x = m, fx = fm, isroot = false, iter = iter, ismaxiter = true)
     end
+end
+
+function cell(CellType)
+    if CellType == "Doyle_94"
+        CellType = string(CellType,".jl")
+        include(joinpath(dirname(pathof(LIBRA)), "Data/Doyle_94", CellType))
+    elseif CellType == "LG_M50"
+        CellType = string(CellType,".jl")
+        include(joinpath(dirname(pathof(LIBRA)), "Data/Chen_2020", CellType))
+    end
+
 end
 
 end # module

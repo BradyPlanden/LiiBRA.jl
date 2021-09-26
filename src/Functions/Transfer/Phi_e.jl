@@ -1,7 +1,6 @@
 @inline function Phi_e(CellData,s,z)
    """ 
    Electrolyte Potential Transfer Function
-   # Add License
    # Add Ins and Outs
        # Cell Data 
        # Frequency Vector 

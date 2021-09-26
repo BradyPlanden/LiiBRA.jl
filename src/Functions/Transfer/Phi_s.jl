@@ -1,7 +1,6 @@
 function Phi_s(CellData,s,z,Def)
     """ 
     Solid Potential Transfer Function
-    # Add License
     # Add Ins and Outs
         # Cell Data 
         # Frequency Vector 
