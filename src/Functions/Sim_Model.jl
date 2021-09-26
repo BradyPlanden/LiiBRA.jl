@@ -25,6 +25,8 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
     ϕ_e_ = Array{Float64}(undef,tlength,0)
     jNeg_ = Array{Float64}(undef,tlength,0)
     jPos_ = Array{Float64}(undef,tlength,0)
+    Cse_Neg_ = Array{Float64}(undef,tlength,0)
+    Cse_Pos_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
     for γ in 1:1
@@ -154,8 +156,8 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
             y[i,:] = C*x[i,:] + D*Iapp[i]
 
             #Concentrations & Force electrode concentration maximum
-            Cse_Neg[i,:] = (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd]) > [CellData.Neg.cs_max,CellData.Neg.cs_max]  ? [CellData.Neg.cs_max,CellData.Neg.cs_max] : (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd])
-            Cse_Pos[i,:] = (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd]) > [CellData.Pos.cs_max,CellData.Pos.cs_max] ? [CellData.Pos.cs_max,CellData.Pos.cs_max] : (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd])
+            Cse_Neg[i,:] = (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd]) > ones(size(Cse_Neg,2))*CellData.Neg.cs_max ? ones(size(Cse_Neg,2))*CellData.Neg.cs_max : (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd])
+            Cse_Pos[i,:] = (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd]) > ones(size(Cse_Neg,2))*CellData.Neg.cs_max ? ones(size(Cse_Neg,2))*CellData.Neg.cs_max : (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd])
             Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
         
             #Potentials
@@ -220,6 +222,8 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
         ϕ_e_ = ϕ_e
         Uocp_Neg_ = [Uocp_Neg_ Uocp_Neg]
         Uocp_Pos_ = [Uocp_Pos_ Uocp_Pos]
+        Cse_Neg_ = [Cse_Neg_ Cse_Neg]
+        Cse_Pos_ = [Cse_Pos_ Cse_Pos]
     end 
-    return CellV_, Ce_, jNeg_, jPos_, RtotNeg_, RtotPos_, η0_, ηL_, η_neg_, η_pos_, ϕ_ẽ1_, ϕ_ẽ2_, Uocp_Neg_, Uocp_Pos_, ϕ_e_
+    return CellV_, Ce_, jNeg_, jPos_, RtotNeg_, RtotPos_, η0_, ηL_, η_neg_, η_pos_, ϕ_ẽ1_, ϕ_ẽ2_, Uocp_Neg_, Uocp_Pos_, ϕ_e_, Cse_Neg_, Cse_Pos_
 end

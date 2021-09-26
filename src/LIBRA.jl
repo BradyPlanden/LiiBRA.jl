@@ -1,9 +1,8 @@
 module LIBRA
 
-using UnitSystems, Parameters, LinearAlgebra, FFTW, Statistics
-using Dierckx, Arpack, Infiltrator
-import Base: +,-,*,==,>,>=,<,<=,broadcast,sin,cos,tan,cot,abs,exp,log,log10
-export CellData, C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
+using UnitSystems, Parameters, LinearAlgebra, FFTW
+using Dierckx, Arpack, Infiltrator, Statistics
+export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export RealisationAlgorthim, TransferFun, flatten, R, F, CellDef, Sim_Model, D_Linear, _bisection, cell
 
 include("Functions/Transfer/C_e.jl")
@@ -65,10 +64,6 @@ function D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, 
             end
         end
         D = [D; Dt]
-        #Iterate through D terms and export new D Matrix
-        #Inputs: All parameters needed? or some method to capture the numerical values of those parameters and dynamically write them
-        #Outputs: Vector containing the updated D terms
-        #Logic to export only the requested D term or all terms (multiple dispatch?)
     end
     return D
 end
@@ -135,7 +130,7 @@ function cell(CellType)
         CellType = string(CellType,".jl")
         include(joinpath(dirname(pathof(LIBRA)), "Data/Chen_2020", CellType))
     end
-
+    return CellData
 end
 
 end # module
