@@ -28,7 +28,12 @@ using Parameters
         else
             ∂Uocp = @. -32.4096*exp(-40*(-0.133875+θ))-0.0135664/((0.998432-θ)^1.49247)+0.0595559*exp(-0.04738*θ^8)*θ^7-0.823297*(sech(8.60942-14.5546*θ))^2
         end
-    Ce_M::Int64 = 4
+        Ce_M::Int64 = 4
+        D1::Float64 = 1.0
+        D2::Float64 = 1.0
+        D3::Float64 = 1.0
+        Ltot::Float64 = 0.
+        Lnegsep::Float64 = 0.
 end
 @with_kw mutable struct Negative
     L::Float64 = 1.28e-4
@@ -121,3 +126,8 @@ end
 end
 
 CellData = Cell(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(),TransferFun())
+CellData.Const.Lnegsep, CellData.Const.Ltot = CellData.Neg.L+CellData.Sep.L,CellData.Neg.L+CellData.Sep.L+CellData.Pos.L
+CellData.Const.D1 = CellData.Const.De*CellData.Neg.ϵ_e^CellData.Neg.De_brug
+CellData.Const.D2 = CellData.Const.De*CellData.Sep.ϵ_e^CellData.Sep.De_brug
+CellData.Const.D3 = CellData.Const.De*CellData.Pos.ϵ_e^CellData.Pos.De_brug
+CellData.Const.Ce_M = size(CellData.Transfer.tfs[1,3],1)

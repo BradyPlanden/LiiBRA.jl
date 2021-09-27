@@ -56,7 +56,7 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 
 R_ce = roots(CellData,CellData.Const.Ce_M+1)
 λ = R_ce[2:end]
-#λ = (λ[1:size(λ,1) .!= 1,: ]) #Delete first element relating to location zero
+
 #Create all k's
 in1 = @. sqrt(λ*CellData.Neg.ϵ_e/CellData.Const.D1)
 in2 = @. sqrt(λ*CellData.Sep.ϵ_e/CellData.Const.D2)
@@ -89,18 +89,6 @@ k6 = @. k1*k6_s
 j_Neg = @. k1*ζ*ν_n*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*sin(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos(Bound_Neg_1))*sinh(ν_n)*ν_n)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2+ν_n^2)*sinh(ν_n))
 zero_tf_neg = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
 j_Neg[:,findall(s.==0)] .= zero_tf_neg[:,findall(s.==0)]
-#= Hlp1 = @. ((κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*ν_p)
-Hlp2 = @. ((σ_eff_Pos+κ_eff_Pos*cosh(ν_p))*ν_p)
-Hlp3 = @. (Bound_Pos_2^2+ν_p^2)*sinh(ν_p)
-
-j_Pos1 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_1)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
-j_Pos2 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_2)*Hlp1)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
-j_Pos3 = @. (k6*ζ*Bound_Pos_2*cos(Bound_Pos_0)*Hlp1)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
-j_Pos4 = @. (k5*ζ*Bound_Pos_2*sin(Bound_Pos_1)*Hlp2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*Hlp3)
-j_Pos5 = @. (k5*ζ*(σ_eff_Pos*cos(Bound_Pos_0)+κ_eff_Pos*cos(Bound_Pos_1))*ν_p^2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*(Bound_Pos_2^2+ν_p^2))
-j_Pos6 = @. (k6*ζ*(σ_eff_Pos*sin(Bound_Pos_0)+κ_eff_Pos*sin(Bound_Pos_1))*ν_p^2)/(CC_A*(σ_eff_Pos+κ_eff_Pos)*(Bound_Pos_2^2+ν_p^2))
-
-j_Pos = j_Pos1 - j_Pos2 + j_Pos3 - j_Pos4 - j_Pos5 - j_Pos6 =#
 
 j_Pos = @. -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
 zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
@@ -133,8 +121,8 @@ end
 
 function roots(CellData,roots_n) #Change these functions to be inclusive of CellData struct -> one input for roots
     root = Float64[0]
-    i = 0.00001
-    ∇ = 0.00001
+    i = 1e-5
+    ∇ = 1e-5
     if(roots_n > 1)
         while length(root) <= roots_n-1
             if flambda(CellData,(i-∇))*flambda(CellData,i)<0

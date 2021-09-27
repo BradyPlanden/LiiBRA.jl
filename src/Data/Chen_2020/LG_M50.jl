@@ -96,9 +96,9 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
-    SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
-    M::Int64 = 10    # Model Order
+    Fs::Float64 =  2 #6    # Sampling Frequency of Transfer Functions [Hz]
+    SamplingT::Float64 = 1 #0.25     # Final Model Sampling Time [s]
+    M::Int64 = 5    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 131072 #65536 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s]
     H1::Array{Int64,1} = 0:3000 #4000 #4612     # Hankel Dimensions 1
@@ -124,3 +124,4 @@ CellData.Const.Lnegsep, CellData.Const.Ltot = CellData.Neg.L+CellData.Sep.L,Cell
 CellData.Const.D1 = CellData.Const.De*CellData.Neg.ϵ_e^CellData.Neg.De_brug
 CellData.Const.D2 = CellData.Const.De*CellData.Sep.ϵ_e^CellData.Sep.De_brug
 CellData.Const.D3 = CellData.Const.De*CellData.Pos.ϵ_e^CellData.Pos.De_brug
+CellData.Const.Ce_M = size(CellData.Transfer.tfs[1,3],1)

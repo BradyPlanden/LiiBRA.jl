@@ -41,12 +41,12 @@
         #tf = reverse!(tf, dims=2)
         #c = plan_ifft(tf,2)
         #jk = CellData.RA.Fs*real((c*tf)') # inverse fourier transform tranfser function response
-        jk = CellData.RA.Fs*real(ifft(tf,2)') # inverse fourier transform tranfser function response
+        jk = CellData.RA.Fs*real(ifft(tf,2)') # inverse fourier transform tranfser function response (Large Compute)
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
         samplingtf = Array{Float64}(undef,size(stpsum,1),length(OrgT))
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
             for Output in 1:size(stpsum,1)
-                spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #High compute line
+                spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #Large compute - First to improve
                 samplingtf[Output,:]= evaluate(spl1,OrgT)
             end
             puls = [puls; diff(samplingtf, dims=2)]
@@ -111,7 +111,7 @@
     Control = S_*(@view T.V[:,1:CellData.RA.M])'
     
     A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
-    A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line
+    A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line (Second)
     
     #Error check
     # if any(i -> i>1, eigvals(A))
