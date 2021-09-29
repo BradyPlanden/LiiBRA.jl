@@ -57,6 +57,16 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
         FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
         FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
 
+        CeNeg = CellData.Transfer.tfs[1,3].<=CellData.Neg.L
+        CeNegOffset = CellData.Transfer.tfs[1,3].<CellData.Neg.L
+        CeSep = CellData.Transfer.tfs[1,3].<=CellData.Neg.L+CellData.Sep.L
+        CeSepOffset = CellData.Transfer.tfs[1,3].<CellData.Neg.L+CellData.Sep.L
+        CePos = CellData.Transfer.tfs[1,3].<=CellData.Const.Ltot
+        CeNegInd = findall(CeNeg .== 1)
+        CeSepInd = findall(CeSep.-CeNegOffset .== 1)
+        CePosInd = findall(CePos.-CeSepOffset .== 1)
+
+
         csegain_neg = C[CseNegInd[1][1],end]
         csegain_pos = C[CsePosInd[1][1],end]
 
@@ -129,9 +139,9 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
             javg_pos = Iapp[i]/(CellData.Pos.as*F*CellData.Pos.L*CellData.Const.CC_A)
 
             Arr_Factor = ((1/CellData.Const.T_ref)-(1/Tk[i]))/R
-            κneg = CellData.Const.κf(mean(Ce[i,1:3]))*exp(CellData.Const.Ea_κ*Arr_Factor) 
-            κpos = CellData.Const.κf(mean(Ce[i,3:4]))*exp(CellData.Const.Ea_κ*Arr_Factor) # Parameterise
-            κsep = CellData.Const.κf(mean(Ce[i,4:6]))*exp(CellData.Const.Ea_κ*Arr_Factor)
+            κneg = CellData.Const.κf(mean(Ce[i,CeNegInd]))*exp(CellData.Const.Ea_κ*Arr_Factor) 
+            κpos = CellData.Const.κf(mean(Ce[i,CePosInd]))*exp(CellData.Const.Ea_κ*Arr_Factor) # Parameterise
+            κsep = CellData.Const.κf(mean(Ce[i,CeSepInd]))*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_neg = CellData.Neg.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
             σ_pos = CellData.Pos.σ*exp(CellData.Const.Ea_κ*Arr_Factor)
             κ_eff_Neg = κneg*(CellData.Neg.ϵ_e^(CellData.Neg.κ_brug))

@@ -11,13 +11,13 @@ CellData = cell("LG_M50") #Alternative "Doyle_94"
         CellData.Const.T = 273.15+Temp
         Arr_Factor = (1/CellData.Const.T_ref-1/CellData.Const.T)/R
         CellData.Const.κ = CellData.Const.κf(CellData.Const.ce0)*exp(CellData.Const.Ea_κ*Arr_Factor)
-            for i in 2500:500:2500
+            for i in 2000:500:2000
                 CellData.RA.H1 = 0:i
                 CellData.RA.H2 = 0:i
                 Nfft = 2^(ceil(log2(CellData.RA.Fs*CellData.RA.Tlen)))
                 f = 0:Nfft-1
                 s = transpose(((2im.*CellData.RA.Fs)*tan.(pi.*f./Nfft)))
-                for SOC in 0.77:0.77:0.77
+                for SOC in 0.77:0.1:0.77
                     CellData.Const.SOC = SOC
                     A_DRA, B_DRA, C_DRA, D_DRA = DRA(CellData,s,f)
                     A = flatten(A,A_DRA)
