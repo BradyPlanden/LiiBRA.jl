@@ -22,7 +22,6 @@ using Parameters
         else
             Uocp = @. -0.8090*θ + 4.4875 - 0.0428*tanh(18.5138*(θ - 0.5542)) - 17.7326*tanh(15.7890*(θ - 0.3117)) + 17.5842*tanh(15.9308*(θ - 0.3120))
         end
-
     ∂Uocp::Function = (Electrode,θ) -> 
         if Electrode == "Neg"
             #∂Uocp = @. 0.667934002(tanh(14.9159*θ - 4.13021271)^2) + 2.71371042(tanh(29.8538*θ - 3.68395892)^2) + 0.6241102(tanh(30.4444*θ - 18.58021732)^2) - 4.005754622 - (77.91453287630758(2.7182818284^(-39.3631*θ)))
@@ -103,13 +102,15 @@ end
     Tlen::Int64 = 21600 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
-    Outs::Int64 = 31    # Number of Outputs
+    Outs::Int64 = 22    # Number of Outputs
 end
 
 @with_kw mutable struct TransferFun
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[0,0.5,1], Number[1],Number[0,0.5,1],Number[0,0.5,1],Number[0,0.5,1],Number[1],Number[0,0.5,1],Number[0,0.5,1]]]
-
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[0,0.5,1], Number[1],Number[0,0.5,1],Number[0,0.5,1],Number[0,0.5,1],Number[1],Number[0,0.5,1],Number[0,0.5,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 8.52E-05, 9.72E-05, 1.728E-04], Number[8.52E-05, 9.72E-05, 1.728E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    #Entries::Function = (x) -> for i in 1:size(tfs[:,3],1) return [x;tfs[i,3]] end 
 end
+
 @with_kw mutable struct Cell
     Const::Constants
     Neg::Negative
@@ -125,3 +126,4 @@ CellData.Const.D1 = CellData.Const.De*CellData.Neg.ϵ_e^CellData.Neg.De_brug
 CellData.Const.D2 = CellData.Const.De*CellData.Sep.ϵ_e^CellData.Sep.De_brug
 CellData.Const.D3 = CellData.Const.De*CellData.Pos.ϵ_e^CellData.Pos.De_brug
 CellData.Const.Ce_M = size(CellData.Transfer.tfs[1,3],1)
+#CellData.RA.Outs = size(CellData.Transfer.Entries,1)
