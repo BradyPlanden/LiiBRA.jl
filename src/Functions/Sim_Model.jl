@@ -29,7 +29,7 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
     Cse_Pos_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
-    for γ in 1:1
+    for γ in 1:9
         A = A0[γ]
         B = B0[γ]
         C = C0[γ]
