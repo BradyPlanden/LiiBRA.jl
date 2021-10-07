@@ -3,7 +3,7 @@ module LIBRA
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using Dierckx, Arpack, Infiltrator, Statistics
 export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
-export RealisationAlgorthim, TransferFun, flatten, R, F, CellDef, Sim_Model, D_Linear, _bisection, cell
+export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, cell
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -68,13 +68,13 @@ function D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, 
     return D
 end
 
-function flatten end
-flatten() = ()
-flatten(a::Tuple) = Tuple(a)
-flatten(a) = (a,)
-flatten(a::Tuple, b...) = tuple(a..., flatten(b...)...)
-flatten(a, b...) = tuple(a, flatten(b...)...)
-flatten_tuple(x::Tuple) = flatten(x...)
+function flatten_ end
+flatten_() = ()
+flatten_(a::Tuple) = Tuple(a)
+flatten_(a) = (a,)
+flatten_(a::Tuple, b...) = tuple(a..., flatten_(b...)...)
+flatten_(a, b...) = tuple(a, flatten_(b...)...)
+flatten_tuple(x::Tuple) = flatten_(x...)
 
 
 """

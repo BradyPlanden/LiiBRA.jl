@@ -1,4 +1,4 @@
-function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
+function Sim_Model(CellData,Iapp,Tk,SOC,A0,B0,C0,D0)
     """ 
     Simulation of generated reduced-order models
     # Add License
@@ -29,12 +29,12 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
     Cse_Pos_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
-    for γ in 1:1:1
-        A = A0#[γ]
-        B = B0#[γ]
-        C = C0#[γ]
-        D = D0#[γ]
-
+    for γ in 1:1:size(SOC,1)
+        A = A0[γ]
+        B = B0[γ]
+        C = C0[γ]
+        D = D0[γ]
+        @show CellData.Const.SOC = SOC[γ]
         #Capturing Indices
         tfstr = Array{String}(undef,0,1)
         for i in 1:size(CellData.Transfer.tfs[:,1],1)
@@ -102,8 +102,8 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
         #Defining SOC
         SOC_Neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
         SOC_Pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
-        θ_neg[1] = SOC_Neg
-        θ_pos[1] = SOC_Pos
+        @show θ_neg[1] = SOC_Neg
+        @show θ_pos[1] = SOC_Pos
 
         #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
@@ -167,7 +167,7 @@ function Sim_Model(CellData,Iapp,Tk,A0,B0,C0,D0)
 
             #Concentrations & Force electrode concentration maximum
             Cse_Neg[i,:] = (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd]) > ones(size(Cse_Neg,2))*CellData.Neg.cs_max ? ones(size(Cse_Neg,2))*CellData.Neg.cs_max : (SOC_Neg.*CellData.Neg.cs_max .+ y[i,CseNegInd])
-            Cse_Pos[i,:] = (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd]) > ones(size(Cse_Neg,2))*CellData.Neg.cs_max ? ones(size(Cse_Neg,2))*CellData.Neg.cs_max : (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd])
+            Cse_Pos[i,:] = (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd]) > ones(size(Cse_Pos,2))*CellData.Pos.cs_max ? ones(size(Cse_Pos,2))*CellData.Pos.cs_max : (SOC_Pos.*CellData.Pos.cs_max .+ y[i,CsePosInd])
             Ce[i,:] = @. CellData.Const.ce0 + y[i,CeInd]
         
             #Potentials

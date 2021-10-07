@@ -114,13 +114,13 @@
     A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line (Second)
     
     #Error check
-    # if any(i -> i>1, eigvals(A))
-    #     println("Oscilating System")
-    # end
+    if any(i -> i>1., real(eigvals(A)))
+        println("Oscilating System: A has indices of values > 1")
+    end
 
-    # if any(i -> i>1, eigvals(A))
-    #     println("Unstable System")
-    # end
+    if any(i -> i<0., real(eigvals(A)))
+        println("Unstable System: A has indices of negative values")
+    end
     
     B = [CellData.RA.SamplingT; Control[:,1:CellData.RA.N]]
     C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]

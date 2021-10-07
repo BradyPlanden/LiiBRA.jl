@@ -29,7 +29,7 @@ using Parameters
         else
             ∂Uocp = @. 279.9800214*(tanh(15.789*θ - 4.9214313)^2) + 0.79239064*(tanh(18.5138*θ - 10.26034796)^2) - 1.4510386800000594 - (280.13037336*(tanh(15.9308*θ - 4.9704096)^2))
         end
-    Ce_M::Int64 = 6
+    Ce_M::Int64 = 4
     D1::Float64 = 1.0
     D2::Float64 = 1.0
     D3::Float64 = 1.0
@@ -95,11 +95,11 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions [Hz]
+    Fs::Float64 = 8    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 10    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 21600 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    Tlen::Int64 = 131072 #21600 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 22    # Number of Outputs
