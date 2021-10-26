@@ -8,7 +8,7 @@ using Parameters
     tpf::Function = ce -> -0.1287*(ce/1000)^3+0.4106*(ce/1000)^2-0.4717*(ce/1000)+0.4492 # Transference Number Function - Requires ce in dm-3
     De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity
     Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
-    SOC::Float64 = 0.5 # Initial State of Charge
+    SOC::Float64 = 0.65 # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
     Ea_κ = 0.
@@ -95,19 +95,26 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 8    # Sampling Frequency of Transfer Functions [Hz]
-    SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
-    M::Int64 = 10    # Model Order
+    Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
+    SamplingT::Float64 = 0.3     # Final Model Sampling Time [s]
+    M::Int64 = 8    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 131072 #21600 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    Tlen::Int64 = 16200 #21600 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 22    # Number of Outputs
+    Nfft::Float64 = 0
+    f::Array{Float64,1} = [0]
+    s::Array{ComplexF64} = [0 - 0.0im]
+    Nfft!::Function = (Fs,Tlen) -> 2^(ceil(log2(Fs*Tlen)))
+    f!::Function = (Nfft) -> 0:Nfft-1
+    s!::Function = (Fs,Nfft,f) -> transpose(((2im.*Fs)*tan.(pi.*f./Nfft)))
 end
 
 @with_kw mutable struct TransferFun
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[4.26E-05, 8.52E-05, 9.72E-05, 1.35E-4, 1.728E-04], Number[0,0.5,1], Number[1],Number[0,0.5,1],Number[0,0.5,1],Number[0,0.5,1],Number[1],Number[0,0.5,1],Number[0,0.5,1]]]
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 8.52E-05, 9.72E-05, 1.728E-04], Number[8.52E-05, 9.72E-05, 1.728E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0.0  2.46857e-5  4.93714e-5  7.40571e-5  9.87429e-5  0.000123429  0.000148114  0.0001728], Number[2.46857e-5  4.93714e-5  7.40571e-5  9.87429e-5  0.000123429  0.000148114  0.0001728], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0, 8.52E-05, 9.72E-05, 1.728E-04], Number[8.52E-05, 9.72E-05, 1.728E-04], Number[0,1], Number[1],Number[0,1],Number[0,1],Number[0,1],Number[1],Number[0,1],Number[0,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Number[0.0  3.456e-5  6.912e-5  0.00010368  0.00013824  0.0001728], Number[3.456e-5  6.912e-5  0.00010368  0.00013824  0.0001728], Number[0,0.333,0.666,1], Number[1],Number[0,0.333,0.666,1],Number[0,0.333,0.666,1],Number[0,0.333,0.666,1],Number[1],Number[0,0.333,0.666,1],Number[0,0.333,0.666,1]]]
     #Entries::Function = (x) -> for i in 1:size(tfs[:,3],1) return [x;tfs[i,3]] end 
 end
 
@@ -127,3 +134,6 @@ CellData.Const.D2 = CellData.Const.De*CellData.Sep.ϵ_e^CellData.Sep.De_brug
 CellData.Const.D3 = CellData.Const.De*CellData.Pos.ϵ_e^CellData.Pos.De_brug
 CellData.Const.Ce_M = size(CellData.Transfer.tfs[1,3],1)
 #CellData.RA.Outs = size(CellData.Transfer.Entries,1)
+# CellData.RA.Nfft = 2^(ceil(log2(Cell.RA.Fs*Cell.RA.Tlen)))
+# CellData.RA.f = 0:Nfft-1
+# CellData.RA.s = transpose(((2im.*Cell.RA.Fs)*tan.(pi.*f./Nfft)))

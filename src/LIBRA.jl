@@ -1,6 +1,6 @@
 module LIBRA
 
-using UnitSystems, Parameters, LinearAlgebra, FFTW
+using UnitSystems, Parameters, LinearAlgebra, FFTW, LoopVectorization
 using Dierckx, Arpack, Infiltrator, Statistics
 export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, cell

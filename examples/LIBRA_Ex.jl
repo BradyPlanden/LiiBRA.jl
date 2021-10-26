@@ -1,4 +1,4 @@
-using LIBRA, Plots
+using LIBRA, Plots, BenchmarkTools, Infiltrator
 
 #---------- Cell Definition -----------------#
 Cell = cell("LG_M50") #Alternative "Doyle_94"
@@ -9,36 +9,40 @@ SOC_Exp = [97.3  94.8  92.3  89.8  87.3  84.8  82.3  79.8  77.2  74.7  72.2  69.
 
 #---------- DRA Loop -----------------#
 @inline function DRA_loop(Cell)
-    A = B = C = D = tuple()
+    A = B = C = D = Time = tuple()
     for Temp in 25.0:25.0:25.0
         Cell.Const.T = 273.15+Temp
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
         Cell.Const.κ = Cell.Const.κf(Cell.Const.ce0)*exp(Cell.Const.Ea_κ*Arr_Factor)
-            for i in 1:1:1
-                #Cell.RA.H1 = 0:i
-                #Cell.RA.H2 = 0:i
-                #Cell.RA.Tlen = 15000+5000*i
-                #Cell.RA.Fs = (i)
-                #Cell.RA.SamplingT = 1/(i)
-                Nfft = 2^(ceil(log2(Cell.RA.Fs*Cell.RA.Tlen)))
-                f = 0:Nfft-1
-                s = transpose(((2im.*Cell.RA.Fs)*tan.(pi.*f./Nfft)))
-                for SOC in SOC_Exp[13:16]
-                    @show Cell.Const.SOC = SOC
-                    A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,s,f)
-                    A = flatten_(A,A_DRA)
-                    B = flatten_(B,B_DRA)
-                    C = flatten_(C,C_DRA)
-                    D = flatten_(D,D_DRA)
-                end
-            end
+            #for i in 3600:(28800-3600):28800
+                #for k in 1:1:1
+                    #@show Cell.RA.Tlen = i
+                    Cell.RA.Nfft = Cell.RA.Nfft!(Cell.RA.Fs, Cell.RA.Tlen)
+                    Cell.RA.f = Cell.RA.f!(Cell.RA.Nfft)
+                    Cell.RA.s = Cell.RA.s!(Cell.RA.Fs,Cell.RA.Nfft,Cell.RA.f)
+                    #Cell.RA.Tlen = 15000+5000*i
+                    #Cell.RA.Fs = (i)
+                    #Cell.RA.SamplingT = 1/(i)
+
+                    #for SOC in SOC_Exp[13:13]
+                        #@show Cell.Const.SOC = SOC
+                        #A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,s,f)
+                        x = @benchmark DRA(Cell,Cell.RA.s,Cell.RA.f)
+                        # A = flatten_(A,A_DRA)
+                        # B = flatten_(B,B_DRA)
+                        # C = flatten_(C,C_DRA)
+                        # D = flatten_(D,D_DRA)
+                        Time = flatten_(Time,x)
+                    #end
+                #end
+            #end
     end
-return A, B, C, D
+return A, B, C, D, Time
 end
 
 
 #---------- Generate Model -----------------#
-A, B, C, D = DRA_loop(Cell)
+A, B, C, D, Time = DRA_loop(Cell)
 
 
 #---------- Simulate Model -----------------#
@@ -59,7 +63,7 @@ function Sim_loop(Cell, SOC_Exp)
     return CellV, time, Uocp_Neg, Uocp_Pos
 end
 
-CellV, time, Uocp_Neg, Uocp_Pos = Sim_loop(Cell, SOC_Exp)
+#CellV, time, Uocp_Neg, Uocp_Pos = Sim_loop(Cell, SOC_Exp)
 #----------- Plotting ---------------------------#
 # plotly()
 # display(plot(time,CellV[1:end-1], legend=:topright,color=:blue,label="Voltage",bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Voltage [V]"))
