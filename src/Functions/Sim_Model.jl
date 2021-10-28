@@ -66,7 +66,6 @@ function Sim_Model(CellData,Iapp,Tk,SOC,A0,B0,C0,D0)
         CeSepInd = findall(CeSep.-CeNegOffset .== 1)
         CePosInd = findall(CePos.-CeSepOffset .== 1)
 
-
         csegain_neg = C[CseNegInd[1][1],end]
         csegain_pos = C[CsePosInd[1][1],end]
 
