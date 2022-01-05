@@ -53,8 +53,9 @@
             D = [D; Di]
             Dtt = [Dtt; Dti]
             C_Aug = [C_Aug; res0]
-            i = i+1
+            i += 1
 
+            
         if Debug == 1
             println("jk:",jk, "\n")
             println("stpsum:",size(stpsum))
@@ -112,15 +113,15 @@
     
     A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
     A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line (Second)
-    
-    #Error check
-    # if any(i -> i>1, eigvals(A))
-    #     println("Oscilating System")
-    # end
 
-    # if any(i -> i>1, eigvals(A))
-    #     println("Unstable System")
-    # end
+    #Error check
+    if any(i -> i>1., real(eigvals(A)))
+        println("Oscilating System: A has indices of values > 1")
+    end
+
+    if any(i -> i<0., real(eigvals(A)))
+        println("Unstable System: A has indices of negative values")
+    end
     
     B = [CellData.RA.SamplingT; Control[:,1:CellData.RA.N]]
     C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]
