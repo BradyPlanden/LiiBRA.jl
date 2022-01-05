@@ -1,4 +1,4 @@
-using LIBRA, UnitSystems, Test
+using LIBRA, UnitSystems, Test, LinearAlgebra
 
 #Construct cell struct
 Cell = Construct("LG_M50")
@@ -34,7 +34,12 @@ end
 
 A,B,C,D = TestDRA(Cell)
 
+
 @test size(A[1],1) == Cell.RA.M+1
+@test typeof(A[1]) == Diagonal{Float64, Vector{Float64}}
+@test typeof(B[1]) == Matrix{Float64}
+@test typeof(C[1]) == Matrix{Float64}
+@test typeof(D[1]) == Matrix{Float64}
 #@test output eigs and compare to diagonal of A 
 #@test sim_model output at multiple SOC?
- 
+

@@ -102,8 +102,8 @@ function Sim_Model(CellData,Iapp,Tk,SOC,A0,B0,C0,D0)
         #Defining SOC
         SOC_Neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0
         SOC_Pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
-        @show θ_neg[1] = SOC_Neg
-        @show θ_pos[1] = SOC_Pos
+        θ_neg[1] = SOC_Neg
+        θ_pos[1] = SOC_Pos
 
         #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
