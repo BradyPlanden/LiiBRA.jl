@@ -1,7 +1,7 @@
 # LithIum-ion Battery Realisation Algorithms (LiBRA)
 
 <p align="center">
-<img src="https://github.com/BradyPlanden/LiBRA.jl/blob/fd145a4150bd33f0b8811890c2790be146a45482/LiBRA.png" width="600" align="center"  />
+<img src="LiBRA.png" width="600" align="center"  />
 </p>
 
 ## Create and Simulation Reduced Order Lithium-Ion Battery Models
