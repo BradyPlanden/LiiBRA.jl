@@ -1,4 +1,4 @@
-module LIBRA
+module LiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW, LoopVectorization
 using Dierckx, Arpack, Infiltrator, Statistics
@@ -150,10 +150,10 @@ Currently supports:
 function Construct(CellType)
     if CellType == "Doyle_94"
         CellType = string(CellType,".jl")
-        include(joinpath(dirname(pathof(LIBRA)), "Data/Doyle_94", CellType))
+        include(joinpath(dirname(pathof(LiBRA)), "Data/Doyle_94", CellType))
     elseif CellType == "LG_M50"
         CellType = string(CellType,".jl")
-        include(joinpath(dirname(pathof(LIBRA)), "Data/Chen_2020", CellType))
+        include(joinpath(dirname(pathof(LiBRA)), "Data/Chen_2020", CellType))
     end
     return Cell
 end
