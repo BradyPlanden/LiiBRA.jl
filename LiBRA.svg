@@ -5,7 +5,7 @@
    viewBox="0 0 340.15749 113.38582"
    version="1.1"
    id="svg22"
-   sodipodi:docname="LIBRA.svg"
+   sodipodi:docname="LiBRA.svg"
    inkscape:export-filename="/Users/bradyplanden/Documents/Git/julia-logo-graphics/images/julia-dots.png"
    inkscape:export-xdpi="198"
    inkscape:export-ydpi="198"
@@ -31,13 +31,13 @@
      showgrid="false"
      units="mm"
      inkscape:zoom="1.4468942"
-     inkscape:cx="456.14946"
-     inkscape:cy="376.32331"
-     inkscape:window-width="2560"
-     inkscape:window-height="1395"
-     inkscape:window-x="0"
-     inkscape:window-y="23"
-     inkscape:window-maximized="1"
+     inkscape:cx="180.04081"
+     inkscape:cy="58.400953"
+     inkscape:window-width="1408"
+     inkscape:window-height="819"
+     inkscape:window-x="32"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
      inkscape:current-layer="svg22" />
   <g
      id="surface91"
@@ -65,5 +65,5 @@
        id="tspan1106"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:84.0721px;font-family:Nexa;-inkscape-font-specification:'Nexa, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:2.10178"
        x="94.684067"
-       y="85.87722">LIBRA</tspan></text>
+       y="85.87722">LiBRA</tspan></text>
 </svg>
