@@ -1,4 +1,4 @@
-using LIBRA, UnitSystems, Test, LinearAlgebra
+using LiBRA, UnitSystems, Test, LinearAlgebra
 
 #Construct cell struct
 Cell = Construct("LG_M50")

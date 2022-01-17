@@ -1,4 +1,4 @@
-using LIBRA, Plots, BenchmarkTools, Infiltrator, MAT, StatsBase
+using LiBRA, Plots
 
 #---------- Cell Definition -----------------#
 Cell = Construct("LG_M50") #Alternative "Doyle_94"
