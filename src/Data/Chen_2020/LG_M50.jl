@@ -95,7 +95,7 @@ end
 end
 
 @with_kw mutable struct RealisationAlgorthim
-    Fs::Float64 = 8    # Sampling Frequency of Transfer Functions [Hz]
+    Fs::Float64 = 16    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 6    # Model Order
     N::Int64 = 1    # Number of Inputs
