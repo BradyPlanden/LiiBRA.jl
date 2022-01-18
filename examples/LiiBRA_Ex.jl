@@ -1,4 +1,4 @@
-using LiBRA, Plots
+using LiiBRA, Plots
 
 #---------- Cell Definition -----------------#
 Cell = Construct("LG_M50") #Alternative "Doyle_94"
