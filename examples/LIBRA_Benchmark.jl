@@ -1,4 +1,4 @@
-using LIBRA, Plots, BenchmarkTools, Infiltrator, MAT, StatsBase
+using LiBRA, Plots, BenchmarkTools, MAT, StatsBase
 
 #---------- Cell Definition -----------------#
 Cell = Construct("LG_M50") #Alternative "Doyle_94"
@@ -30,24 +30,24 @@ SOC_Exp = [97.3  94.8  92.3  89.8  87.3  84.8  82.3  79.8  77.2  75  72.2  69.7 
 
                     #for SOC in SOC_Exp[13:13]
                         #@show Cell.Const.SOC = SOC
-                        A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,Cell.RA.s,Cell.RA.f)
-                        #x = @benchmark DRA(Cell,Cell.RA.s,Cell.RA.f)
-                          A = flatten_(A,A_DRA)
-                          B = flatten_(B,B_DRA)
-                          C = flatten_(C,C_DRA)
-                          D = flatten_(D,D_DRA)
-                        #Time = flatten_(Time,x)
+                        #A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,Cell.RA.s,Cell.RA.f)
+                        x = @benchmark DRA(Cell,Cell.RA.s,Cell.RA.f)
+                          #A = flatten_(A,A_DRA)
+                          #B = flatten_(B,B_DRA)
+                          #C = flatten_(C,C_DRA)
+                          #D = flatten_(D,D_DRA)
+                        Time = flatten_(Time,x)
                     #end
                 end
             #end
     end
-return A, B, C, D#,Time 
+return Time#A, B, C, D#,Time 
 end
 
 
 #---------- Generate Model -----------------#
-A, B, C, D = DRA_loop(Cell)
-#Time = DRA_loop(Cell)
+#A, B, C, D = DRA_loop(Cell)
+Time = DRA_loop(Cell)
 
 #---------- Simulate Model -----------------#
 function Sim_loop(Cell, SOC_Exp, HPPC_Data)
@@ -91,19 +91,19 @@ function Stats(k)
 return Rms_Cn, Max_Cn, Rms_Cp, Max_Cp, Rms_V
 end
 
-file = matopen("/Users/bradyplanden/Documents/Git/LIBRA_Paper/Data/PyBaMM/sol_data.mat")
-Pyb_Cn = read(file,"c_n")
-Pyb_Cp = read(file,"c_p")
-Pyb_T = read(file,"t")
-Pyb_V = read(file,"V")
-Rms_Cn = Array{Float64}(undef,tuple_len(C),1)
-Max_Cn = Array{Float64}(undef,tuple_len(C),1)
-Rms_Cp = Array{Float64}(undef,tuple_len(C),1)
-Max_Cp = Array{Float64}(undef,tuple_len(C),1)
-Rms_V = Array{Float64}(undef,tuple_len(C),1)
+# file = matopen("/Users/bradyplanden/Documents/Git/LIBRA_Paper/Data/PyBaMM/sol_data.mat")
+# Pyb_Cn = read(file,"c_n")
+# Pyb_Cp = read(file,"c_p")
+# Pyb_T = read(file,"t")
+# Pyb_V = read(file,"V")
+# Rms_Cn = Array{Float64}(undef,tuple_len(C),1)
+# Max_Cn = Array{Float64}(undef,tuple_len(C),1)
+# Rms_Cp = Array{Float64}(undef,tuple_len(C),1)
+# Max_Cp = Array{Float64}(undef,tuple_len(C),1)
+# Rms_V = Array{Float64}(undef,tuple_len(C),1)
 
-HPPC_Data = HPPC_Data_Import(10,data_all) 
-CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra = Sim_loop(Cell, SOC_Exp, Pyb_T)
+#HPPC_Data = HPPC_Data_Import(10,data_all) 
+#CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra = Sim_loop(Cell, SOC_Exp, Pyb_T)
 #CellV, time, Uocp_Neg, Uocp_Pos = Sim_loop(Cell, [0.747])
 #Stats(tuple_len(C))
 
