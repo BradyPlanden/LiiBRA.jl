@@ -1,4 +1,4 @@
-# LithIum-ion Battery Realisation Algorithms (LiBRA)
+# LithIum-ion Battery Realisation Algorithms (LiiBRA)
 
 <p align="center">
 <img src="LiiBRA.png" width="600" align="center"  />
@@ -12,4 +12,4 @@ For more information on the current derived transfer functions used to represent
 
 Please report any issues using the Github [issue tracker]. All feedback is welcome.
 
-[issue tracker]: https://github.com/BradyPlanden/LiBRA/issues
+[issue tracker]: https://github.com/BradyPlanden/LiiBRA/issues
