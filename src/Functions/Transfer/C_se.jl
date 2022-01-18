@@ -1,11 +1,9 @@
 @inline function C_se(CellData,s,z,Def)
     """ 
     Concentration Solid-Electrolyte Transfer Function
-    # Add Ins and Outs
-        # Cell Data 
-        # Frequency Vector 
-        # Discretisation Locations
-        # Electrode Definition
+
+    C_se(CellData,s,z,Def)
+
     """
 
 
@@ -55,22 +53,8 @@ D_term = "zeros(length($z))"
 if Def == "Pos"
     cse_tf = -cse_tf
     cse_res = -cse_res
-
-    if Debug == 1
-        println("D:C_se:Pos",D)
-        println("z:C_se:Pos",z)
-        println("zero_tf:C_se:Pos",zero_tf[:,1])
-        println("κ_eff:C_se:Pos",κ_eff)
-        println("σ_eff:C_se:Pos",σ_eff)
-        #println("ν_∞:C_se:Pos",ν_∞)
-        println("j0:C_se:Pos",j0)
-        println("as:C_se:Pos",Electrode.as)
-        println("Rtot:C_se:Pos",Rtot)
-        println("σ_eff:C_se:Pos",σ_eff)
-        println("∂Uocp_elc:C_se:Pos",∂Uocp_elc)
-        println("Electrode.L:C_se:Pos",Electrode.L)
-    end
 end
+
 cse_res = cse_res*ones(length(z))
 return cse_tf, D, cse_res, D_term
 

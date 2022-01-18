@@ -1,11 +1,9 @@
 function Phi_s(CellData,s,z,Def)
     """ 
     Solid Potential Transfer Function
-    # Add Ins and Outs
-        # Cell Data 
-        # Frequency Vector 
-        # Discretisation Locations
-        # Electrode Definition
+
+    Phi_s(CellData,s,z,Def)
+
     """
 
 
@@ -57,38 +55,7 @@ if Def == "Pos"
    ϕ_tf = -ϕ_tf
    D = -D
    D_term = "@. $(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(CellData.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
-   if Debug == 1
-      println("D:Phi_s:Pos:",D)
-      println("zero_tf:Phi_s:Pos:",zero_tf)
-      println("zero_tf:Phi_s:Pos:",ϕ_tf[1:5])
-      println("z:Phi_s:Pos:",z)
-      println("ν_∞:Phi_s:Pos:",ν_∞)
-      println("as:Phi_s:Pos:",as)
-      println("L:Phi_s:Pos:",Electrode.L)
-      println("ν:Phi_s:Pos:",ν[1:5])
-      println("θ:Phi_s:Pos:",θ)
-      println("κ:Phi_s:Pos:",κ)
-      println("Rtot:Phi_s:Pos:",Rtot)
-      println("j0:Phi_s:Pos:",j0)
-      println("κ_eff:Phi_s:Pos:",κ_eff)
-      println("σ_eff:Phi_s:Pos:",σ_eff)
-   end
-else
-   if Debug == 1
-      println("D:Phi_s:Neg:",D)
-      println("D_check:Phi_s:Neg:",D_check)
-      println("ν_∞:Phi_s:Neg:",ν_∞)
-      println("θ:Phi_s:Neg:",θ)
-      println("κ:Phi_s:Neg:",κ)
-      println("Rtot:Phi_s:Neg:",Rtot)
-      println("j0:Phi_s:Neg:",j0)
-      println("κ_eff:Phi_s:Neg:",κ_eff)
-      println("σ_eff:Phi_s:Neg:",σ_eff)
-      println("zero_tf:Phi_s:Neg:",zero_tf)
-      #println("z:Phi_s:Neg:",z)
-      #println("ν:Phi_s:Neg:",ν)
-   end
 end
-return ϕ_tf, D, res0, D_term
 
+return ϕ_tf, D, res0, D_term
 end

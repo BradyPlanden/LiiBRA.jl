@@ -1,9 +1,9 @@
 @inline function C_e(CellData,s,z)
 """ 
 Electrolyte Concentration Transfer Function
-# Add Ins and Outs
-    # Locations to be computed
-    # Sampling Frequency
+
+C_e(CellData,s,z)
+
 """
 
 ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable

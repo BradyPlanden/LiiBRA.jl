@@ -1,15 +1,10 @@
 @inline function DRA(CellData,s,f)
     """ 
-    Discrete Realiastion Algorithm
-    # Add License
-    # Add Ins and Outs
-        # Cell Data
-        # Frequency Vector
-        # Discretisation Locations
-        # Electrode Definition
-    """
+    Function for Discrete Realisation Algorithm.
 
-    DRA_Debug = 0
+    DRA(CellData,s,f)
+    
+    """
 
     # Loop Call Transfer Functions ---------------------------------
     tfft = @. (1/CellData.RA.Fs)*f
@@ -45,45 +40,16 @@
         stpsum = (cumsum(jk, dims=1).*(1/CellData.RA.Fs))' # cumulative sum of tf response * sample time
         samplingtf = Array{Float64}(undef,size(stpsum,1),length(OrgT))
         # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
-            for Output in 1:size(stpsum,1)
-                spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #Large compute - First to improve
-                samplingtf[Output,:]= evaluate(spl1,OrgT)
-            end
-            puls = [puls; diff(samplingtf, dims=2)]
-            D = [D; Di]
-            Dtt = [Dtt; Dti]
-            C_Aug = [C_Aug; res0]
-            i += 1
-
-            
-        if Debug == 1
-            println("jk:",jk, "\n")
-            println("stpsum:",size(stpsum))
-            println("tf:",tf, "\n")
-            println("D:",D)
-            println("nR:",nR)
+        for Output in 1:size(stpsum,1)
+            spl1 = Spline1D(tfft,stpsum[Output,:]; k=3) #Large compute - First to improve
+            samplingtf[Output,:]= evaluate(spl1,OrgT)
         end
+        puls = [puls; diff(samplingtf, dims=2)]
+        D = [D; Di]
+        Dtt = [Dtt; Dti]
+        C_Aug = [C_Aug; res0]
+        i += 1
 
-        if DRA_Debug == 1
-            # stpsum__ = [stpsum__; stpsum]
-            # tf__ = [tf__; tf]
-            # jk__ = [jk__ jk]
-            # testifft__ = [testifft__ testifft]
-        end
-    end
-
-    if DRA_Debug == 1
-        println("tf__:",size(tf__))
-        display("text/plain", tf__)
-
-        println("testifft__:",size(testifft__))
-        display("text/plain", testifft__)
-
-        println("jk__:",size(jk__))
-        display("text/plain", jk__)
-
-        println("stpsum__:")
-        display("text/plain", stpsum__)
     end
 
     #Scale Transfer Functions in Pulse Response
