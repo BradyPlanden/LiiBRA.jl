@@ -1,11 +1,9 @@
 @inline function Flux(CellData,s,z,Def)
     """ 
     Flux Transfer Function
-    # Add Ins and Outs
-        # Cell Data 
-        # Frequency Vector 
-        # Discretisation Locations
-        # Electrode Definition
+
+    Flux(CellData,s,z,Def)
+    
     """
 
 
@@ -62,23 +60,6 @@ if Def == "Pos"
     j_tf = -j_tf
     D = -D
     D_term = "@. -$ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
-    if Debug == 1
-        println("D:Flux:Pos",D)
-        println("z:Flux:Pos",z)
-        println("ν_∞:Flux:Pos",ν_∞)
-        println("j0:Flux:Pos",j0)
-        println("Rtot:Flux:Pos",Rtot)
-        println("σ_eff:Flux:Pos",σ_eff)
-        println("ν_∞:Flux:Pos",ν_∞)
-        println("L:Flux:Pos",Electrode.L)
-    end
-else 
-    if Debug == 1  
-        println("D:Flux:Neg",D)
-        println("z:Flux:Neg",z)
-        println("ν_∞:Flux:Neg",ν_∞)
-        println("D:Flux:Neg",D)
-    end
 end
 
 return j_tf, D, res0, D_term

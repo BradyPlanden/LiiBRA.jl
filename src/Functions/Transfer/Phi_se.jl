@@ -1,11 +1,9 @@
 @inline function Phi_se(CellData,s,z,Def)
     """ 
     Solid-Electrolyte Potential Transfer Function
-    # Add Ins and Outs
-        # Cell Data 
-        # Frequency Vector 
-        # Discretisation Locations
-        # Electrode Definition
+    
+    Phi_se(CellData,s,z,Def)
+
     """
 
 
@@ -64,19 +62,6 @@ if Def == "Pos" #Double check this implementation
    ϕ_tf = -ϕ_tf
    D = -D
    D_term = "@. -$(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
-   if Debug == 1
-      println("ϕ_tf:Phi_se:Pos",ϕ_tf[:,1])
-      println("D:Phi_se:Pos",D)
-      println("z:Phi_se:Pos",z)
-      println("zero_tf:Phi_se:Pos",zero_tf)
-      println("ν_∞:Phi_se:Pos",ν_∞)
-      println("j0:Phi_se:Pos",j0)
-      println("Rtot:Phi_se:Pos",Rtot)
-      println("σ_eff:Phi_se:Pos",σ_eff)
-      #println("res0:Phi_se:Pos",res0[:,1])
-      println("∂Uocp_elc:Phi_se:Pos",∂Uocp_elc)
-      println("L:Phi_se:Pos",Electrode.L)
-  end
 end
 res0 = zeros(length(z))
 return ϕ_tf, D, res0, D_term

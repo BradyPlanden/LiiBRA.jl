@@ -1,10 +1,9 @@
 function Sim_Model(CellData,Iapp,Tk,SOC,A0,B0,C0,D0)
     """ 
-    Simulation of generated reduced-order models
-    # Add License
-    # Add Ins and Outs
-        # Locations to be computed
-        # Sampling Frequency
+    Function to simulate generated reduced-order models.
+
+    Sim_Model(CellData,Iapp,Tk,SOC,A,B,C,D)
+    
     """
     #Determine time span and allocate arrays
     tlength = size(Iapp,1)

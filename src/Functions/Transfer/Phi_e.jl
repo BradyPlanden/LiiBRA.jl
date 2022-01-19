@@ -1,13 +1,10 @@
 @inline function Phi_e(CellData,s,z)
    """ 
    Electrolyte Potential Transfer Function
-   # Add Ins and Outs
-       # Cell Data 
-       # Frequency Vector 
-       # Discretisation Locations
-       # Electrode Definition
-   """
 
+   Phi_e(CellData,s,z)
+
+   """
 
 CC_A = CellData.Const.CC_A   # Current-collector area [m^2]
 De = CellData.Const.De # Electrolyte Diffusivity
@@ -16,8 +13,6 @@ De = CellData.Const.De # Electrolyte Diffusivity
 κ_eff_Pos = CellData.Const.κ*CellData.Pos.ϵ_e^CellData.Pos.κ_brug
 σ_eff_Neg = CellData.Neg.σ*CellData.Neg.ϵ_s^CellData.Neg.σ_brug #Effective Conductivity Neg
 σ_eff_Pos = CellData.Pos.σ*CellData.Pos.ϵ_s^CellData.Pos.σ_brug #Effective Conductivity Pos
-#dln = CellData.Const.dln  #Electrolyte activity coefficient term (Rod. 17)
-#κ_D_eff = (2*R*CellData.Const.T/F)*κ_eff_Neg*(1-CellData.Const.t_plus)*(1+dln) #Diffision Effective Electrolyte Conductivity
 
 #Defining SOC
 θ_neg = CellData.Const.SOC * (CellData.Neg.θ_100-CellData.Neg.θ_0) + CellData.Neg.θ_0 
@@ -60,38 +55,6 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 ν_pos = @. CellData.Pos.L*sqrt((CellData.Pos.as/σ_eff_Pos+CellData.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds ))*(tanh(βp)/(tanh(βp)-βp)))) #Condensing Variable - eq. 4.13
 ν_pos_∞ = @. CellData.Pos.L*sqrt(CellData.Pos.as*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
 
-
-# if tf = Rod17 #Consider splitting into different function calls.
-
-#    for i < length(z)
-#    pt = z[i]
-
-#       if pt <= CellData.Neg.L
-#          ϕ_tf = @. CellData.Neg.L*(σ_eff*(1-cosh(ν_neg*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(κ_eff*cosh(ν_neg)-cosh(ν_neg*(1-pt))-pt*sinh(ν_neg)*ν_neg))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)
-#          zero_tf = @. -(CellData.Neg.L*pt^2)/(2*as*κ_eff) - (κ_d*CellData.Neg.L)(t_plus-1)*pt^2)/(2*A*ce0*De*F*κ_eff)
-#          #D  =  @. CellData.Neg.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Neg.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞)
-#          ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
-
-#       elseif pt <= CellData.Neg.L + CellData.Sep.L
-#          ϕ_tf1 = @. -pt*CellData.Sep.L/(as*κ_eff)
-#          ϕ_tf2 = @. -(κ_D_eff/κ_eff_Pos*ce0)*(cS1*(e^ΛS1*pt-1)+cS2*(e^ΛS1*pt-1))
-#          ϕ_n_tf = @. CellData.Neg.L*(σ_eff*(1-cosh(ν_neg*CellData.Neg.L)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(κ_eff*cosh(ν_neg)-cosh(ν_neg*(1-CellData.Neg.L))-CellData.Neg.L*sinh(ν_neg)*ν_neg))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)
-#          ϕ_tf = @. ϕ_n_tf + ϕ_tf1 + ϕ_tf2 
-#          zero_tf = @. -(CellData.Neg.L*pt^2)/(2*as*κ_eff) - (κ_d*CellData.Neg.L)(t_plus-1)*pt^2)/(2*A*ce0*De*F*κ_eff)
-#          #D  = @. CellData.Sep.L*(σ_eff*(1-cosh(ν_∞*pt)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) + (CellData.Sep.L*(κ_eff*cosh(ν_∞)-cosh(ν_∞*(1-pt))-pt*sinh(ν_∞)*ν_∞))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_∞)*ν_∞) - pt*CellData.Sep.L/(as*κ_eff)
-#          ϕ_tf[findall(s.==0),:] .= zero_tf[findall(s.==0),:]
-
-#       else
-#          ϕ_s_tf1 = @. -pt*CellData.Sep.L/(as*κ_eff)
-#          ϕ_s_tf2 = @. -(κ_D_eff/κ_eff_Pos*ce0)*(cS1*(e^ΛS1*pt-1)+cS2*(e^ΛS1*pt-1))
-#          ϕ_n_tf = @. CellData.Neg.L*(σ_eff*(1-cosh(ν_neg*CellData.Neg.L)/(as*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg) + (CellData.Neg.L*(κ_eff*cosh(ν_neg)-cosh(ν_neg*(1-CellData.Neg.L))-CellData.Neg.L*sinh(ν_neg)*ν_neg))/(A*κ_eff*(κ_eff+σ_eff)*sinh(ν_neg)*ν_neg)
-#          ϕ_p_tf1 = ((pt-1)*CellData.Pos.L/κ_eff_Pos*CC_A)+(CellData.Pos.as*F*CellData.Pos.L^2/κ_eff_Pos) * (j_Pos_1*(e^(ΛP1*pt)+(1-pt)*ΛP1*e^ΛP1-e^ΛP1)/ΛP1^2 + j_Pos_2*(e^(-ΛP1*pt)+(pt-1)*ΛP1*e^-ΛP1-e^-ΛP1)/ΛP1^2 + j_Pos_1*(e^(ΛP1*pt)+(1-pt)*ΛP1*e^ΛP1-e^ΛP1)/ΛP1^2 + j_Pos_3*(e^(ΛP2*pt)+(1-pt)*ΛP2*e^ΛP2-e^ΛP2)/ΛP2^2 + j_Pos_4*(e^(-ΛP2*pt)+(pt-1)*ΛP2*e^-ΛP2-e^-ΛP2)/ΛP2^2)
-#          ϕ_p_tf2 = -(κ_D_eff/κ_eff_Pos*ce0)*(cp1*(e^ΛP1*pt-e^Λp1)+cp2*(e^ΛP1*pt-e^Λp1)+cp3*(e^ΛP2*pt-e^Λp2)+cp4*(e^ΛP2*pt-e^Λp2))
-#          ϕ_tf = @. ϕ_n_tf + ϕ_s_tf1 + ϕ_s_tf2 + ϕ_p_tf1 + ϕ_p_tf2
-
-#          #D  = @.  
-#    end
-
 ϕ_tf = Array{ComplexF64}(undef,length(z),length(s))
 D_term = Array{String}(undef,length(z),1)
 D = fill(0.0,length(z))
@@ -125,21 +88,7 @@ i=Int64(1)
          end
       i=i+1
  end
- if Debug == 1
-      println("D:Phi_e:",size(D))
-      println("ϕ_tf:Phi_e:",ϕ_tf[:,2])
-      println("D:Phi_e:Pos",D)
-      println("z:Phi_e:Pos",z)
-      println("ν_∞:Phi_e:Pos",ν_neg_∞)
-      println("j0:Phi_e:Pos",j0_neg)
-      println("Rtot:Phi_e:Pos",Rtot_neg)
-      println("σ_eff:Phi_e:Pos",σ_eff_Neg)
-      println("∂Uocp_elc:Phi_e:Pos",∂Uocp_neg)
-      println("L:Phi_e:Pos",CellData.Neg.L)
-      println("D_term:", D_term)
- end
+
 res0 = zeros(length(z))
-
 return ϕ_tf, D, res0, D_term
-
 end

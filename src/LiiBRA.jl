@@ -1,4 +1,4 @@
-module LiBRA
+module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using Dierckx, Arpack, Statistics
@@ -14,8 +14,7 @@ include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 
-const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant
-const Debug = 0 #Print Variables for Debugging    
+const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
 
 """
     D_Linear(Cell,ν_neg,ν_pos,σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep) 
@@ -150,10 +149,10 @@ Currently supports:
 function Construct(CellType)
     if CellType == "Doyle_94"
         CellType = string(CellType,".jl")
-        include(joinpath(dirname(pathof(LiBRA)), "Data/Doyle_94", CellType))
+        include(joinpath(dirname(pathof(LiiBRA)), "Data/Doyle_94", CellType))
     elseif CellType == "LG_M50"
         CellType = string(CellType,".jl")
-        include(joinpath(dirname(pathof(LiBRA)), "Data/Chen_2020", CellType))
+        include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
     end
     return Cell
 end
