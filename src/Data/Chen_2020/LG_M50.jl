@@ -11,7 +11,7 @@ using Parameters
     SOC::Float64 = 0.747 # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
-    Ea_κ = 0.
+    Ea_κ::Float64 = 0.
     Ea_De::Float64 = 0
     CC_A::Float64 =  0.1027  #Electrode Plate Area 
     κ::Float64 = 0.9487
@@ -97,11 +97,11 @@ end
 @with_kw mutable struct RealisationAlgorthim
     Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
-    M::Int64 = 5    # Model Order
+    M::Int64 = 8    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 18000 #64800 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
-    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
+    Tlen::Int64 = 115200 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
     Nfft::Float64 = 0
     f::Array{Float64,1} = [0]
@@ -113,7 +113,7 @@ end
 
 @with_kw mutable struct TransferFun
     #6 - 4
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
     
     #4 - 4
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.0, 8.52e-5,9.72e-5,0.0001728], Float64[8.52e-5,9.72e-5,0.0001728], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
@@ -125,7 +125,7 @@ end
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
 
     # 4 - 2
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
 
     # 4 - 6
     ##tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
