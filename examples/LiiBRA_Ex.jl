@@ -2,17 +2,15 @@ using LiiBRA, Plots
 
 #---------- Cell Definition -----------------#
 Cell = Construct("LG_M50") #Alternative "Doyle_94"
-SList = collect(1.0:-0.05:0.0)
-Init_SOC = 0.95
+SList = collect(0.85:-0.05:0.65)
+Init_SOC = 0.75
 
 #---------- DRA Loop -----------------#
 @inline function DRA_loop(Cell, SList)
     A = B = C = D = tuple()
-
-    #for Temp in 5.0:10.0:45.0
     for i in SList 
         #Arrhenius
-        Cell.Const.T = 298.15#+Temp
+        Cell.Const.T = 298.15
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
 
         #Set Cell Constants
@@ -22,10 +20,10 @@ Init_SOC = 0.95
         Cell.RA.f = Cell.RA.f!(Cell.RA.Nfft)
         Cell.RA.s = Cell.RA.s!(Cell.RA.Fs,Cell.RA.Nfft,Cell.RA.f)
 
-        #DRA
+        #Realisation
         A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,Cell.RA.s,Cell.RA.f)
 
-        #Flatten output into tuples
+        #Flatten output into Tuples
         A = flatten_(A,A_DRA)
         B = flatten_(B,B_DRA)
         C = flatten_(C,C_DRA)
@@ -40,7 +38,6 @@ A, B, C, D = DRA_loop(Cell, SList)
 
 #---------- Sim Loop -----------------#
 function Sim_loop(Cell,SList,Init_SOC,A,B,C,D)
-    CellV = Ce = jNeg = jPos = RtotNeg = RtotPos = η0 = ηL = η_neg = η_pos = ϕ_ẽ1 = ϕ_ẽ2 = Uocp_Neg = Uocp_Pos = ϕ_e = Cse_Neg = Cse_Pos = tuple()
 
     #Set Experiment
     i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
@@ -50,17 +47,7 @@ function Sim_loop(Cell,SList,Init_SOC,A,B,C,D)
     tDra = 0:(1.0/i):((length(Iapp)-1)/i)
     
     #Simulate Model
-    Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC = Sim_Model(Cell,Iapp,Tk,SList,Init_SOC,A,B,C,D)
-    
-    #Flatten output into tuples
-    # CellV = flatten_(CellV,CellV_)
-    # Ce = flatten_(Ce,Ce_)
-    # Cse_Neg = flatten_(Cse_Neg,Cse_Neg_)
-    # Cse_Pos = flatten_(Cse_Pos,Cse_Pos_)
-    # Uocp_Neg = flatten_(Uocp_Neg,Uocp_Neg_)
-    # Uocp_Pos = flatten_(Uocp_Pos,Uocp_Pos_)
-
-return Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra
+    return Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra = Sim_Model(Cell,Iapp,Tk,SList,Init_SOC,A,B,C,D,tDra)
 end
 
 #---------- Simulate Model -----------------#
