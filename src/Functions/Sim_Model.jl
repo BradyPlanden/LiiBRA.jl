@@ -8,28 +8,10 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
     #Determine time span and allocate arrays
     tlength = size(Iapp,1)
 
-    #CellV_= Array{Float64}(undef,tlength,0)
     A = Array{Float64}(undef,size(A0[1]))
     B = Array{Float64}(undef,size(B0[1]))
     C = Array{Float64}(undef,size(C0[1]))
     D = Array{Float64}(undef,size(D0[1]))
-    Ce_= Array{Float64}(undef,tlength,0)
-    j0_ = Array{Float64}(undef,tlength,0)
-    RtotNeg_ = Array{Float64}(undef,tlength,0)
-    RtotPos_ = Array{Float64}(undef,tlength,0)
-    ϕ_ẽ1_ = Array{Float64}(undef,tlength,0)
-    ϕ_ẽ2_ = Array{Float64}(undef,tlength,0)
-    Uocp_Neg_ = Array{Float64}(undef,tlength,0)
-    Uocp_Pos_ = Array{Float64}(undef,tlength,0)
-    η0_ = Array{Float64}(undef,tlength,0)
-    η_neg_ = Array{Float64}(undef,tlength,0)
-    ηL_ = Array{Float64}(undef,tlength,0)
-    η_pos_ = Array{Float64}(undef,tlength,0)
-    ϕ_e_ = Array{Float64}(undef,tlength,0)
-    jNeg_ = Array{Float64}(undef,tlength,0)
-    jPos_ = Array{Float64}(undef,tlength,0)
-    CellV_ = Cse_Neg_ = Cse_Pos_ = tuple()
-    #Cse_Pos_ = Array{Float64}(undef,tlength,0)
 
     #Selecting SS Models
     for i in 1:length(SList)
@@ -104,6 +86,7 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
         Uocp_Pos = Array{Float64}(undef,tlength,1) .= 0.
         Cell_V = Array{Float64}(undef,tlength,1) .= 0.
         ϕ_e = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
+        Cell_SOC = Array{Float64}(undef,tlength,1) .= 0
 
 
         #Defining SOC
@@ -111,6 +94,7 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
         SOC_Pos = CellData.Const.SOC * (CellData.Pos.θ_100-CellData.Pos.θ_0) + CellData.Pos.θ_0
         θ_neg[1] = SOC_Neg
         θ_pos[1] = SOC_Pos
+        Cell_SOC[1] = (SOC_Neg-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
         #Loop through time
         #Compute dependent variables (voltage, flux, etc.)
@@ -139,7 +123,7 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
             
             θ_neg[i+1] = cs_neg_avg/CellData.Neg.cs_max
             θ_pos[i+1] = cs_pos_avg/CellData.Pos.cs_max
-            Cell_SOC = (θ_neg[i]-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
+            Cell_SOC[i+1] = (θ_neg[i+1]-CellData.Neg.θ_0)/(CellData.Neg.θ_100-CellData.Neg.θ_0)
 
 
             javg_neg = Iapp[i]/(CellData.Neg.as*F*CellData.Neg.L*CellData.Const.CC_A)
@@ -170,7 +154,7 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
             D = D_Linear(CellData, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
 
             #Interpolate C Matrix
-            C = interp(C0,SList,Cell_SOC)
+            C = interp(C0,SList,Cell_SOC[i])
             #SS Output
             y[i,:] = C*x[i,:] + D*Iapp[i]
 
@@ -213,29 +197,11 @@ function Sim_Model(CellData,Iapp,Tk,SList,SOC,A0,B0,C0,D0)
             ϕ_s_pos = @. y[i,ϕ_sPosInd] + Cell_V[i]
 
             #Interpolate A Matrix
-            A = interp(A0,SList,Cell_SOC)
+            A = interp(A0,SList,Cell_SOC[i])
 
             #Update States
             x[i+1,:] = A*x[i,:] + B*Iapp[i]
         end
 
-        CellV_ = flatten_(CellV_, Cell_V)
-        Ce_ = [Ce_ Ce]
-        jNeg_ = jNeg
-        jPos_ = jPos
-        RtotNeg_ = [RtotNeg_ Rtot_neg]
-        RtotPos_ = [RtotPos_ Rtot_pos]
-        η0_ = [η0_ η0]
-        η_neg_ = η_neg
-        ηL_ = [ηL_ ηL]
-        η_pos_ = η_pos
-        ϕ_ẽ1_ = ϕ_ẽ1
-        ϕ_ẽ2_ = ϕ_ẽ2
-        ϕ_e_ = ϕ_e
-        Uocp_Neg_ = [Uocp_Neg_ Uocp_Neg]
-        Uocp_Pos_ = [Uocp_Pos_ Uocp_Pos]
-        Cse_Neg_ = flatten_(Cse_Neg_, Cse_Neg)
-        Cse_Pos_ = flatten_(Cse_Pos_, Cse_Pos)
-
-    return CellV_, Ce_, jNeg_, jPos_, RtotNeg_, RtotPos_, η0_, ηL_, η_neg_, η_pos_, ϕ_ẽ1_, ϕ_ẽ2_, Uocp_Neg_, Uocp_Pos_, ϕ_e_, Cse_Neg_, Cse_Pos_
+    return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC
 end

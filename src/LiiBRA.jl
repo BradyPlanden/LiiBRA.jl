@@ -171,13 +171,12 @@ function interp(MTup::Tuple,SList::Array,SOC)
     T1 = 0
     T2 = 0
     for i in 1:length(SList)
-        if SOC <= SList[i]
-            T1 = i
-        elseif SOC >= SList[i]
+        if SList[i] > SOC >= SList[i+1]
             T2 = i
+            T1 = i+1
         end
     end
-    return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-T1)/(T2-T1)
+    return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])
 end
 
 end # module
