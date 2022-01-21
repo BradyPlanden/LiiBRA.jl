@@ -1,4 +1,4 @@
-# LithIum-ion Battery Realisation Algorithms (LiiBRA)
+# Lithium-ion Battery Realisation Algorithms (LiiBRA)
 
 [![Build Status](https://github.com/BradyPlanden/LiiBRA.jl/workflows/CI/badge.svg)](https://github.com/BradyPlanden/LiiBRA.jl/actions)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
