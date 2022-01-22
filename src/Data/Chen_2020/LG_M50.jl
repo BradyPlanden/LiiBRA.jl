@@ -99,9 +99,9 @@ end
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 8    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 115200 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
-    H1::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 1
-    H2::Array{Int64,1} = 0:2500 #4000 #4612     # Hankel Dimensions 2
+    Tlen::Int64 = 64800 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
+    H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
     Nfft::Float64 = 0
     f::Array{Float64,1} = [0]

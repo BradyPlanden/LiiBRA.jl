@@ -55,6 +55,10 @@ if Def == "Pos"
     cse_res = -cse_res
 end
 
+if abs.(cse_tf[:,1]) > abs.(cse_tf[:,2])*10
+    cse_tf[:,1] = cse_tf[:,2]*10
+end
+
 cse_res = cse_res*ones(length(z))
 return cse_tf, D, cse_res, D_term
 

@@ -3,7 +3,7 @@ module LiiBRA
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using Dierckx, Arpack, PROPACK, Statistics
 export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
-export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, Construct, tuple_len
+export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, Construct, tuple_len, interp
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -165,5 +165,18 @@ Function to return Tuple length.
 
 """
 tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
+
+
+function interp(MTup::Tuple,SList::Array,SOC)
+    T1 = 0
+    T2 = 0
+    for i in 1:length(SList)
+        if SList[i] > SOC >= SList[i+1]
+            T2 = i
+            T1 = i+1
+        end
+    end
+    return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])
+end
 
 end # module
