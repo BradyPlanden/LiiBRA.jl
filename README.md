@@ -8,6 +8,15 @@
 <img src="LiiBRA.png" width="600" align="center"  />
 </p>
 
+Install (Julia 1.6 and later)
+-----------------------------
+
+```julia
+(v1.6) pkg> add LiiBRA
+```
+
+(Type `]` to enter package mode.)
+
 ## Create and Simulation Reduced Order Lithium-Ion Battery Models
 LiBRA provides an open-source implementation of realisation algorithms commonly used for generating reduced-order state-space models.
 For more information on the current derived transfer functions used to represent the lithium-ion cell, please refer to [1](https://doi.org/10.1016/j.enconman.2007.03.015), [2](https://doi.org/10.1016/j.jpowsour.2012.07.075).
