@@ -21,7 +21,7 @@ Install (Julia 1.6 and later)
 
 (Type `]` to enter package mode.)
 
-## Example 
+## Example Usage
 
 ```julia
 using LiiBRA, Plots
