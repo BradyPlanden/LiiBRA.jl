@@ -72,13 +72,13 @@ end
     ϵ_e::Float64 = 0.335    # Porosity of positive electrode
     De_brug::Float64 = 1.5  # Bruggeman Diffusivity Exponent
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
-    σ::Float64 = 0.847  # Solid Phase Conductivity
+    σ::Float64 = 0.18 #0.847  # Solid Phase Conductivity
     σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
     θ_100::Float64 = 0.263849 #0.27 # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.853974 #0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 8E-05 #9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 = 4E-05 #9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D3::Float64 = 1   # Init Value
@@ -100,7 +100,7 @@ end
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 6    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 65536 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    Tlen::Int64 = 21600 #65536 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
@@ -156,8 +156,4 @@ Cell.Const.D2 = Cell.Const.De*Cell.Sep.ϵ_e^Cell.Sep.De_brug
 Cell.Const.D3 = Cell.Const.De*Cell.Pos.ϵ_e^Cell.Pos.De_brug
 Cell.Const.Ce_M = size(Cell.Transfer.tfs[1,3],1)
 Cell.RA.Outs = sum([size(Cell.Transfer.tfs[i,3],1) for i in 1:size(Cell.Transfer.tfs[:,1],1)])
-#Cell.RA.Outs = size(Cell.Transfer.Entries,1)
-# Cell.RA.Nfft = 2^(ceil(log2(Cell.RA.Fs*Cell.RA.Tlen)))
-# Cell.RA.f = 0:Nfft-1
-# Cell.RA.s = transpose(((2im.*Cell.RA.Fs)*tan.(pi.*f./Nfft)))
 

@@ -1,9 +1,10 @@
 module LiiBRA
 
-using UnitSystems, Parameters, LinearAlgebra, FFTW, Infiltrator
+using UnitSystems, Parameters, LinearAlgebra, FFTW
 using Dierckx, Arpack, PROPACK, Statistics, Roots
-export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
-export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, Construct, tuple_len, interp
+export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
+export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
+export Realise, HPPC
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -14,12 +15,58 @@ include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 
+
 const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
+
+
+#---------- Generate Model -----------------#
+function Realise(Cell, SList::Array, T::Float64)
+    A = B = C = D = tuple()
+    for i in SList
+        #Arrhenius
+        Cell.Const.T = 298.15+T
+        Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
+
+        #Set Cell Constants
+        Cell.Const.SOC = i
+        Cell.Const.κ = Cell.Const.κf(Cell.Const.ce0)*exp(Cell.Const.Ea_κ*Arr_Factor)
+        Cell.RA.Nfft = Cell.RA.Nfft!(Cell.RA.Fs, Cell.RA.Tlen)
+        Cell.RA.f = Cell.RA.f!(Cell.RA.Nfft)
+        Cell.RA.s = Cell.RA.s!(Cell.RA.Fs,Cell.RA.Nfft,Cell.RA.f)
+
+        #Realisation
+        Aϕ, Bϕ, Cϕ, Dϕ = DRA(Cell,Cell.RA.s,Cell.RA.f)
+
+        #Flatten output into Tuples
+        A = flatten_(A,Aϕ)
+        B = flatten_(B,Bϕ)
+        C = flatten_(C,Cϕ)
+        D = flatten_(D,Dϕ)
+    end
+return A, B, C, D
+end
+
+
+
+#---------- Simulate Model -----------------#
+function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B::Tuple,C::Tuple,D::Tuple)
+
+    #Set Experiment
+    i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
+    Iapp = [ones(1)*0.; ones(10*i)*λ; ones(40*i)*0.; ones(10*i)*ϕ; ones(40*i)*0.] #1C HPPC Experiment Current Profile
+    Tk = ones(size(Iapp))*Cell.Const.T #Cell Temperature
+    t = 0:(1.0/i):((length(Iapp)-1)/i)
+    
+    #Simulate Model
+    return Sim_Model(Cell,Iapp,Tk,SList,SOC,A,B,C,D,t)
+end
+
+
 
 """
     D_Linear(Cell,ν_neg,ν_pos,σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep) 
 
-Function to linearise D array from input cell type and conductivites. 
+    Function to linearise D array from input cell type and conductivites. 
 
 """
 function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
@@ -75,6 +122,7 @@ end
 
 
 """
+
     flatten_(a::Tuple, b...) 
 
 Flattens input Tuple "a" and inserts "b" 
@@ -90,68 +138,22 @@ flatten_tuple(x::Tuple) = flatten_(x...)
 
 
 """
-    bisection(f, a, b; fa = f(a), fb = f(b), ftol, wtol)
+    Construct(::String) 
 
-Bisection algorithm for finding the root ``f(x) ≈ 0`` within the initial bracket
-`[a,b]`.
+    Function to create Construct dictionary.
 
-Returns a named tuple
+    Currently supports:
 
-`(x = x, fx = f(x), isroot = ::Bool, iter = ::Int, ismaxiter = ::Bool)`.
-
-Terminates when either
-
-1. `abs(f(x)) < ftol` (`isroot = true`),
-2. the width of the bracket is `≤wtol` (`isroot = false`),
-3. `maxiter` number of iterations is reached. (`isroot = false, maxiter = true`).
-
-which are tested for in the above order. Therefore, care should be taken not to make `wtol` too large.
+    1. Doyle '94 parameterisation
+    2. Chen 2020 parameterisation
 
 """
-function bisection(f,Cell, a::Real, b::Real; fa::Real = f(a), fb::Real = f(b),
-                   ftol = √eps(), wtol = 0, maxiter = 200)
-    @assert fa * fb ≤ 0 "initial values don't bracket zero"
-    @assert isfinite(a) && isfinite(b)
-    _bisection(f, Cell, float.(promote(a, b, fa, fb, ftol, wtol))..., maxiter)
-end
-
-function _bisection(f,Cell, a, b, fa, fb, ftol, wtol, maxiter)
-    iter = 0
-    abs(fa) < ftol && return (x = a, fx = fa, isroot = true, iter = iter, ismaxiter = false)
-    abs(fb) < ftol && return (x = b, fx = fb, isroot = true, iter = iter, ismaxiter = false)
-    while true
-        iter += 1
-        m = middle(a, b)
-        fm = f(Cell,m)
-        abs(fm) < ftol && return (x = m, fx = fm, isroot = true, iter = iter, ismaxiter = false)
-        abs(b-a) ≤ wtol && return (x = m, fx = fm, isroot = false, iter = iter, ismaxiter = false)
-        if fa * fm > 0
-            a, fa = m, fm
-        else
-            b, fb = m, fm
-        end
-        iter == maxiter && return (x = m, fx = fm, isroot = false, iter = iter, ismaxiter = true)
-    end
-end
-
-
-"""
-Construct(::String) 
-
-Function to create Construct dictionary.
-
-Currently supports:
-
-1. Doyle '94 parameterisation
-2. Chen 2020 parameterisation
-
-"""
-function Construct(CellType)
-    if CellType == "Doyle_94"
+function Construct(CellType::String)
+    if CellType == "Doyle 94"
         CellType = string(CellType,".jl")
         include(joinpath(dirname(pathof(LiiBRA)), "Data/Doyle_94", CellType))
-    elseif CellType == "LG_M50"
-        CellType = string(CellType,".jl")
+    elseif CellType == "LG M50"
+        CellType = string("LG_M50.jl")
         include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
     end
     return Cell
@@ -161,12 +163,19 @@ end
 """
     tuple_len(::NTuple) 
 
-Function to return Tuple length. 
+    Function to return Tuple length. 
 
 """
 tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
 
 
+
+"""
+    interp(MTup::Tuple,SList::Array,SOC) 
+
+    Function to interpolate Tuple indices
+
+"""
 function interp(MTup::Tuple,SList::Array,SOC)
     T1 = 0
     T2 = 0
