@@ -1,7 +1,7 @@
 using LiiBRA, UnitSystems, Test, LinearAlgebra
 
 #Construct cell struct
-Cell = Construct("LG_M50")
+Cell = Construct("LG M50")
 Cell.RA.Tlen = 128
 Cell.RA.Fs = 1
 Cell.RA.H1 = 0:Cell.RA.Tlen
