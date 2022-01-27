@@ -8,7 +8,7 @@ using Parameters
     tpf::Function = ce -> -0.1287*(ce/1000)^3+0.4106*(ce/1000)^2-0.4717*(ce/1000)+0.4492 # Transference Number Function - Requires ce in dm-3
     De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity
     Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
-    SOC::Float64 = 0.747 # Initial State of Charge
+    SOC::Float64 = 0.75 # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
     Ea_κ::Float64 = 0.
@@ -35,6 +35,7 @@ using Parameters
     D3::Float64 = 1.0
     Ltot::Float64 = 0.
     Lnegsep::Float64 = 0.
+    CeRootRange::Float64 = 10
 end
 
 @with_kw mutable struct Negative
@@ -53,7 +54,7 @@ end
     θ_0::Float64 = 0.0263473 #0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 7.264265E-06 #6.48e-6 #7.226781E-06 #6.8973799e-13 #4.1580e-8 #2.12e-10 #Initial Reaction Rate
+    k_norm::Float64 = 1E-5 #6.48e-6 #7.226781E-06 #6.8973799e-13 #4.1580e-8 #2.12e-10 #Initial Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D1::Float64 = 1.   # Init Value
@@ -71,13 +72,13 @@ end
     ϵ_e::Float64 = 0.335    # Porosity of positive electrode
     De_brug::Float64 = 1.5  # Bruggeman Diffusivity Exponent
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
-    σ::Float64 = 0.18   # Solid Phase Conductivity
+    σ::Float64 = 0.847  # Solid Phase Conductivity
     σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
     θ_100::Float64 = 0.263849 #0.27 # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.853974 #0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 =  7.26426E-05 #9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 = 8E-05 #9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance
     D3::Float64 = 1   # Init Value
@@ -97,9 +98,9 @@ end
 @with_kw mutable struct RealisationAlgorthim
     Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
-    M::Int64 = 8    # Model Order
+    M::Int64 = 6    # Model Order
     N::Int64 = 1    # Number of Inputs
-    Tlen::Int64 = 64800 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
+    Tlen::Int64 = 65536 #21600 #16200 #28800 #43200 #65536 #131072 #1048576 #2097152 #262144 #32768 #24    #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
@@ -113,7 +114,7 @@ end
 
 @with_kw mutable struct TransferFun
     #6 - 4
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
     
     #4 - 4
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.0, 8.52e-5,9.72e-5,0.0001728], Float64[8.52e-5,9.72e-5,0.0001728], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
@@ -125,7 +126,7 @@ end
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
 
     # 4 - 2
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
+    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
 
     # 4 - 6
     ##tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]

@@ -1,7 +1,7 @@
 module LiiBRA
 
-using UnitSystems, Parameters, LinearAlgebra, FFTW
-using Dierckx, Arpack, PROPACK, Statistics
+using UnitSystems, Parameters, LinearAlgebra, FFTW, Infiltrator
+using Dierckx, Arpack, PROPACK, Statistics, Roots
 export C_e, Negative, Constants, Positive, Seperator, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export RealisationAlgorthim, TransferFun, flatten_, R, F, CellDef, Sim_Model, D_Linear, _bisection, Construct, tuple_len, interp
 
@@ -109,7 +109,7 @@ which are tested for in the above order. Therefore, care should be taken not to 
 
 """
 function bisection(f,Cell, a::Real, b::Real; fa::Real = f(a), fb::Real = f(b),
-                   ftol = √eps(), wtol = 0, maxiter = 100)
+                   ftol = √eps(), wtol = 0, maxiter = 200)
     @assert fa * fb ≤ 0 "initial values don't bracket zero"
     @assert isfinite(a) && isfinite(b)
     _bisection(f, Cell, float.(promote(a, b, fa, fb, ftol, wtol))..., maxiter)

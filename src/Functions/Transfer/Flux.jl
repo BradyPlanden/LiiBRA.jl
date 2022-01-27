@@ -22,12 +22,12 @@ as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 θ = CellData.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0 
 
 #Beta's
-β = @. Electrode.Rs*sqrt(s/Electrode.Ds )
+β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
 cs_max = Electrode.cs_max
-cs0 = cs_max * θ
+cs0 = cs_max*θ
 α = Electrode.α
 
 #Current Flux Density

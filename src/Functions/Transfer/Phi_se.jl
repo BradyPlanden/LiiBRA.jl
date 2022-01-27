@@ -13,11 +13,9 @@
     Electrode = CellData.Neg #Electrode Length
  end
 
-ζ = (1-CellData.Const.t_plus)/F    #Simplifying Variable
-Rs = Electrode.Rs       # Particle radius [m]
-Ds = Electrode.Ds       # Solid diffusivity [m^2/s]
+
 CC_A = CellData.Const.CC_A   # Current-collector area [m^2]
-as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
+as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 κ_eff = CellData.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 
@@ -25,7 +23,7 @@ as = 3*Electrode.ϵ_s/Rs # Specific interfacial surf. area
 θ = CellData.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
 
 #Beta's
-β = @. Rs*sqrt(s/Ds)
+β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
 
 #Prepare for j0
 ce0 = CellData.Const.ce0
@@ -45,15 +43,15 @@ end
 Rtot = R*CellData.Const.T/(j0*F^2) + Electrode.RFilm
 
 ∂Uocp_elc = CellData.Const.∂Uocp(Def,θ)/cs_max #Open Circuit Potential Partial
-res0 = @. -3*∂Uocp_elc/(as*F*Electrode.L*CC_A*Rs) # residual for pole removal
+res0 = @. -3*∂Uocp_elc/(as*F*Electrode.L*CC_A*Electrode.Rs) # residual for pole removal
 
-ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Rs/(F*Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
+ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 ϕ_tf = @. Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
 ϕ_tf = @. ϕ_tf - res0./s
 
-zero_tf = @. (6*(5*Ds*F*Rtot-∂Uocp_elc*Rs)*σ_eff)/(30*CC_A*as*Ds*F*σ_eff*Electrode.L) + (5*as*Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Ds*F*σ_eff*κ_eff*Electrode.L)
+zero_tf = @. (6*(5*Electrode.Ds*F*Rtot-∂Uocp_elc*Electrode.Rs)*σ_eff)/(30*CC_A*as*Electrode.Ds*F*σ_eff*Electrode.L) + (5*as*Electrode.Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Electrode.Ds*F*σ_eff*κ_eff*Electrode.L)
 D = @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 D_term = "@. $(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]

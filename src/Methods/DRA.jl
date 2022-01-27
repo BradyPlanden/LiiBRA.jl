@@ -1,4 +1,4 @@
-@inline function DRA(CellData,s,f)
+function DRA(CellData,s,f)
     """ 
     Function for Discrete Realisation Algorithm.
 
@@ -18,7 +18,7 @@
     C_Aug = Array{Float64}(undef,0,1)
     #tf = Vector{Array}
     # stpsum__ = Array{Float64}(undef,0,length(s))
-    #tf__ = Array{Float64}(undef,0,length(s))
+    tf__ = Array{Float64}(undef,0,length(s))
     # jk__ = Array{Float64}(undef,length(s),0)
     # testifft__ = Array{Float64}(undef,length(s),0)
     #D_term = Array{Float64}(undef,0,1)
@@ -48,14 +48,16 @@
         D = [D; Di]
         Dtt = [Dtt; Dti]
         C_Aug = [C_Aug; res0]
+        tf__ = [tf__;tf]
         i += 1
 
     end
 
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
-    puls .= puls./SFactor[:,ones(Int64,size(puls,2))]
-    
+    puls1 = puls
+    puls = puls./SFactor[:,ones(Int64,size(puls,2))]
+
     #Hankel Formation, perform svd to determine the highest order singular values
     Puls_L = size(puls,1)
     Hank1 = Array{Float64}(undef,length(CellData.RA.H1)*Puls_L,length(CellData.RA.H2))
@@ -69,13 +71,13 @@
     end
 
     #Truncated SVD of Hank1 Matrix
-    #T = svds(Hank1; nsv=CellData.RA.M)[1]
-    U,S,V = tsvd(Hank1, k=CellData.RA.M)
+    T = svds(Hank1; nsv=CellData.RA.M)[1]
+    #U,S,V = tsvd(Hank1, k=CellData.RA.M)
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-    S_ = sqrt(diagm(S[1:CellData.RA.M]))
-    Observibility = (@view U[:,1:CellData.RA.M])*S_
-    Control = S_*(@view V[:,1:CellData.RA.M])'
+    S_ = sqrt(diagm(T.S[1:CellData.RA.M]))
+    Observibility = (@view T.U[:,1:CellData.RA.M])*S_
+    Control = S_*(@view T.V[:,1:CellData.RA.M])'
     
     A = Matrix{Float64}(I,CellData.RA.M+1,CellData.RA.M+1)
     A[2:end,2:end] = (Observibility\Hank2)/Control #High compute line (Second)
@@ -92,11 +94,14 @@
     B = [CellData.RA.SamplingT; Control[:,1:CellData.RA.N]]
     C = [C_Aug SFactor[:,ones(Int64,CellData.RA.M)].*Observibility[1:size(puls,1),:]]
 
+    #@infiltrate
+
     #  Final State-Space Form
     d, S = eigen(A)
     A = Diagonal(d)
     B = S\B
     C = C*S
+
     # sys = diagonalize(ss(A,B,C,D,CellData.RA.SamplingT))
     # ss_B = sys.B
     # ss_C = sys.C

@@ -6,7 +6,7 @@ SList = collect(0.85:-0.05:0.65)
 Init_SOC = 0.75
 
 #---------- DRA Loop -----------------#
-@inline function DRA_loop(Cell, SList)
+function DRA_loop(Cell, SList)
     A = B = C = D = tuple()
     for i in SList 
         #Arrhenius
@@ -47,11 +47,11 @@ function Sim_loop(Cell,SList,Init_SOC,A,B,C,D)
     tDra = 0:(1.0/i):((length(Iapp)-1)/i)
     
     #Simulate Model
-    return Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra = Sim_Model(Cell,Iapp,Tk,SList,Init_SOC,A,B,C,D,tDra)
+    return Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, j0, jL = Sim_Model(Cell,Iapp,Tk,SList,Init_SOC,A,B,C,D,tDra)
 end
 
 #---------- Simulate Model -----------------#
-Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra = Sim_loop(Cell,SList,Init_SOC,A,B,C,D)
+Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, j0, jL = Sim_loop(Cell,SList,Init_SOC,A,B,C,D)
 
 #----------- Plotting ---------------------------#
 plotly()

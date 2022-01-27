@@ -32,7 +32,7 @@ cs0_pos = cs_max_pos * θ_pos
 #Current Flux Density
 
 if CellData.Const.CellTyp == "Doyle_94"
-    κ_pos = CellData.Pos.k_norm/(CellData.Pos.cs_max*ce0^(1-CellData.Pos.α))
+    κ_pos = CellData.Pos.k_norm/CellData.Pos.cs_max/ce0^(1-CellData.Pos.α)
     κ_neg = CellData.Neg.k_norm/CellData.Neg.cs_max/ce0^(1-CellData.Neg.α)
     j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-CellData.Neg.α)*cs0_neg^CellData.Neg.α
     j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-CellData.Pos.α)*cs0_pos^CellData.Pos.α
@@ -54,8 +54,14 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 ν_p =  @. CellData.Pos.L*sqrt((CellData.Pos.as/σ_eff_Pos+CellData.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
 
 
-R_ce = roots(CellData,CellData.Const.Ce_M+1)
-λ = R_ce[2:end]
+#R_ce = roots(CellData,CellData.Const.Ce_M+1)
+R_ce = find_zeros(x->flambda(Cell,x),0.0,Cell.Const.CeRootRange)
+if size(R_ce,1) >= CellData.Const.Ce_M+1
+    λ = R_ce[2:CellData.Const.Ce_M+1]
+else
+    throw(DomainError(R_ce, "Ce roots 'R_ce' does not contain enough values, increase Cell.Const.CeRootRange"))
+end
+#λ = R_ce[2:end]
 
 #Create all k's
 in1 = @. sqrt(λ*CellData.Neg.ϵ_e/CellData.Const.D1)
@@ -126,7 +132,7 @@ function roots(CellData,roots_n) #Change these functions to be inclusive of Cell
     if(roots_n > 1)
         while length(root) <= roots_n-1
             if flambda(CellData,(i-∇))*flambda(CellData,i)<0
-            push!(root, _bisection(flambda,CellData,(i-∇),i,(i-∇),i,√eps(),0,100)[1])
+            push!(root, _bisection(flambda,CellData,(i-∇),i,(i-∇),i,√eps(),0,200)[1])
             end
         i = i+∇
         end
@@ -148,10 +154,10 @@ function flambda(CellData,λ)
     sle1 = sqrt(λ*ϵ1/D1)
     sle2 = sqrt(λ*ϵ2/D2)
     sle3 = sqrt(λ*ϵ3/D3)
-    k3 = k1*(cos(sle1*Lneg).*cos(sle2*Lneg) + D1*sle1.*sin(sle1*Lneg).*sin(sle2*Lneg)./(D2*sle2))
-    k4 = k1*(cos(sle1*Lneg).*sin(sle2*Lneg) - D1*sle1.*cos(sle2*Lneg).*sin(sle1*Lneg)./(D2*sle2))
-    k5 = k3*(cos(sle2*Lnegsep).*cos(sle3*Lnegsep) + D2*sle2.*sin(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*cos(sle3*Lnegsep) - D2*sle2.*cos(sle2*Lnegsep).*sin(sle3*Lnegsep)./(D3*sle3))
-    k6 = k3*(cos(sle2*Lnegsep).*sin(sle3*Lnegsep) - D2*sle2.*sin(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))+k4*(sin(sle2*Lnegsep).*sin(sle3*Lnegsep) + D2*sle2.*cos(sle2*Lnegsep).*cos(sle3*Lnegsep)./(D3*sle3))
-    Psiprime = -k5.*sle3.*sin(sle3*Ltot) + k6.*sle3.*cos(sle3*Ltot)
+    k3 = @. k1*(cos(sle1*Lneg)*cos(sle2*Lneg) + D1*sle1*sin(sle1*Lneg)*sin(sle2*Lneg)/(D2*sle2))
+    k4 = @. k1*(cos(sle1*Lneg)*sin(sle2*Lneg) - D1*sle1*cos(sle2*Lneg)*sin(sle1*Lneg)/(D2*sle2))
+    k5 = @. k3*(cos(sle2*Lnegsep)*cos(sle3*Lnegsep) + D2*sle2*sin(sle2*Lnegsep)*sin(sle3*Lnegsep)/(D3*sle3))+k4*(sin(sle2*Lnegsep)*cos(sle3*Lnegsep) - D2*sle2*cos(sle2*Lnegsep)*sin(sle3*Lnegsep)/(D3*sle3))
+    k6 = @. k3*(cos(sle2*Lnegsep)*sin(sle3*Lnegsep) - D2*sle2*sin(sle2*Lnegsep)*cos(sle3*Lnegsep)/(D3*sle3))+k4*(sin(sle2*Lnegsep)*sin(sle3*Lnegsep) + D2*sle2*cos(sle2*Lnegsep)*cos(sle3*Lnegsep)/(D3*sle3))
+    Psiprime = @. -k5*sle3*sin(sle3*Ltot) + k6*sle3*cos(sle3*Ltot)
     return Psiprime
 end
