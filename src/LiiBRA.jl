@@ -4,7 +4,7 @@ using UnitSystems, Parameters, LinearAlgebra, FFTW
 using Dierckx, Arpack, PROPACK, Statistics, Roots
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC
+export Realise, HPPC, fh!
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -61,7 +61,20 @@ function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B:
     return Sim_Model(Cell,Iapp,Tk,SList,SOC,A,B,C,D,t)
 end
 
+#---------- Hankel Formation -----------------#
+function fh!(H,Hlen1,Hlen2,puls,M)
+    Puls_L = size(puls,1)
+    @inbounds for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
+    end
 
+    U,S,V = tsvd(H, k=M)
+
+    @inbounds for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+           H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+2]
+    end
+    return U,S,V
+end
 
 """
     D_Linear(Cell,ν_neg,ν_pos,σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep) 

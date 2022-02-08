@@ -1,4 +1,4 @@
-@inline function C_se(Cell,s,z,Def)
+@inline function C_se(Cell,s,z,Def,cse_tf,D,res0)
 """ 
 Concentration Solid-Electrolyte Transfer Function
 
@@ -40,26 +40,22 @@ Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
 #∂Uocp_Def
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
-cse_res = -3/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Rs) #Residual Variable for Pole Removal - eq. 4.45
+res0 .= -3/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Rs)*ones(length(z)) #Residual Variable for Pole Removal - eq. 4.45
 ν = @. Electrode.L*sqrt((Electrode.as/σ_eff+Electrode.as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 
-cse_tf = @. ν*Electrode.Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))*tanh(β)/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Ds*(κ_eff+σ_eff)*sinh(ν)*(tanh(β)-β)) #Transfer Function - eq. 4.17
-cse_tf = @. cse_tf-cse_res/s  #Pole removal - eq. 4.43
+cse_tf .= @. ν*Electrode.Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))*tanh(β)/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Ds*(κ_eff+σ_eff)*sinh(ν)*(tanh(β)-β))-res0/s #Transfer Function - eq. 4.17
+#cse_tf .= @. cse_tf-res0/s  #Pole removal - eq. 4.43
 zero_tf = @. (5*Electrode.as*Electrode.Ds*F*Electrode.L^2*(κ_eff*(2-6*z+3*z^2)+(3*z^2-1)*σ_eff)-6*∂Uocp_elc*Electrode.Rs*κ_eff*σ_eff)/(30*Cell.Const.CC_A*Electrode.as*Electrode.Ds*∂Uocp_elc*F*Electrode.L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
 cse_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-D = zeros(length(z))
-D_term = "zeros(length($z))"
+D .= zeros(length(z))
 
 if Def == "Pos"
     cse_tf = -cse_tf
-    cse_res = -cse_res
+    res0 = -res0
 end
 
 if abs.(cse_tf[:,1]) > abs.(cse_tf[:,2])*10
     cse_tf[:,1] = cse_tf[:,2]*10
 end
-
-cse_res = cse_res*ones(length(z))
-return cse_tf, D, cse_res, D_term
 
 end

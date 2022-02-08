@@ -1,4 +1,4 @@
-@inline function C_e(Cell,s,z)
+@inline function C_e(Cell,s,z,tf,D,res0)
 """ 
 Electrolyte Concentration Transfer Function
 
@@ -99,7 +99,7 @@ j_Pos = @. -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν
 zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
 j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 
-C_e =  @. ((j_Neg + j_Pos)/(s+λ))
+ 
 i=Int64(1)
 ψ = fill(0.0,length(z),length(λ))
 for loop in 1:length(λ)
@@ -116,12 +116,9 @@ for loop in 1:length(λ)
     end
 end
 
-C_e = ψ*C_e
-D =  zeros(length(z))
-D_term = "zeros(length($z))"
-res0 = zeros(length(z))
-
-return C_e, D, res0, D_term
+tf .= ψ*((j_Neg .+ j_Pos)./(s.+λ))
+D .=  zeros(length(z))
+res0 .= zeros(length(z))
 end
 
 function flambda(Cell,λ)

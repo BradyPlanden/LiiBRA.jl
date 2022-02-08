@@ -1,4 +1,4 @@
-@inline function Phi_se(Cell,s,z,Def)
+@inline function Phi_se(Cell,s,z,Def,ϕ_tf,D,res0)
 """ 
    Solid-Electrolyte Potential Transfer Function
 
@@ -48,20 +48,11 @@ res0 = @. -3*∂Uocp_elc/(as*F*Electrode.L*CC_A*Electrode.Rs) # residual for pol
 ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
-ϕ_tf = @. Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1))) #Transfer Function - eq. 4.14
-ϕ_tf = @. ϕ_tf - res0./s
+ϕ_tf .= @. Electrode.L/(CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1)))-res0./s #Transfer Function - eq. 4.14
 
 zero_tf = @. (6*(5*Electrode.Ds*F*Rtot-∂Uocp_elc*Electrode.Rs)*σ_eff)/(30*CC_A*as*Electrode.Ds*F*σ_eff*Electrode.L) + (5*as*Electrode.Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*CC_A*as*Electrode.Ds*F*σ_eff*κ_eff*Electrode.L)
-D = @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
-D_term = "@. $(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
+D .= @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-
-if Def == "Pos" #Double check this implementation
-   ϕ_tf = -ϕ_tf
-   D = -D
-   D_term = "@. -$(Electrode.L)/($CC_A*$ν_∞*sinh($ν_∞))*((1/$κ_eff)*cosh($ν_∞*$z)+(1/$σ_eff)*cosh($ν_∞*($z-1)))"
-end
 res0 = zeros(length(z))
-return ϕ_tf, D, res0, D_term
 
 end

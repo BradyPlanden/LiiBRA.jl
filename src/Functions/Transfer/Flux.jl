@@ -1,4 +1,4 @@
-@inline function Flux(Cell,s,z,Def)
+@inline function Flux(Cell,s,z,Def,j_tf,D,res0)
 """ 
 Flux Transfer Function
 
@@ -49,19 +49,10 @@ Rtot = R*Cell.Const.T /(j0*F^2) + Electrode.RFilm
 ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function
-j_tf = @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
-D = @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
-D_term = "@. $ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
+j_tf .= @. ν*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν))
+D .= @. ν_∞*(σ_eff*cosh(ν_∞*z)+κ_eff*cosh(ν_∞*(z-1)))/(as*F*Electrode.L*CC_A*(κ_eff+σ_eff)*sinh(ν_∞))
 zero_tf =ones(size(z,1))*1/(Cell.Const.CC_A*as*F*Electrode.L)
 j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-res0 = zeros(length(z))
-
-if Def == "Pos"
-    j_tf = -j_tf
-    D = -D
-    D_term = "@. -$ν_∞*($σ_eff*cosh($ν_∞*$z)+$κ_eff*cosh($ν_∞*($z-1)))/($as*$F*$(Electrode.L)*$CC_A*($κ_eff+$σ_eff)*sinh($ν_∞))"
-end
-
-return j_tf, D, res0, D_term
+res0 .= zeros(length(z))
 
 end
