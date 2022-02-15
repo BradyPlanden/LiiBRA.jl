@@ -55,4 +55,9 @@ D .= @. Electrode.L/(CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 = zeros(length(z))
 
+if Def == "Pos" #Double check this implementation
+   ϕ_tf .= -ϕ_tf
+   D .= -D
+end
+
 end

@@ -55,7 +55,7 @@ Rtot_pos = R*CellData.Const.T/(j0_pos*F^2) + CellData.Pos.RFilm
 ν_pos = @. CellData.Pos.L*sqrt((CellData.Pos.as/σ_eff_Pos+CellData.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(CellData.Pos.Rs/(F*CellData.Pos.Ds ))*(tanh(βp)/(tanh(βp)-βp)))) #Condensing Variable - eq. 4.13
 ν_pos_∞ = @. CellData.Pos.L*sqrt(CellData.Pos.as*((1/κ_eff_Pos)+(1/σ_eff_Pos))/(Rtot_pos))
 
-D = fill(0.0,length(z))
+
 i=Int64(1)
 # Loop Tf's
    for pt in z

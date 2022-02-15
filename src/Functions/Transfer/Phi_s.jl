@@ -7,7 +7,7 @@
     """
 
 
- if Def == "Pos"   
+ if Def == "Pos"
     Electrode = Cell.Pos #Electrode Length
  else
     Electrode = Cell.Neg #Electrode Length
@@ -49,5 +49,10 @@ D .= @. (-Electrode.L*(κ_eff*(cosh(ν_∞)-cosh((z-1)*ν_∞)))-Electrode.L*(σ
 zero_tf = @. Electrode.L*(z-2)*z/(2*Cell.Const.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 .= zeros(length(z))
+
+if Def == "Pos"
+   ϕ_tf .= -ϕ_tf
+   D .= -D
+end
 
 end

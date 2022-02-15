@@ -55,4 +55,9 @@ zero_tf =ones(size(z,1))*1/(Cell.Const.CC_A*as*F*Electrode.L)
 j_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
 res0 .= zeros(length(z))
 
+if Def == "Pos"
+   j_tf .= -j_tf
+   D .= -D
+end
+
 end

@@ -8,7 +8,7 @@ using Parameters
     tpf::Function = ce -> -0.1287*(ce/1000)^3+0.4106*(ce/1000)^2-0.4717*(ce/1000)+0.4492 # Transference Number Function - Requires ce in dm-3
     De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity
     Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
-    SOC::Float64 = 0.75 # Initial State of Charge
+    SOC::Float64 = 0.8 # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration
     #dln::Float64 = 3.
     Ea_κ::Float64 = 0.
@@ -95,7 +95,7 @@ end
     D2f::Function = De -> De * ϵ_e^De_brug
 end
 
-@with_kw mutable struct RealisationAlgorthim
+@with_kw mutable struct Realisation
     Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 6    # Model Order
@@ -145,11 +145,11 @@ end
     Neg::Negative
     Pos::Positive
     Sep::Seperator
-    RA::RealisationAlgorthim
+    RA::Realisation
     Transfer::TransferFun
 end
 
-Cell = Params(Constants(),Negative(),Positive(),Seperator(),RealisationAlgorthim(),TransferFun())
+Cell = Params(Constants(),Negative(),Positive(),Seperator(),Realisation(),TransferFun())
 Cell.Const.Lnegsep, Cell.Const.Ltot = Cell.Neg.L+Cell.Sep.L,Cell.Neg.L+Cell.Sep.L+Cell.Pos.L
 Cell.Const.D1 = Cell.Const.De*Cell.Neg.ϵ_e^Cell.Neg.De_brug
 Cell.Const.D2 = Cell.Const.De*Cell.Sep.ϵ_e^Cell.Sep.De_brug

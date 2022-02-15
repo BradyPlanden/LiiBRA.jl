@@ -1,7 +1,7 @@
 module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
-using Dierckx, Arpack, PROPACK, Statistics, Roots
+using Dierckx, TSVD, Statistics, Roots
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
 export Realise, HPPC, fh!
@@ -15,7 +15,6 @@ include("Functions/Transfer/Phi_se.jl")
 include("Methods/DRA.jl")
 include("Functions/Sim_Model.jl")
 
-
 const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
 
 
@@ -24,7 +23,7 @@ function Realise(Cell, SList::Array, T::Float64)
     A = B = C = D = tuple()
     for i in SList
         #Arrhenius
-        Cell.Const.T = 298.15+T
+        Cell.Const.T = T
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
 
         #Set Cell Constants
@@ -61,16 +60,16 @@ function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B:
     return Sim_Model(Cell,Iapp,Tk,SList,SOC,A,B,C,D,t)
 end
 
-#---------- Hankel Formation -----------------#
+#---------- Hankel Formation & SVD -----------------#
 function fh!(H,Hlen1,Hlen2,puls,M)
     Puls_L = size(puls,1)
-    @inbounds for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+    for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
             H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end
 
-    U,S,V = tsvd(H, k=M)
+    U,S,V = tsvd(H, M)
 
-    @inbounds for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+    for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+2]
     end
     return U,S,V

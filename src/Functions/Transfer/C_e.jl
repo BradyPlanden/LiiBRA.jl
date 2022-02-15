@@ -53,7 +53,6 @@ Rtot_pos = R*Cell.Const.T/(j0_pos*F^2) + Cell.Pos.RFilm
 ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(βn)/(tanh(βn)-βn))))
 ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
 
-
 R_ce = find_zeros(x->flambda(Cell,x),0.0,Cell.Const.CeRootRange)
 if size(R_ce,1) >= Cell.Const.Ce_M+1
     λ = R_ce[2:Cell.Const.Ce_M+1]
