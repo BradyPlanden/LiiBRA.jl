@@ -61,8 +61,7 @@ function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B:
 end
 
 #---------- Hankel Formation & SVD -----------------#
-function fh!(H,Hlen1,Hlen2,puls,M)
-    Puls_L = size(puls,1)
+function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
     for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
             H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end

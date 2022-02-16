@@ -55,7 +55,7 @@
     #Pre-Allocation for Hankel & SVD
     Puls_L = size(puls,1)
     Hank = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
-    U,S,V = fh!(Hank,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M)
+    U,S,V = fh!(Hank,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
     S_ = sqrt(diagm(S[1:Cell.RA.M]))
