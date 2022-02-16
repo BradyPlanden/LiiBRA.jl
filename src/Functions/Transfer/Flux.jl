@@ -21,9 +21,6 @@ as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 #Defining SOC
 θ = Cell.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0 
 
-#Beta's
-β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
-
 #Prepare for j0
 ce0 = Cell.Const.ce0
 cs_max = Electrode.cs_max
@@ -45,7 +42,7 @@ Rtot = R*Cell.Const.T /(j0*F^2) + Electrode.RFilm
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/cs_max
 
 #Condensing Variable
-ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β))))
+ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(Electrode.β)/(tanh(Electrode.β)-Electrode.β))))
 ν_∞ = @. Electrode.L*sqrt(as*((1/κ_eff)+(1/σ_eff))/(Rtot))
 
 #Transfer Function

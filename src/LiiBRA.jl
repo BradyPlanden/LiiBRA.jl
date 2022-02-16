@@ -32,6 +32,8 @@ function Realise(Cell, SList::Array, T::Float64)
         Cell.RA.Nfft = Cell.RA.Nfft!(Cell.RA.Fs, Cell.RA.Tlen)
         Cell.RA.f = Cell.RA.f!(Cell.RA.Nfft)
         Cell.RA.s = Cell.RA.s!(Cell.RA.Fs,Cell.RA.Nfft,Cell.RA.f)
+        Cell.Neg.β = Cell.Neg.β!(Cell.RA.s)
+        Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
 
         #Realisation
         Aϕ, Bϕ, Cϕ, Dϕ = DRA(Cell,Cell.RA.s,Cell.RA.f)

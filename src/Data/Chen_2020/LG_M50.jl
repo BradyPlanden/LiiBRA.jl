@@ -60,6 +60,8 @@ end
     D1::Float64 = 1.   # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug # Effective Diffusivity
     as::Float64 = 3.0*ϵ_s/Rs # Specific Interfacial Surf. Area
+    β::Array{ComplexF64} = [0 - 0.0im] # Init Value
+    β!::Function = (s) -> @. Rs*sqrt(s/Ds) # Negative β
 end
 
 @with_kw mutable struct Positive
@@ -84,6 +86,8 @@ end
     D3::Float64 = 1   # Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
     as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
+    β::Array{ComplexF64} = [0 - 0.0im] # Init Value
+    β!::Function = (s) -> @. Rs*sqrt(s/Ds) # Positive β
 end
 
 @with_kw mutable struct Seperator

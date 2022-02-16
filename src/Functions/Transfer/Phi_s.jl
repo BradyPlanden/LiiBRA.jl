@@ -21,9 +21,6 @@ comb_cond_eff = κ_eff+σ_eff #combining into single variable
 #Defining SOC
 θ = Cell.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
 
-#Beta's
-β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
-
 #Prepare for j0
 cs0 = Electrode.cs_max * θ
 
@@ -41,7 +38,7 @@ Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
 #∂Uocp_Def
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
-ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
+ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(Electrode.β)/(tanh(Electrode.β)-Electrode.β)))) #Condensing Variable - eq. 4.13
 ν_∞ = @. Electrode.L*sqrt((as/κ_eff+as/σ_eff)/(Rtot))
 
 ϕ_tf .= @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh((z-1)*ν)))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19

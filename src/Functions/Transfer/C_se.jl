@@ -19,9 +19,6 @@ end
 #Defining SOC
 θ = Cell.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0 
 
-#Beta's
-β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
-
 #Prepare for j0
 cs0 = Electrode.cs_max * θ
 
@@ -40,9 +37,9 @@ Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
 res0 .= -3/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Rs)*ones(length(z)) #Residual Variable for Pole Removal - eq. 4.45
-ν = @. Electrode.L*sqrt((Electrode.as/σ_eff+Electrode.as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
+ν = @. Electrode.L*sqrt((Electrode.as/σ_eff+Electrode.as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(Electrode.β)/(tanh(Electrode.β)-Electrode.β)))) #Condensing Variable - eq. 4.13
 
-cse_tf .= @. ν*Electrode.Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))*tanh(β)/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Ds*(κ_eff+σ_eff)*sinh(ν)*(tanh(β)-β))-res0/s #Transfer Function - eq. 4.17
+cse_tf .= @. ν*Electrode.Rs*(σ_eff*cosh(ν*z)+κ_eff*cosh(ν*(z-1)))*tanh(Electrode.β)/(Electrode.as*F*Electrode.L*Cell.Const.CC_A*Electrode.Ds*(κ_eff+σ_eff)*sinh(ν)*(tanh(Electrode.β)-Electrode.β))-res0/s #Transfer Function - eq. 4.17
 #cse_tf .= @. cse_tf-res0t/s  #Pole removal - eq. 4.43
 zero_tf = @. (5*Electrode.as*Electrode.Ds*F*Electrode.L^2*(κ_eff*(2-6*z+3*z^2)+(3*z^2-1)*σ_eff)-6*∂Uocp_elc*Electrode.Rs*κ_eff*σ_eff)/(30*Cell.Const.CC_A*Electrode.as*Electrode.Ds*∂Uocp_elc*F*Electrode.L*κ_eff*σ_eff) #For s = 0 / Wolfram Alpha
 cse_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]

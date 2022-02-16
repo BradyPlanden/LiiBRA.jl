@@ -18,10 +18,6 @@ CC_A = Cell.Const.CC_A   # Current-collector area [m^2]
 θ_neg = Cell.Const.SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0 
 θ_pos = Cell.Const.SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0 
 
-#Beta's
-βn = @. Cell.Neg.Rs*sqrt(s/Cell.Neg.Ds)
-βp = @. Cell.Pos.Rs*sqrt(s/Cell.Pos.Ds)
-
 #Prepare for j0
 ce0 = Cell.Const.ce0
 cs_max_neg = Cell.Neg.cs_max
@@ -50,8 +46,9 @@ Rtot_pos = R*Cell.Const.T/(j0_pos*F^2) + Cell.Pos.RFilm
 ∂Uocp_neg = Cell.Const.∂Uocp("Neg",θ_neg)/cs_max_neg
 
 #Condensing Variable
-ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(βn)/(tanh(βn)-βn))))
-ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
+ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(Cell.Neg.β)/(tanh(Cell.Neg.β)-Cell.Neg.β))))
+ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(Cell.Pos.β)/(tanh(Cell.Pos.β)-Cell.Pos.β))))
+
 
 R_ce = find_zeros(x->flambda(Cell,x),0.0,Cell.Const.CeRootRange)
 if size(R_ce,1) >= Cell.Const.Ce_M+1

@@ -1,7 +1,7 @@
 using LiiBRA, Plots
 
 #---------- Cell Definition -----------------#
-Cell = Construct("LG_M50") #Alternative "Doyle_94"
+Cell = Construct("LG M50") #Alternative "Doyle_94"
 SList = collect(0.85:-0.05:0.65)
 SOC = 0.75
 
