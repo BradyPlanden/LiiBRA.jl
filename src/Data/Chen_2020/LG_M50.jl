@@ -1,16 +1,15 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    CellTyp::String = "Doyle_94"
-    T::Float64 = 298.15 # Cell Temperature
-    T_ref::Float64 = 298.15 # Reference Temperature
+    CellTyp::String = "LG M50" #"Doyle_94"
+    T::Float64 = 298.15 # Cell Temperature (K)
+    T_ref::Float64 = 298.15 # Reference Temperature (K)
     t_plus::Float64 = 0.2594 # Inital Transference Number
     tpf::Function = ce -> -0.1287*(ce/1000)^3+0.4106*(ce/1000)^2-0.4717*(ce/1000)+0.4492 # Transference Number Function - Requires ce in dm-3
-    De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity
+    De::Float64 = 1.769e-10   # Inital Electrolyte Diffusivity (J mol⁻¹)
     Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
     SOC::Float64 = 0.8 # Initial State of Charge
-    ce0::Float64 = 1000 # Initial Electrolyte Concentration
-    #dln::Float64 = 3.
+    ce0::Float64 = 1000 # Initial Electrolyte Concentration (mol m⁻³)
     Ea_κ::Float64 = 0.
     Ea_De::Float64 = 0
     CC_A::Float64 =  0.1027  #Electrode Plate Area 
@@ -54,9 +53,9 @@ end
     θ_0::Float64 = 0.0263473 #0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 1E-5 #6.48e-6 #7.226781E-06 #6.8973799e-13 #4.1580e-8 #2.12e-10 #Initial Reaction Rate
+    k_norm::Float64 = 6.716047e-12 #6.48e-7 #2.12e-10#1E-5 #7.226781e-7 # Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
-    RFilm::Float64 = 0 # Film Resistance
+    RFilm::Float64 = 0 # Film Resistance - Ωm²
     D1::Float64 = 1.   # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug # Effective Diffusivity
     as::Float64 = 3.0*ϵ_s/Rs # Specific Interfacial Surf. Area
@@ -80,9 +79,9 @@ end
     θ_0::Float64 = 0.853974 #0.9084   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 4E-05 #9E-05 #3.640283886203905e-12 #3.5954e-7 #3.42e-6 #1.12e-9  #Initial Reaction Rate
+    k_norm::Float64 = 3.54458e-11 #3.42e-6 #1.12e-9#4E-05 #7.264272e-6 # Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
-    RFilm::Float64 = 0 # Film Resistance
+    RFilm::Float64 = 0 # Film Resistance - Ωm²
     D3::Float64 = 1   # Init Value
     D3f::Function = De -> De * ϵ_e^De_brug
     as::Float64 = 3.0*ϵ_s/Rs # Specific interfacial surf. area
@@ -117,14 +116,16 @@ end
 end
 
 @with_kw mutable struct TransferFun
+    #Electrolyte - Solid
+
     #6 - 4
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
     
     #4 - 4
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.0, 8.52e-5,9.72e-5,0.0001728], Float64[8.52e-5,9.72e-5,0.0001728], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
 
     #8 - 4
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.72e-5,0.0001224,1.224e-4,1.476e-4,1.728e-4], Float64[2.84e-5,5.68e-5,8.52e-5,9.72e-5,0.0001224,1.224e-4,1.476e-4,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
+    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.72e-5,1.224e-4,1.476e-4,1.728e-4], Float64[2.84e-5,5.68e-5,8.52e-5,9.72e-5,1.224e-4,1.476e-4,1.728e-4], Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1],Float64[1],Float64[0,0.333,0.666,1],Float64[0,0.333,0.666,1]]]
     
     # 9 - 6
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
@@ -136,7 +137,7 @@ end
     ##tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
 
     # 6 - 2
-    #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,1], Float64[1],Float64[0,1],Float64[0,1],Float64[0,1],Float64[1],Float64[0,1],Float64[0,1]]]
+    #tfs =    [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
 
     # 6 - 6
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]

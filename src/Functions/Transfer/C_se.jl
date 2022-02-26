@@ -27,11 +27,12 @@ if Cell.Const.CellTyp == "Doyle_94"
     κ = Electrode.k_norm/Electrode.cs_max/Cell.Const.ce0^(1-Electrode.α)
     j0 = κ*(Cell.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
 else
-    j0 = Electrode.k_norm*(Cell.Const.ce0*(cs0/Electrode.cs_max*(1-cs0/Electrode.cs_max)))^(1-Electrode.α)
+    j0 = Electrode.k_norm*(Cell.Const.ce0*cs0*(Electrode.cs_max-cs0))^(1-Electrode.α)
 end
 
 #Resistances
 Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
+#Rtot = R*Cell.Const.T/(j0*Cell.Const.CC_A*F) + Electrode.RFilm
 
 #∂Uocp_Def
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max

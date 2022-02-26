@@ -15,7 +15,7 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
     #Selecting SS Models
     for i in 1:length(SList)
-        if SOC == SList[i]     
+        if SOC == SList[i] # Fix this, round?
             A = A0[i]
             B = B0[i]
             C = C0[i]
@@ -23,7 +23,6 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         end
     end
 
-    Cell.Const.SOC = SOC
     #Capturing Indices
     tfstr = Array{String}(undef,0,1)
     for i in 1:size(Cell.Transfer.tfs[:,1],1)
@@ -91,8 +90,8 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
 
     #Defining SOC
-    SOC_Neg = Cell.Const.SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0
-    SOC_Pos = Cell.Const.SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
+    SOC_Neg = SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0
+    SOC_Pos = SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
     θ_neg[1] = SOC_Neg
     θ_pos[1] = SOC_Pos
     Cell_SOC[1] = (SOC_Neg-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
@@ -113,19 +112,22 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Reaction Rates
         if Cell.Const.CellTyp == "Doyle_94"
-            k_neg = Cell.Neg.k_norm/Cell.Neg.cs_max/Cell.Const.ce0^(1-Cell.Neg.α)
-            k_pos = Cell.Pos.k_norm/Cell.Pos.cs_max/Cell.Const.ce0^(1-Cell.Pos.α)
+            k_neg = Cell.Neg.k_norm#/Cell.Neg.cs_max/Cell.Const.ce0^(1-Cell.Neg.α)
+            k_pos = Cell.Pos.k_norm#/Cell.Pos.cs_max/Cell.Const.ce0^(1-Cell.Pos.α)
             jeq_neg[i+1] = k_neg*sqrt(cs_neg_avg*Cell.Const.ce0*(Cell.Neg.cs_max-cs_neg_avg))
             jeq_pos[i+1] = k_pos*sqrt(cs_pos_avg*Cell.Const.ce0*(Cell.Pos.cs_max-cs_pos_avg))
         else
-            jeq_neg = Cell.Neg.k_norm*Cell.Neg.cs_max*(Cell.Const.ce0*(cs_neg_avg/Cell.Neg.cs_max*(1-cs_neg_avg/Cell.Neg.cs_max)))^(1-Cell.Neg.α)
-            jeq_pos = Cell.Pos.k_norm*Cell.Pos.cs_max*(Cell.Const.ce0*(cs_pos_avg/Cell.Pos.cs_max*(1-cs_pos_avg/Cell.Pos.cs_max)))^(1-Cell.Pos.α)
+            #jeq_neg = Cell.Neg.k_norm*Cell.Neg.cs_max*(Cell.Const.ce0*(cs_neg_avg/Cell.Neg.cs_max*(1-cs_neg_avg/Cell.Neg.cs_max)))^(1-Cell.Neg.α)
+            #jeq_pos = Cell.Pos.k_norm*Cell.Pos.cs_max*(Cell.Const.ce0*(cs_pos_avg/Cell.Pos.cs_max*(1-cs_pos_avg/Cell.Pos.cs_max)))^(1-Cell.Pos.α)
+            k_neg = Cell.Neg.k_norm
+            k_pos = Cell.Pos.k_norm
+            jeq_neg[i+1] = Cell.Neg.k_norm*(Cell.Const.ce0*cs_neg_avg*(Cell.Neg.cs_max-cs_neg_avg))^(1-Cell.Neg.α)
+            jeq_pos[i+1] = Cell.Pos.k_norm*(Cell.Const.ce0*cs_pos_avg*(Cell.Pos.cs_max-cs_pos_avg))^(1-Cell.Pos.α)
         end
         
         θ_neg[i+1] = cs_neg_avg/Cell.Neg.cs_max
         θ_pos[i+1] = cs_pos_avg/Cell.Pos.cs_max
         Cell_SOC[i+1] = (θ_neg[i+1]-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
-
 
         javg_neg = Iapp[i+1]/(Cell.Neg.as*F*Cell.Neg.L*Cell.Const.CC_A)
         javg_pos = Iapp[i+1]/(Cell.Pos.as*F*Cell.Pos.L*Cell.Const.CC_A)
@@ -153,7 +155,7 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         ν_pos = @. Cell.Pos.L*sqrt((Cell.Pos.as*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos[i+1])
 
         #Relinearise dependent on ν, σ, κ
-        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+        #D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
 
         #Interpolate C & D Matrices
         C = interp(C0,SList,Cell_SOC[i+1])
@@ -181,14 +183,15 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         jL[i+1] = y[i+1,FluxPosInd[1]]
 
 
-        j0_CC_neg[i+1] = findmax([eps(); (k_neg*(Cell.Neg.cs_max-Cse_Neg[i+1,1])^(1-Cell.Neg.α))*((Cse_Neg[i+1,1]^Cell.Neg.α)*(Ce[i+1,1]^(1-Cell.Neg.α)))])[1]
+        #j0_CC_neg[i+1] = findmax([eps(); (k_neg*(Cell.Neg.cs_max-Cse_Neg[i+1,1])^(1-Cell.Neg.α))*((Cse_Neg[i+1,1]^Cell.Neg.α)*(Ce[i+1,1]^(1-Cell.Neg.α)))])[1]
         j0_neg = findmax([ones(size(Cse_Neg,2))*eps() (k_neg.*(Cse_Neg[i+1,:].^Cell.Neg.α).*(Ce[i+1,1].^(1-Cell.Neg.α))).*(Cell.Neg.cs_max.-Cse_Neg[i+1,:]).^(1-Cell.Neg.α)], dims=2)[1]
-        η0[i+1] = Tk[i+1]*2*R/F*asinh(j0[i+1]/(2*j0_CC_neg[i+1]))
+
+        η0[i+1] = Tk[i+1]*2*R/F*asinh(j0[i+1]/(2*j0_neg[1]))
         η_neg[i+1,:] = @. (Tk[i+1]*2*R)/F*asinh((jNeg[i+1,:])/(2*j0_neg))
 
-        j0_CC_pos[i+1] = findmax([eps(); (k_pos*(Cell.Pos.cs_max-Cse_Pos[i+1,1])^(1-Cell.Pos.α))*((Cse_Pos[i+1,1]^Cell.Pos.α)*(Ce[i+1,end]^(1-Cell.Pos.α)))])[1] 
+        #j0_CC_pos[i+1] = findmax([eps(); (k_pos*(Cell.Pos.cs_max-Cse_Pos[i+1,1])^(1-Cell.Pos.α))*((Cse_Pos[i+1,1]^Cell.Pos.α)*(Ce[i+1,end]^(1-Cell.Pos.α)))])[1] 
         j0_pos = findmax([ones(size(Cse_Pos,2))*eps() (k_pos.*(Cse_Pos[i+1,:].^Cell.Pos.α).*(Ce[i+1,1].^(1-Cell.Pos.α))).*(Cell.Pos.cs_max.-Cse_Pos[i+1,:]).^(1-Cell.Pos.α)], dims=2)[1]
-        ηL[i+1] = (Tk[i+1]*2*R)/F*asinh(jL[i+1]/(2*j0_CC_pos[i+1]))
+        ηL[i+1] = (Tk[i+1]*2*R)/F*asinh(jL[i+1]/(2*j0_pos[1]))
         η_pos[i+1,:] = @. (Tk[i+1]*2*R)/F*asinh(jPos[i+1,:]/(2*j0_pos))
     
 
@@ -206,6 +209,6 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         x[i+2,:] = A*x[i+1,:] + B*Iapp[i+1]
 
     end
-    
-return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL, y
+
+return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL
 end

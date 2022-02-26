@@ -50,7 +50,7 @@
 
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
-    puls .= puls./SFactor[:,ones(Int64,size(puls,2))]
+    puls .= puls./SFactor
 
     #Pre-Allocation for Hankel & SVD
     Puls_L = size(puls,1)
@@ -65,7 +65,7 @@
     A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
     A[2:end,2:end] .= (Observibility\Hank)/Control
 
-    #Error check
+    #Performance check
     if any(i -> i>1., real(eigvals(A)))
         println("Oscilating System: A has indices of values > 1")
     end
@@ -75,13 +75,16 @@
     end
     
     B = [Cell.RA.SamplingT; Control[:,1:Cell.RA.N]]
-    C = [C_Aug SFactor[:,ones(Int64,Cell.RA.M)].*Observibility[1:size(puls,1),:]]
+    C = [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
 
     #  Final State-Space Form
-    d, S = eigen(A)
-    A .= Diagonal(d)
-    C .= (C*S).*(S\B)'
-    B .= ones(size(B))
-        
-return real(A), real(B), real(C), D
+    #d, Sᵘ = eigen(A,sortby=nothing)
+    #d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values
+    #S = mag!(S)
+    #A = Diagonal(d)
+    #C = C*Sᵘ.*(inv(Sᵘ)*B)'
+    #B = ones(size(B))
+
+return mag!(A), mag!(B), mag!(C), D   
+ 
 end

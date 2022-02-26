@@ -1,10 +1,10 @@
 module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
-using Dierckx, TSVD, Statistics, Roots
+using Dierckx, TSVD, Roots, Statistics, Infiltrator
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC, fh!
+export Realise, HPPC, fh!, mag!
 
 include("Functions/Transfer/C_e.jl")
 include("Functions/Transfer/C_se.jl")
@@ -199,6 +199,30 @@ function interp(MTup::Tuple,SList::Array,SOC)
         end
     end
     return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])
+end
+
+function mag!(γ::AbstractArray)
+    ψ = Array{Float64}(undef,size(γ))
+    for j in 1:size(γ,2), i in 1:size(γ,1)
+        if real(γ[i,j]) < 0
+            ψ[i,j] = -abs(γ[i,j])
+        else
+            ψ[i,j] = abs(γ[i,j])
+        end
+    end
+    return ψ
+end
+
+function mag!(γ::AbstractVector)
+    ψ = Vector{Float64}(undef,length(γ))
+    for i in 1:length(γ)
+        if real(γ[i]) < 0
+            ψ[i] = -abs(γ[i])
+        else
+            ψ[i] = abs(γ[i])
+        end
+    end
+    return ψ
 end
 
 end # module
