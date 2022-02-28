@@ -3,13 +3,13 @@ using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots  # run PROPACK, tsvd (remove
 #include("/Users/bradyplanden/Documents/Git/LIBRA_Paper/Data/Experimental/HPPC/HPPCStepCalc.jl")
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 10
 Cell = Construct("LG M50")
-SList = collect(0.8:-0.05:0.7)
+SList = collect(0.9:-0.05:0.55)
 SOC = 0.75
 T = 298.15
 
 function DRA_Loop(Cell, SList::Array, T::Float64)
     A = B = C = D = Time = x = tuple()
-    for i in 1500:500:1500
+    for i in 1500:3000:4500
         
         #Arrhenius
         Cell.Const.T = T
@@ -18,9 +18,9 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         Cell.RA.H1 = 0:i
         Cell.RA.H2 = 0:i
         Cell.RA.Tlen = 16200
-        Cell.RA.Fs = 6.0
-        Cell.RA.M = 4
-        Cell.RA.SamplingT = 1/4
+        Cell.RA.Fs = 20
+        Cell.RA.M = 9
+        Cell.RA.SamplingT = 1/10
         
         #Set Cell Constants
         Cell.Const.κ = Cell.Const.κf(Cell.Const.ce0)*exp(Cell.Const.Ea_κ*Arr_Factor)
@@ -47,19 +47,18 @@ end
 
 #---------- Experimental Data -----------------#
 
-function Sim_loop(Cell, SList, SOC, A, B, C, D)
+function Sim_loop(Cell, Input, SList, SOC, A, B, C, D)
     CellV = tDra = Ce = jNeg = jPos = RtotNeg = RtotPos = η0 = ηL = η_neg = η_pos = ϕ_ẽ1 = ϕ_ẽ2 = Uocp_Neg = Uocp_Pos = ϕ_e = Cse_Neg = Cse_Pos = tuple()
        for i in Int64(1/Cell.RA.SamplingT):Int64(1/Cell.RA.SamplingT):Int64(1/Cell.RA.SamplingT)
-           Iapp = [ones(1)*0.; ones(10*i)*4.8181; ones(40*i)*0.; ones(10*i)*-3.613; ones(40*i+1)*0.] #1C HPPC Experiment Current Profile
-           Tk = ones(length(Iapp))*298.15 #Cell Temperature
-           time_ = 0:(1.0/i):(length(Iapp)*(1/i))
+           Tk = ones(length(Input))*298.15 #Cell Temperature
+           time_ = 0:(1.0/i):(length(Input)*(1/i))
            tDra = flatten_(tDra,time_)
         
            u = 1
            k = 0
            for i in 1:Int64(tuple_len(C)/length(SList))
                 k += length(SList)
-                Cell_V, Ce_, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg_, Uocp_Pos_, ϕ_e, Cse_Neg_, Cse_Pos_, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL = Sim_Model(Cell,Iapp,Tk,SList,SOC,A[u:k],B[u:k],C[u:k],D[u:k],tDra)
+                Cell_V, Ce_, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg_, Uocp_Pos_, ϕ_e, Cse_Neg_, Cse_Pos_, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL = Sim_Model(Cell,Input,"Power",Tk,SList,SOC,A[u:k],B[u:k],C[u:k],D[u:k],tDra)
                 u = k+1
 
                 CellV = flatten_(CellV,Cell_V)
@@ -90,13 +89,16 @@ function Sim_loop(Cell, SList, SOC, A, B, C, D)
    
    Time, A, B, C, D = DRA_Loop(Cell, SList, T)
    HPPC_Data = HPPC_Data_Import(10,data_all) 
-   CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra = Sim_loop(Cell, SList, SOC, A, B, C, D)
+   WLTP_File = matopen("/Users/bradyplanden/Documents/Git/LiiBRA.jl/test/WLTP_M50_M3.mat")
+   WLTP_P = read(WLTP_File,"WLTP_M50_M3")
+   #Iapp = [ones(1)*0.; ones(10*i)*4.8181; ones(40*i)*0.; ones(10*i)*-3.613; ones(40*i+1)*0.] #1C HPPC Experiment Current Profile
+   CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra = Sim_loop(Cell, WLTP_P, SList, SOC, A, B, C, D)
    
-   file = matopen("/Users/bradyplanden/Documents/Git/LIBRA_Paper/Data/PyBaMM/sol_data.mat")
-   Pyb_Cn = read(file,"c_n")
-   Pyb_Cp = read(file,"c_p")
-   Pyb_T = read(file,"t")
-   Pyb_V = read(file,"V")
+   Pyb_File = matopen("/Users/bradyplanden/Documents/Git/LIBRA_Paper/Data/PyBaMM/sol_data.mat")
+   Pyb_Cn = read(Pyb_File,"c_n")
+   Pyb_Cp = read(Pyb_File,"c_p")
+   Pyb_T = read(Pyb_File,"t")
+   Pyb_V = read(Pyb_File,"V")
    Rms_Cn = Array{Float64}(undef,tuple_len(CellV),1)
    Max_Cn = Array{Float64}(undef,tuple_len(CellV),1)
    Rms_Cp = Array{Float64}(undef,tuple_len(CellV),1)

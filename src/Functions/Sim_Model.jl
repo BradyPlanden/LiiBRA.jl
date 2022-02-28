@@ -1,12 +1,12 @@
-function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
+function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     """ 
     Function to simulate generated reduced-order models.
 
-    Sim_Model(Cell,Iapp,Tk,SOC,A,B,C,D)
+    Sim_Model(Cell,Input,Def,Tk,SOC,A,B,C,D)
     
     """
     #Determine time span and allocate arrays
-    tlength = size(Iapp,1)
+    tlength = size(Input,1)
 
     A = Array{Float64}(undef,size(A0[1]))
     B = Array{Float64}(undef,size(B0[1]))
@@ -87,6 +87,7 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     Cell_V = Array{Float64}(undef,tlength,1) .= 0.
     ϕ_e = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
     Cell_SOC = Array{Float64}(undef,tlength,1) .= 0
+    Iapp = Array{Float64}(undef,tlength+1,1) .= 0
 
 
     #Defining SOC
@@ -95,6 +96,7 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     θ_neg[1] = SOC_Neg
     θ_pos[1] = SOC_Pos
     Cell_SOC[1] = (SOC_Neg-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
+    Iapp[1] = 0
 
     #Loop through time
     #Compute dependent variables (voltage, flux, etc.)
@@ -207,6 +209,14 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Update States
         x[i+2,:] = A*x[i+1,:] + B*Iapp[i+1]
+
+        #@infiltrate cond=true
+
+        if Def =="Power"
+            Iapp[i+2] = Input[i+1,2]/Cell_V[i+1]
+        else
+            Iapp[i+2] = Input[i+1,2]
+        end
 
     end
 
