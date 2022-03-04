@@ -48,7 +48,7 @@ D .= zeros(length(z))
 
 if Def == "Pos"
     cse_tf .= -cse_tf
-    res0 = -res0
+    res0 .= -res0
 end
 
 if abs.(cse_tf[:,1]) > abs.(cse_tf[:,2])*10

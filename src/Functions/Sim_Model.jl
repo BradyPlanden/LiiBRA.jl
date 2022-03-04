@@ -1,4 +1,4 @@
-function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
+function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
     """ 
     Function to simulate generated reduced-order models.
 
@@ -54,8 +54,8 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     CeSepInd = findall(CeSep.-CeNegOffset .== 1)
     CePosInd = findall(CePos.-CeSepOffset .== 1)
 
-    csegain_neg = C[CseNegInd[1][1],end]
-    csegain_pos = C[CsePosInd[1][1],end]
+    csegain_neg = C[CseNegInd[1][1],1] #First Column in C Array (zeros column)
+    csegain_pos = C[CsePosInd[1][1],1] #First Column in C Array (zeros column)
 
     #Memory Allocation
     θ_neg = Array{Float64}(undef,tlength,1) .= 0.
@@ -96,13 +96,12 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     θ_neg[1] = SOC_Neg
     θ_pos[1] = SOC_Pos
     Cell_SOC[1] = (SOC_Neg-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
-    Iapp[1] = 0
 
     #Loop through time
     #Compute dependent variables (voltage, flux, etc.)
     for i in 0:(tlength-1)
-        cs_neg_avg = x[i+1,end] * csegain_neg + SOC_Neg * Cell.Neg.cs_max < 0. ? 0. : x[i+1,end] * csegain_neg + SOC_Neg * Cell.Neg.cs_max #Zero if < 0
-        cs_pos_avg = x[i+1,end] * csegain_pos + SOC_Pos * Cell.Pos.cs_max < 0. ? 0. : x[i+1,end] * csegain_pos + SOC_Pos * Cell.Pos.cs_max #Zero if < 0
+        cs_neg_avg = x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max < 0. ? 0. : x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max #Zero if < 0
+        cs_pos_avg = x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max < 0. ? 0. : x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max #Zero if < 0
 
         if cs_neg_avg > Cell.Neg.cs_max
             cs_neg_avg = Cell.Neg.cs_max
@@ -158,7 +157,7 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Relinearise dependent on ν, σ, κ
         #D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
-
+        
         #Interpolate C & D Matrices
         C = interp(C0,SList,Cell_SOC[i+1])
         D = interp(D0,SList,Cell_SOC[i+1])
@@ -206,19 +205,18 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Interpolate A Matrix
         A = interp(A0,SList,Cell_SOC[i+1])
+        B = interp(B0,SList,Cell_SOC[i+1])
 
         #Update States
         x[i+2,:] = A*x[i+1,:] + B*Iapp[i+1]
 
-        #@infiltrate cond=true
-
         if Def =="Power"
-            Iapp[i+2] = Input[i+1,2]/Cell_V[i+1]
+            Iapp[i+2] = Input[i+1,1]/Cell_V[i+1]
         else
-            Iapp[i+2] = Input[i+1,2]
+            Iapp[i+2] = Input[i+1,1]
         end
 
     end
 
-return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL
+return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL
 end

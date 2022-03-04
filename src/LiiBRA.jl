@@ -68,7 +68,8 @@ function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
             H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end
 
-    U,S,V = tsvd(H, M)
+    Init = abs.(convert(Vector{float(eltype(H))}, randn(size(H,1))))
+    U,S,V = tsvd(H, M; initvec=Init)
 
     for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+2]
@@ -192,7 +193,7 @@ tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
 function interp(MTup::Tuple,SList::Array,SOC)
     T1 = 0
     T2 = 0
-    for i in 1:length(SList)
+    for i in 1:length(SList)-1
         if SList[i] > SOC >= SList[i+1]
             T2 = i
             T1 = i+1
