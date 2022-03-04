@@ -107,8 +107,8 @@ end
     H1::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 1
     H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
-    Nfft::Float64 = 0
-    f::Array{Float64,1} = [0]
+    Nfft::Int64 = 0
+    f::UnitRange{Int64} = 0:0
     s::Array{ComplexF64} = [0 - 0.0im]
     Nfft!::Function = (Fs,Tlen) -> ceil(2^(log2(Fs*Tlen))) #2^(ceil(log2(Fs*Tlen))) Old way (constains to 2^ values)
     f!::Function = (Nfft) -> 0:Nfft-1
@@ -131,7 +131,9 @@ end
     #tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0,2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[2.84e-5,5.68e-5,8.52e-5,9.12e-5,9.72e-5,0.0001224,0.0001476,0.0001728], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
 
     # 4 - 2
-    tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]]
+    tfs::Vector{Function} = [C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se]
+    Elec::Vector{String} = ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] 
+    Locs::Vector{Vector{Float64}} = [Float64[0, 8.52E-05, 9.72E-05, 1.728E-04], Float64[8.52E-05, 9.72E-05, 1.728E-04], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1], Float64[0,1], Float64[1], Float64[0,1], Float64[0,1]]
 
     # 4 - 6
     ##tfs =   [[C_e, Phi_e, C_se, Phi_s, Phi_se, Flux, C_se, Phi_s, Flux, Phi_se] ["Na", "Na", "Pos", "Pos", "Pos", "Pos", "Neg", "Neg", "Neg", "Neg"] [Float64[0.00,4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[4.26e-5,8.52e-5,9.72e-5,1.35e-04,1.728e-4], Float64[0,0.2,0.4,0.6,0.8,1], Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[1],Float64[0,0.2,0.4,0.6,0.8,1],Float64[0,0.2,0.4,0.6,0.8,1]]]
@@ -159,6 +161,6 @@ Cell.Const.Lnegsep, Cell.Const.Ltot = Cell.Neg.L+Cell.Sep.L,Cell.Neg.L+Cell.Sep.
 Cell.Const.D1 = Cell.Const.De*Cell.Neg.ϵ_e^Cell.Neg.De_brug
 Cell.Const.D2 = Cell.Const.De*Cell.Sep.ϵ_e^Cell.Sep.De_brug
 Cell.Const.D3 = Cell.Const.De*Cell.Pos.ϵ_e^Cell.Pos.De_brug
-Cell.Const.Ce_M = size(Cell.Transfer.tfs[1,3],1)
-Cell.RA.Outs = sum([size(Cell.Transfer.tfs[i,3],1) for i in 1:size(Cell.Transfer.tfs[:,1],1)])
+Cell.Const.Ce_M = size(Cell.Transfer.Locs[1],1)
+Cell.RA.Outs = sum([size(Cell.Transfer.Locs[i],1) for i in 1:length(Cell.Transfer.tfs)])
 

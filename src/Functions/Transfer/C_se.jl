@@ -54,5 +54,5 @@ end
 if abs.(cse_tf[:,1]) > abs.(cse_tf[:,2])*10
     cse_tf[:,1] = cse_tf[:,2]*10
 end
-#res0 .= res0t#*ones(length(z))
+
 end

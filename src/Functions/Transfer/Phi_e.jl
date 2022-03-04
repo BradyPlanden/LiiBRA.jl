@@ -75,6 +75,5 @@ i=Int64(1)
             end
       i+=1
  end
-
 res0 .= zeros(length(z))
 end

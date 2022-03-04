@@ -7,45 +7,51 @@
     """
 
     #Additional Pulse Setup
-    tfft = @. (1/Cell.RA.Fs)*f
-    OrgT = @. Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
+    tfft = (1/Cell.RA.Fs)*f
+    OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
 
 
     #Initialise Loop Variables
-    puls = Array{Float64}(undef,Cell.RA.Outs,size(OrgT,1)-1)
+    A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
+    B = Vector{Float64}(undef,Cell.RA.M+1)
+    C = Matrix{Float64}(undef,Cell.RA.Outs,Cell.RA.M+1)
     D = Vector{Float64}(undef,Cell.RA.Outs)
+    puls = Array{Float64}(undef,Cell.RA.Outs,size(OrgT,1)-1)
     C_Aug = Vector{Float64}(undef,Cell.RA.Outs)
-    i=Int64(1)
-    l=Int64(1)
-    u=Int64(0)
+    i=Int(1)
+    l=Int(1)
+    u=Int(0)
 
+    for run in Cell.Transfer.tfs
+        tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(s,2))
+        Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
+        res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
+        samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
 
-    for run in Cell.Transfer.tfs[:,1]
-        tf = Array{ComplexF64}(undef,size(Cell.Transfer.tfs[i,3],1),size(s,2))
-        Di = Vector{Float64}(undef,size(Cell.Transfer.tfs[i,3],1))
-        res0 = Vector{Float64}(undef,size(Cell.Transfer.tfs[i,3],1))
-        samplingtf = Array{Float64}(undef,size(Cell.Transfer.tfs[i,3],1),length(OrgT))
-
-        if Cell.Transfer.tfs[i,2] == "Pos"
-            run(Cell,s,Cell.Transfer.tfs[i,3],"Pos",tf,Di,res0) 
-        elseif Cell.Transfer.tfs[i,2] == "Neg"
-            run(Cell,s,Cell.Transfer.tfs[i,3],"Neg",tf,Di,res0) 
+        if Cell.Transfer.Elec[i] == "Pos"
+            run(Cell,s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
+        elseif Cell.Transfer.Elec[i] == "Neg"
+            run(Cell,s,Cell.Transfer.Locs[i],"Neg",tf,Di,res0) 
         else 
-            run(Cell,s,Cell.Transfer.tfs[i,3],tf,Di,res0) 
+            run(Cell,s,Cell.Transfer.Locs[i],tf,Di,res0) 
         end
+        
         stpsum = (cumsum(Cell.RA.Fs*real(ifft(tf,2)), dims=2).*(1/Cell.RA.Fs)) #cumulative sum of tf response * sample time
 
         #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
         for k in 1:size(stpsum,1)
-            spl1 = Spline1D(tfft,stpsum[k,:]; k=3)
-            samplingtf[k,:] .= evaluate(spl1,OrgT)
+            #spl1 = Spline1D(tfft,stpsum[k,:]; k=3)
+            #samplingtf[k,:] .= evaluate(spl1,OrgT)
+            spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
+            samplingtf[k,:] .= spl1(OrgT)
         end
-        u += size(Cell.Transfer.tfs[i,3],1)
+        u += Int(size(Cell.Transfer.Locs[i],1))::Int
         puls[l:u,:] .= diff(samplingtf, dims=2)
         D[l:u,:] .= Di
         C_Aug[l:u,:] .= res0
-        l = u+1
-        i += 1
+        l = u+one(u)::Int
+        i += one(i)
+
     end
 
     #Scale Transfer Functions in Pulse Response
@@ -58,11 +64,12 @@
     U,S,V = fh!(Hank,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-    S_ = sqrt(diagm(S[1:Cell.RA.M]))
+    S_ = sqrt(Diagonal(S[1:Cell.RA.M]))
     Observibility = (@view U[:,1:Cell.RA.M])*S_
     Control = S_*(@view V[:,1:Cell.RA.M])'
-    
-    A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
+
+    #@infiltrate cond=true 
+
     A[2:end,2:end] .= (Observibility\Hank)/Control
 
     #Performance check
@@ -74,8 +81,8 @@
         println("Unstable System: A has indices of negative values")
     end
     
-    B = [Cell.RA.SamplingT; Control[:,1:Cell.RA.N]]
-    C = [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
+    B .= [Cell.RA.SamplingT; Control[:,Cell.RA.N]]
+    C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
 
     #  Final State-Space Form
     #d, Sᵘ = eigen(A,sortby=nothing)

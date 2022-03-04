@@ -25,10 +25,10 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
 
     #Capturing Indices
     tfstr = Array{String}(undef,0,1)
-    for i in 1:size(Cell.Transfer.tfs[:,1],1)
+    for i in 1:length(Cell.Transfer.tfs)
         t1 = t2 = Array{String}(undef,0,1)
-        for j in 1:size(Cell.Transfer.tfs[i,3],1)
-            t1 ="$(Cell.Transfer.tfs[i,1])_$(Cell.Transfer.tfs[i,2])"
+        for j in 1:length(Cell.Transfer.Locs[i])
+            t1 ="$(Cell.Transfer.tfs[i])_$(Cell.Transfer.Elec[i])"
             t2 = [t2; t1]
         end
         tfstr = [tfstr; t2]
@@ -45,11 +45,15 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
     FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
     FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
 
-    CeNeg = Cell.Transfer.tfs[1,3].<=Cell.Neg.L
-    CeNegOffset = Cell.Transfer.tfs[1,3].<Cell.Neg.L
-    CeSep = Cell.Transfer.tfs[1,3].<=Cell.Neg.L+Cell.Sep.L
-    CeSepOffset = Cell.Transfer.tfs[1,3].<Cell.Neg.L+Cell.Sep.L
-    CePos = Cell.Transfer.tfs[1,3].<=Cell.Const.Ltot
+
+    #@infiltrate cond = true
+
+
+    CeNeg = Cell.Transfer.Locs[1].<=Cell.Neg.L
+    CeNegOffset = Cell.Transfer.Locs[1].<Cell.Neg.L
+    CeSep = Cell.Transfer.Locs[1].<=Cell.Neg.L+Cell.Sep.L
+    CeSepOffset = Cell.Transfer.Locs[1].<Cell.Neg.L+Cell.Sep.L
+    CePos = Cell.Transfer.Locs[1].<=Cell.Const.Ltot
     CeNegInd = findall(CeNeg .== 1)
     CeSepInd = findall(CeSep.-CeNegOffset .== 1)
     CePosInd = findall(CePos.-CeSepOffset .== 1)

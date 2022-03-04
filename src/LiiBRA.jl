@@ -1,7 +1,7 @@
 module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
-using Dierckx, TSVD, Roots, Statistics, Infiltrator
+using Dierckx, TSVD, Roots, Statistics, Interpolations, Infiltrator
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
 export Realise, HPPC, fh!, mag!
