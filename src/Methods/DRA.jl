@@ -36,7 +36,7 @@
             run(Cell,s,Cell.Transfer.Locs[i],tf,Di,res0) 
         end
         
-        stpsum = (cumsum(Cell.RA.Fs*real(ifft(tf,2)), dims=2).*(1/Cell.RA.Fs)) #cumulative sum of tf response * sample time
+        stpsum = (cumsum(real(ifft(tf,2)), dims=2)) #cumulative sum of tf response * sample time
 
         #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
         for k in 1:size(stpsum,1)
