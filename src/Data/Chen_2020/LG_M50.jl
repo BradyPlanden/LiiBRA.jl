@@ -49,7 +49,7 @@ end
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 215    # Solid Phase Conductivity
     σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
-    θ_100::Float64 = 0.910612#0.9014 # Theta @ 100% Lithium Concentration
+    θ_100::Float64 = 0.910612 #0.9014 # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.0263473 #0.0279   # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
@@ -99,7 +99,7 @@ end
 end
 
 @with_kw mutable struct Realisation
-    Fs::Float64 = 6    # Sampling Frequency of Transfer Functions [Hz]
+    Fs::Float64 = 4    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
     M::Int64 = 6    # Model Order
     N::Int64 = 1    # Number of Inputs
@@ -108,7 +108,7 @@ end
     H2::Array{Int64,1} = 0:2000 #4000 #4612     # Hankel Dimensions 2
     Outs::Int64 = 1    # Number of Outputs (Rewritten)
     Nfft::Int64 = 0
-    f::UnitRange{Int64} = 0:0
+    f::UnitRange{Int64} = 0:1
     s::Array{ComplexF64} = [0 - 0.0im]
     Nfft!::Function = (Fs,Tlen) -> ceil(2^(log2(Fs*Tlen))) #2^(ceil(log2(Fs*Tlen))) Old way (constains to 2^ values)
     f!::Function = (Nfft) -> 0:Nfft-1

@@ -1,4 +1,4 @@
-@inline function DRA(Cell,s,f)
+@inline function DRA(Cell)
     """ 
     Function for Discrete Realisation Algorithm.
 
@@ -7,7 +7,7 @@
     """
 
     #Additional Pulse Setup
-    tfft = (1/Cell.RA.Fs)*f
+    tfft = (1/Cell.RA.Fs)*Cell.RA.f
     OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
 
 
@@ -23,30 +23,40 @@
     u=Int(0)
 
     for run in Cell.Transfer.tfs
-        tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(s,2))
+        tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(Cell.RA.s,2))
         Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
         res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
-        samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
-
+        #samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
+        
         if Cell.Transfer.Elec[i] == "Pos"
-            run(Cell,s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
         elseif Cell.Transfer.Elec[i] == "Neg"
-            run(Cell,s,Cell.Transfer.Locs[i],"Neg",tf,Di,res0) 
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Neg",tf,Di,res0) 
         else 
-            run(Cell,s,Cell.Transfer.Locs[i],tf,Di,res0) 
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],tf,Di,res0) 
         end
         
-        stpsum = (cumsum(real(ifft(tf,2)), dims=2)) #cumulative sum of tf response * sample time
+
+        # if isinteger(Cell.RA.Fs*Cell.RA.SamplingT)
+        #     f = one(Int)
+        #     λ = Int(Cell.RA.Fs*Cell.RA.SamplingT)
+        #     for i in 1:λ:size(tfft,2), j in 1:λ:size(tfft,1)
+        #         Org[j,f] = tf[j,i]
+        #         f+=1
+        #     end
+        # end
+
+        #stpsum = cumsum(real(ifft(tf,2)), dims=2) #cumulative sum of tf response * sample time
 
         #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
-        for k in 1:size(stpsum,1)
-            #spl1 = Spline1D(tfft,stpsum[k,:]; k=3)
-            #samplingtf[k,:] .= evaluate(spl1,OrgT)
-            spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
-            samplingtf[k,:] .= spl1(OrgT)
-        end
+        # for k in 1:size(stpsum,1)
+        #     spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
+        #     samplingtf[k,:] .= spl1(OrgT)
+        # end
         u += Int(size(Cell.Transfer.Locs[i],1))::Int
-        puls[l:u,:] .= diff(samplingtf, dims=2)
+        #puls[l:u,:] .= diff(stpsum, dims=2)
+        puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
+        #puls[l:u,:] .= diff(samplingtf, dims=2)
         D[l:u,:] .= Di
         C_Aug[l:u,:] .= res0
         l = u+one(u)::Int
@@ -60,23 +70,21 @@
 
     #Pre-Allocation for Hankel & SVD
     Puls_L = size(puls,1)
-    Hank = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
-    U,S,V = fh!(Hank,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
+    𝐇 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
+    U,S,V = fh!(𝐇,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-    S_ = sqrt(Diagonal(S[1:Cell.RA.M]))
-    Observibility = (@view U[:,1:Cell.RA.M])*S_
-    Control = S_*(@view V[:,1:Cell.RA.M])'
+    ʃ = sqrt(Diagonal(S[1:Cell.RA.M]))
+    Observibility = (@view U[:,1:Cell.RA.M])*ʃ
+    Control = ʃ*(@view V[:,1:Cell.RA.M])'
 
-    #@infiltrate cond=true 
-
-    A[2:end,2:end] .= (Observibility\Hank)/Control
+    A[2:end,2:end] .= (Observibility\𝐇)/Control
 
     #Performance check
     if any(i -> i>1., real(eigvals(A)))
         println("Oscilating System: A has indices of values > 1")
     end
-
+    
     if any(i -> i<0., real(eigvals(A)))
         println("Unstable System: A has indices of negative values")
     end

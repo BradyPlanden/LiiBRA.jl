@@ -1,7 +1,7 @@
 module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
-using Dierckx, TSVD, Roots, Statistics, Interpolations, Infiltrator
+using TSVD, Roots, Statistics, Interpolations, Infiltrator
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
 export Realise, HPPC, fh!, mag!
@@ -36,7 +36,7 @@ function Realise(Cell, SList::Array, T::Float64)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
 
         #Realisation
-        Aϕ, Bϕ, Cϕ, Dϕ = DRA(Cell,Cell.RA.s,Cell.RA.f)
+        Aϕ, Bϕ, Cϕ, Dϕ = DRA(Cell)
 
         #Flatten output into Tuples
         A = flatten_(A,Aϕ)
