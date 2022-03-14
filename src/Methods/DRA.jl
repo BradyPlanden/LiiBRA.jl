@@ -26,7 +26,6 @@
         tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(Cell.RA.s,2))
         Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
         res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
-        #samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
         
         if Cell.Transfer.Elec[i] == "Pos"
             run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
@@ -37,7 +36,7 @@
         end
         
 
-        # if isinteger(Cell.RA.Fs*Cell.RA.SamplingT)
+        # if Cell.RA.Fs==(1/Cell.RA.SamplingT)
         #     f = one(Int)
         #     λ = Int(Cell.RA.Fs*Cell.RA.SamplingT)
         #     for i in 1:λ:size(tfft,2), j in 1:λ:size(tfft,1)
@@ -46,16 +45,23 @@
         #     end
         # end
 
-        #stpsum = cumsum(real(ifft(tf,2)), dims=2) #cumulative sum of tf response * sample time
-
-        #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
-        # for k in 1:size(stpsum,1)
-        #     spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
-        #     samplingtf[k,:] .= spl1(OrgT)
-        # end
         u += Int(size(Cell.Transfer.Locs[i],1))::Int
+
+        if Cell.RA.Fs==(1/Cell.RA.SamplingT)
+            puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
+        else
+            stpsum = cumsum(real(ifft(tf,2)), dims=2) #cumulative sum of tf response * sample time
+            #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
+            for k in 1:size(stpsum,1)
+                spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
+                samplingtf[k,:] = spl1(OrgT)
+            end
+            puls[l:u,:] .= diff(samplingtf, dims=2)
+        end
+
+       
         #puls[l:u,:] .= diff(stpsum, dims=2)
-        puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
+        #puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
         #puls[l:u,:] .= diff(samplingtf, dims=2)
         D[l:u,:] .= Di
         C_Aug[l:u,:] .= res0
@@ -73,12 +79,24 @@
     𝐇 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
     U,S,V = fh!(𝐇,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
-    # Create Observibility and Control Matrices -> Create A, B, and C 
-    ʃ = sqrt(Diagonal(S[1:Cell.RA.M]))
-    Observibility = (@view U[:,1:Cell.RA.M])*ʃ
-    Control = ʃ*(@view V[:,1:Cell.RA.M])'
 
-    A[2:end,2:end] .= (Observibility\𝐇)/Control
+    # for i in 1:size(puls,1)
+    #     if U[i,1] < 0
+    #         U[i,:] .= -U[i,:]
+    #         V[:,i] .= -V[:,i]
+    #     end
+    # end  
+
+    # Create Observibility and Control Matrices -> Create A, B, and C 
+    ʃ = sqrt(Diagonal(S))
+    #Observibility = U*ʃ
+    #Control = ʃ*V'
+    
+    U .= U*ʃ
+    V .= ʃ*V
+
+    #A[2:end,2:end] .= (Observibility\𝐇)/Control
+    A[2:end,2:end] .= (U\𝐇)/V
 
     #Performance check
     if any(i -> i>1., real(eigvals(A)))
@@ -88,10 +106,15 @@
     if any(i -> i<0., real(eigvals(A)))
         println("Unstable System: A has indices of negative values")
     end
-    
-    B .= [Cell.RA.SamplingT; Control[:,Cell.RA.N]]
-    C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
 
+    #B .= [Cell.RA.SamplingT; Control[:,Cell.RA.N]]
+    #C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
+    B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
+    C .= [C_Aug SFactor.*U[1:Puls_L,:]]
+
+    #@infiltrate cond=true
+
+    
     #  Final State-Space Form
     #d, Sᵘ = eigen(A,sortby=nothing)
     #d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values

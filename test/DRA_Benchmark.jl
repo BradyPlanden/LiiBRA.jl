@@ -2,25 +2,25 @@ using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots, Infiltrator, Plots
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 20
 Cell = Construct("LG M50")
-#SList = collect(0.775:-0.025:0.7)
-#SList = collect(1:-0.25:0.0)
-SList = collect(0.8)
+#SList = collect(0.725:-0.025:0.625)
+SList = collect(1:-0.25:0.0)
+#SList = collect(0.8)
 SOC = 0.717
 T = 298.15
 
 function DRA_Loop(Cell, SList::Array, T::Float64)
     A = B = C = D = Time = x = tuple()
-    for i in 7500:500:7500
+    for i in 2500:500:2500
         
         #Arrhenius
         Cell.Const.T = T
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
         
-        Cell.RA.H1 = 0:i
-        Cell.RA.H2 = 0:i
+        Cell.RA.H1 = 1:i
+        Cell.RA.H2 = 1:i
         Cell.RA.Tlen = 16200
         Cell.RA.Fs = 4
-        Cell.RA.M = 5
+        Cell.RA.M = 6
         Cell.RA.SamplingT = 1/4
         
         #Set Cell Constants
@@ -31,16 +31,16 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         Cell.Neg.β = Cell.Neg.β!(Cell.RA.s)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
         
-        # for Cell.Const.SOC in SList
-        #     #Realisation
-        #     A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell)
-        #     A = flatten_(A,A_DRA)
-        #     B = flatten_(B,B_DRA)
-        #     C = flatten_(C,C_DRA)
-        #     D = flatten_(D,D_DRA)
-        # end
-        x = @benchmark DRA(Cell)
-        Time = flatten_(Time,x)
+        for Cell.Const.SOC in SList
+            #Realisation
+            A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell)
+            A = flatten_(A,A_DRA)
+            B = flatten_(B,B_DRA)
+            C = flatten_(C,C_DRA)
+            D = flatten_(D,D_DRA)
+        end
+        #x = @benchmark DRA(Cell)
+        #Time = flatten_(Time,x)
     
     end
     return Time, A, B, C, D

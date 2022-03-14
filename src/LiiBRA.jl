@@ -65,16 +65,18 @@ end
 #---------- Hankel Formation & SVD -----------------#
 function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
     for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
-            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
+            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]]
     end
 
-    Init = abs.(convert(Vector{float(eltype(H))}, randn(size(H,1))))
-    U,S,V = tsvd(H, M; initvec=Init)
+    #Init = abs.(convert(Vector{float(eltype(H))}, randn(size(H,1))))
+    Init = convert(Vector{float(eltype(H))}, ones(size(H,1)))
+    U,S,V = tsvd(H, M; initvec=Init, maxiter=1e4)
+    println("---")  
 
     for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
-           H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+2]
+           H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= @view puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end
-    return U,S,V
+    return U,S,V'
 end
 
 """
@@ -86,15 +88,17 @@ end
 function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
     D = Array{Float64}(undef,0,1)
     Dt = Array{Float64}(undef,0,1)
-    D_ = Array{Float64}(undef,size(Cell.Transfer.tfs[2,3],1),1)
+    D_ = Array{Float64}(undef,size(Cell.Transfer.Locs[2],1),1)
     q = Int64(1)
     tfs = Cell.Transfer.tfs
+    Elec = Cell.Transfer.Elec
+    Locs = Cell.Transfer.Locs
     for i in 1:size(tfs,1)
-        if tfs[i,1] == C_e
-            Dt =  zeros(length(tfs[i,3]))
-        elseif tfs[i,1] == Phi_e
+        if tfs[i] == C_e
+            Dt =  zeros(length(Locs[i]))
+        elseif tfs[i] == Phi_e
             Dt = Array{Float64}(undef,0,1)
-            for pt in tfs[i,3]
+            for pt in Locs[i]
                 if pt <= Cell.Neg.L+eps()
                 D_[q]  =  @. (Cell.Neg.L*(σ_eff_Neg/κ_eff_Neg)*(1-cosh(ν_neg*pt/Cell.Neg.L)) - pt*ν_neg*sinh(ν_neg) + Cell.Neg.L*(cosh(ν_neg)-cosh(ν_neg*(Cell.Neg.L-pt)/Cell.Neg.L)))/(Cell.Const.CC_A*(κ_eff_Neg+σ_eff_Neg)*sinh(ν_neg)*ν_neg) #Lee. Eqn. 4.22 @ ∞
                 elseif pt <= Cell.Neg.L + Cell.Sep.L + eps()
@@ -106,27 +110,27 @@ function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_e
                 q = q+1
             end
 
-        elseif tfs[i,1] == C_se
-            Dt = zeros(length(tfs[i,3]))
-        elseif tfs[i,2] == "Pos"
+        elseif tfs[i] == C_se
+            Dt = zeros(length(Locs[i]))
+        elseif Elec[i] == "Pos"
             σ_eff = σ_eff_Pos
             κ_eff = κ_eff_Pos
-            if tfs[i,1] == Phi_se
-                Dt = @. -1*Cell.Pos.L/(Cell.Const.CC_A*ν_pos*sinh(ν_pos))*((1/κ_eff)*cosh(ν_pos*tfs[i,3])+(1/σ_eff)*cosh(ν_pos*(tfs[i,3]-1))) # Contribution to D as G->∞
-            elseif tfs[i,1] == Flux
-                Dt = @. -1*ν_pos*(σ_eff*cosh(ν_pos*tfs[i,3])+κ_eff*cosh(ν_pos*(tfs[i,3]-1)))/(Cell.Pos.as*F*Cell.Pos.L*Cell.Const.CC_A*(κ_eff+σ_eff)*sinh(ν_pos))
-            elseif tfs[i,1] == Phi_s
-                Dt = @. -1*(-Cell.Pos.L*(κ_eff*(cosh(ν_pos)-cosh(tfs[i,3]-1)*ν_pos))-Cell.Pos.L*(σ_eff*(1-cosh(tfs[i,3]*ν_pos)+tfs[i,3]*ν_pos*sinh(ν_pos))))/(Cell.Const.CC_A*σ_eff*(κ_eff+σ_eff)*ν_pos*sinh(ν_pos)) # Contribution to D as G->∞ 
+            if tfs[i] == Phi_se
+                Dt = @. -1*Cell.Pos.L/(Cell.Const.CC_A*ν_pos*sinh(ν_pos))*((1/κ_eff)*cosh(ν_pos*Locs[i])+(1/σ_eff)*cosh(ν_pos*(Locs[i]-1))) # Contribution to D as G->∞
+            elseif tfs[i] == Flux
+                Dt = @. -1*ν_pos*(σ_eff*cosh(ν_pos*Locs[i])+κ_eff*cosh(ν_pos*(Locs[i]-1)))/(Cell.Pos.as*F*Cell.Pos.L*Cell.Const.CC_A*(κ_eff+σ_eff)*sinh(ν_pos))
+            elseif tfs[i] == Phi_s
+                Dt = @. -1*(-Cell.Pos.L*(κ_eff*(cosh(ν_pos)-cosh(Locs[i]-1)*ν_pos))-Cell.Pos.L*(σ_eff*(1-cosh(Locs[i]*ν_pos)+Locs[i]*ν_pos*sinh(ν_pos))))/(Cell.Const.CC_A*σ_eff*(κ_eff+σ_eff)*ν_pos*sinh(ν_pos)) # Contribution to D as G->∞ 
             end
-        elseif tfs[i,2] == "Neg"
+        elseif Elec[i] == "Neg"
             σ_eff = σ_eff_Neg
             κ_eff = κ_eff_Neg
-            if tfs[i,1] == Phi_se
-                Dt = @. Cell.Neg.L/(Cell.Const.CC_A*ν_neg*sinh(ν_neg))*((1/κ_eff)*cosh(ν_neg*tfs[i,3])+(1/σ_eff)*cosh(ν_neg*(tfs[i,3]-1))) # Contribution to D as G->∞
-            elseif tfs[i,1] == Flux
-                Dt = @. ν_neg*(σ_eff*cosh(ν_neg*tfs[i,3])+κ_eff*cosh(ν_neg*(tfs[i,3]-1)))/(Cell.Neg.as*F*Cell.Neg.L*Cell.Const.CC_A*(κ_eff+σ_eff)*sinh(ν_neg))
-            elseif tfs[i,1] == Phi_s
-                Dt = @. (-Cell.Neg.L*(κ_eff*(cosh(ν_neg)-cosh(tfs[i,3]-1)*ν_neg))-Cell.Neg.L*(σ_eff*(1-cosh(tfs[i,3]*ν_neg)+tfs[i,3]*ν_neg*sinh(ν_neg))))/(Cell.Const.CC_A*σ_eff*(κ_eff+σ_eff)*ν_neg*sinh(ν_neg)) # Contribution to D as G->∞ 
+            if tfs[i] == Phi_se
+                Dt = @. Cell.Neg.L/(Cell.Const.CC_A*ν_neg*sinh(ν_neg))*((1/κ_eff)*cosh(ν_neg*Locs[i])+(1/σ_eff)*cosh(ν_neg*(Locs[i]-1))) # Contribution to D as G->∞
+            elseif tfs[i] == Flux
+                Dt = @. ν_neg*(σ_eff*cosh(ν_neg*Locs[i])+κ_eff*cosh(ν_neg*(Locs[i]-1)))/(Cell.Neg.as*F*Cell.Neg.L*Cell.Const.CC_A*(κ_eff+σ_eff)*sinh(ν_neg))
+            elseif tfs[i] == Phi_s
+                Dt = @. (-Cell.Neg.L*(κ_eff*(cosh(ν_neg)-cosh(Locs[i]-1)*ν_neg))-Cell.Neg.L*(σ_eff*(1-cosh(Locs[i]*ν_neg)+Locs[i]*ν_neg*sinh(ν_neg))))/(Cell.Const.CC_A*σ_eff*(κ_eff+σ_eff)*ν_neg*sinh(ν_neg)) # Contribution to D as G->∞ 
             end
         end
         D = [D; Dt]

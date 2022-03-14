@@ -160,11 +160,11 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
         ν_pos = @. Cell.Pos.L*sqrt((Cell.Pos.as*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos[i+1])
 
         #Relinearise dependent on ν, σ, κ
-        #D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
         
         #Interpolate C & D Matrices
         C = interp(C0,SList,Cell_SOC[i+1])
-        D = interp(D0,SList,Cell_SOC[i+1])
+        #D = interp(D0,SList,Cell_SOC[i+1])
         #SS Output
         y[i+1,:] = C*x[i+1,:] + D*Iapp[i+1]
 
