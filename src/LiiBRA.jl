@@ -54,12 +54,12 @@ function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B:
 
     #Set Experiment
     i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
-    Iapp = [ones(1)*0.; ones(10*i)*λ; ones(40*i)*0.; ones(10*i)*ϕ; ones(40*i)*0.] #1C HPPC Experiment Current Profile
-    Tk = ones(size(Iapp))*Cell.Const.T #Cell Temperature
-    t = 0:(1.0/i):((length(Iapp)-1)/i)
+    Input = [ones(1)*0.; ones(10*i)*λ; ones(40*i)*0.; ones(10*i)*ϕ; ones(40*i)*0.] #1C HPPC Experiment Current Profile
+    Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
+    t = 0:(1.0/i):((length(Input)-1)/i)
     
     #Simulate Model
-    return Sim_Model(Cell,Iapp,Tk,SList,SOC,A,B,C,D,t)
+    return Sim_Model(Cell,Input,"Current",Tk,SList,SOC,A,B,C,D,t)
 end
 
 #---------- Hankel Formation & SVD -----------------#

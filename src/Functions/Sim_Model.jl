@@ -1,4 +1,4 @@
-function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
+function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     """ 
     Function to simulate generated reduced-order models.
 
@@ -222,5 +222,5 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
 
     end
 
-return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL
+return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL, t
 end

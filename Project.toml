@@ -1,7 +1,7 @@
 name = "LiiBRA"
 uuid = "a5b28938-1935-4481-b801-30e5c8ed4e83"
 authors = ["Brady Planden <info@bradyplanden.com>"]
-version = "0.1.2"
+version = "0.2.0"
 
 [deps]
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
