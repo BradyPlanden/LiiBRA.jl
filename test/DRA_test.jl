@@ -4,8 +4,8 @@ using LiiBRA, UnitSystems, Test, LinearAlgebra
 Cell = Construct("LG M50")
 Cell.RA.Tlen = 128
 Cell.RA.Fs = 1
-Cell.RA.H1 = 0:Cell.RA.Tlen
-Cell.RA.H2 = 0:Cell.RA.Tlen
+Cell.RA.H1 = 1:Cell.RA.Tlen
+Cell.RA.H2 = 1:Cell.RA.Tlen
 
 function TestDRA(Cell)
     A = B = C = D = Time = x = tuple()
@@ -21,7 +21,7 @@ function TestDRA(Cell)
         Cell.RA.s = Cell.RA.s!(Cell.RA.Fs,Cell.RA.Nfft,Cell.RA.f)
 
         #DRA
-        A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell,Cell.RA.s,Cell.RA.f)
+        A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell)
 
         #Flatten output into tuples
         A = flatten_(A,A_DRA)
