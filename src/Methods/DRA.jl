@@ -26,6 +26,7 @@
         tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(Cell.RA.s,2))
         Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
         res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
+        samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
         
         if Cell.Transfer.Elec[i] == "Pos"
             run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 

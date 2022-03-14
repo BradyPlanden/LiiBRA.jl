@@ -1,4 +1,4 @@
-using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots, Infiltrator, Plots
+using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 20
 Cell = Construct("LG M50")
@@ -19,7 +19,7 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         Cell.RA.H1 = 1:i
         Cell.RA.H2 = 1:i
         Cell.RA.Tlen = 16200
-        Cell.RA.Fs = 4
+        Cell.RA.Fs = 6
         Cell.RA.M = 6
         Cell.RA.SamplingT = 1/4
         
@@ -94,12 +94,12 @@ function Sim_loop(Cell, Input, SList, SOC, A, B, C, D)
    end
    
    Time, A, B, C, D = DRA_Loop(Cell, SList, T)
-   WLTP_File = matopen("/Users/bradyplanden/Documents/Git/LiiBRA.jl/test/WLTP_M50_M3.mat")
+   WLTP_File = matopen("test/WLTP/WLTP_M50_M3.mat")
    WLTP_P = read(WLTP_File,"P_Models")
    #Iapp = [ones(1)*0.; ones(10*i)*4.8181; ones(40*i)*0.; ones(10*i)*-3.613; ones(40*i+1)*0.] #1C HPPC Experiment Current Profile
    CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra, Cell_SOC, SimTime = Sim_loop(Cell, WLTP_P, SList, SOC, A, B, C, D)
    
-   Pyb_File = matopen("/Users/bradyplanden/Documents/Git/LiiBRA.jl/test/sol_data.mat")
+   Pyb_File = matopen("test/WLTP/sol_data.mat")
    Pyb_Cn = read(Pyb_File,"c_n")
    Pyb_Cp = read(Pyb_File,"c_p")
    Pyb_T = read(Pyb_File,"t")
