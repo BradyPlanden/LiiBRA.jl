@@ -60,7 +60,7 @@ function Sim_loop(Cell, Input, SList, SOC, A, B, C, D)
            for i in 1:Int64(tuple_len(C)/length(SList))
 
                 k += length(SList)
-                Cell_V, Ce_, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg_, Uocp_Pos_, ϕ_e, Cse_Neg_, Cse_Pos_, Cell_SOC, jeq_neg, jeq_pos, j0, jL = Sim_Model(Cell,Input,"Power",Tk,SList,SOC,A[u:k],B[u:k],C[u:k],D[u:k])
+                Cell_V, Ce_, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg_, Uocp_Pos_, ϕ_e, Cse_Neg_, Cse_Pos_, Cell_SOC, jeq_neg, jeq_pos, j0, jL, tDra = Sim_Model(Cell,Input,"Power",Tk,SList,SOC,A[u:k],B[u:k],C[u:k],D[u:k],tDra)
                 u = k+1
 
                 CellV = flatten_(CellV,Cell_V)

@@ -12,11 +12,11 @@
 LiBRA provides an open-source implementation of realisation algorithms commonly used for generating reduced-order state-space models.
 For more information on the current derived transfer functions used to represent the lithium-ion cell, please refer to [1](https://doi.org/10.1016/j.enconman.2007.03.015), [2](https://doi.org/10.1016/j.jpowsour.2012.07.075).
 
-Install (Julia 1.6 and later)
+Install (Julia 1.7 and later)
 -----------------------------
 
 ```julia
-(v1.6) pkg> add LiiBRA
+(v1.7) pkg> add LiiBRA
 ```
 
 (Type `]` to enter package mode.)
@@ -30,7 +30,7 @@ using LiiBRA, Plots
 Setup:
 ```julia
 Cell = Construct("LG M50")
-SList = collect(0.8:-0.05:0.7)
+SList = collect(1.0:-0.25:0.0)
 SOC = 0.75
 T = 298.15
 ```
@@ -42,16 +42,16 @@ A,B,C,D = Realise(Cell,SList,T)
 
 HPPC Simulation:
 ```julia
-Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, j0, jL = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D)
+Cell_V, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, j0, jL, tDra = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D)
 ```
 
 Plot Results:
 ```julia
 plotly()
-display(plot(tDra[1:end-1],Cell_V[1:end-1], legend=:topright,color=:blue,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Terminal Voltage [V]", xlabel = "Time [s]"))
-display(plot(tDra[1:end-1],Ce[1:end-1,:], legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Electrolyte Concen. [mol/m^3]", xlabel = "Time [s]"))
-display(plot(tDra[1:end-1],Cse_Pos[1:end-1,:], legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Pos. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
-display(plot(tDra[1:end-1],Cse_Neg[1:end-1,:], legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
+display(plot(tDra,Cell_V, legend=:topright,color=:blue,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Terminal Voltage [V]", xlabel = "Time [s]"))
+display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Electrolyte Concen. [mol/m^3]", xlabel = "Time [s]"))
+display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Pos. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
+display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
 ```
 
 ## Bug Tracking
