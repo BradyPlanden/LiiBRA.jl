@@ -1,4 +1,4 @@
-@inline function C_e(Cell,s,z)
+@inline function C_e(Cell,s,z,tf,D,res0)
 """ 
 Electrolyte Concentration Transfer Function
 
@@ -7,7 +7,6 @@ C_e(Cell,s,z)
 """
 
 ζ = (1-Cell.Const.t_plus)/F    #Simplifying Variable
-CC_A = Cell.Const.CC_A   # Current-collector area [m^2]
 κ_eff_Neg = Cell.Const.κ*Cell.Neg.ϵ_e^Cell.Neg.κ_brug
 κ_eff_Pos = Cell.Const.κ*Cell.Pos.ϵ_e^Cell.Pos.κ_brug
 σ_eff_Neg = Cell.Neg.σ*Cell.Neg.ϵ_s^Cell.Neg.σ_brug #Effective Conductivity Neg
@@ -18,27 +17,20 @@ CC_A = Cell.Const.CC_A   # Current-collector area [m^2]
 θ_neg = Cell.Const.SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0 
 θ_pos = Cell.Const.SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0 
 
-#Beta's
-βn = @. Cell.Neg.Rs*sqrt(s/Cell.Neg.Ds)
-βp = @. Cell.Pos.Rs*sqrt(s/Cell.Pos.Ds)
-
 #Prepare for j0
-ce0 = Cell.Const.ce0
-cs_max_neg = Cell.Neg.cs_max
-cs0_neg = cs_max_neg * θ_neg
-cs_max_pos = Cell.Pos.cs_max
-cs0_pos = cs_max_pos * θ_pos
+cs0_neg = Cell.Neg.cs_max * θ_neg
+cs0_pos = Cell.Pos.cs_max * θ_pos
 
 #Current Flux Density
 
 if Cell.Const.CellTyp == "Doyle_94"
-    κ_pos = Cell.Pos.k_norm/Cell.Pos.cs_max/ce0^(1-Cell.Pos.α)
-    κ_neg = Cell.Neg.k_norm/Cell.Neg.cs_max/ce0^(1-Cell.Neg.α)
-    j0_neg = κ_neg*(ce0*(cs_max_neg-cs0_neg))^(1-Cell.Neg.α)*cs0_neg^Cell.Neg.α
-    j0_pos = κ_pos*(ce0*(cs_max_pos-cs0_pos))^(1-Cell.Pos.α)*cs0_pos^Cell.Pos.α
+    κ_pos = Cell.Pos.k_norm/Cell.Pos.cs_max/Cell.Const.ce0^(1-Cell.Pos.α)
+    κ_neg = Cell.Neg.k_norm/Cell.Neg.cs_max/Cell.Const.ce0^(1-Cell.Neg.α)
+    j0_neg = κ_neg*(Cell.Const.ce0*(Cell.Neg.cs_max-cs0_neg))^(1-Cell.Neg.α)*cs0_neg^Cell.Neg.α
+    j0_pos = κ_pos*(Cell.Const.ce0*(Cell.Pos.cs_max-cs0_pos))^(1-Cell.Pos.α)*cs0_pos^Cell.Pos.α
  else
-    j0_neg = Cell.Neg.k_norm*(ce0*(cs0_neg/cs_max_neg*(1-cs0_neg/cs_max_neg)))^(1-Cell.Neg.α)
-    j0_pos = Cell.Pos.k_norm*(ce0*(cs0_pos/cs_max_pos*(1-cs0_pos/cs_max_pos)))^(1-Cell.Pos.α)
+    j0_neg = Cell.Neg.k_norm*(Cell.Const.ce0*cs0_neg*(Cell.Neg.cs_max-cs0_neg))^(1-Cell.Neg.α)
+    j0_pos = Cell.Pos.k_norm*(Cell.Const.ce0*cs0_pos*(Cell.Pos.cs_max-cs0_pos))^(1-Cell.Pos.α)
  end
 
 #Resistances
@@ -46,15 +38,15 @@ Rtot_neg = R*Cell.Const.T/(j0_neg*F^2) + Cell.Neg.RFilm
 Rtot_pos = R*Cell.Const.T/(j0_pos*F^2) + Cell.Pos.RFilm
 
 #OCP derivative
-∂Uocp_pos = Cell.Const.∂Uocp("Pos",θ_pos)/cs_max_pos
-∂Uocp_neg = Cell.Const.∂Uocp("Neg",θ_neg)/cs_max_neg
+∂Uocp_pos = Cell.Const.∂Uocp("Pos",θ_pos)/Cell.Pos.cs_max
+∂Uocp_neg = Cell.Const.∂Uocp("Neg",θ_neg)/Cell.Neg.cs_max
 
 #Condensing Variable
-ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(βn)/(tanh(βn)-βn))))
-ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(βp)/(tanh(βp)-βp))))
+ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(Cell.Neg.β)/(tanh(Cell.Neg.β)-Cell.Neg.β))))
+ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(Cell.Pos.β)/(tanh(Cell.Pos.β)-Cell.Pos.β))))
+# ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds*(1-Cell.Neg.β*coth(Cell.Neg.β))))))
 
-
-R_ce = find_zeros(x->flambda(Cell,x),0.0,Cell.Const.CeRootRange)
+R_ce = find_zeros(x->flambda(Cell,x),0.00,Cell.Const.CeRootRange)
 if size(R_ce,1) >= Cell.Const.Ce_M+1
     λ = R_ce[2:Cell.Const.Ce_M+1]
 else
@@ -91,15 +83,14 @@ k4 = @. k1*k4_s
 k5 = @. k1*k5_s
 k6 = @. k1*k6_s
 
-j_Neg = @. k1*ζ*ν_n*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*sin(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos(Bound_Neg_1))*sinh(ν_n)*ν_n)/(CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2+ν_n^2)*sinh(ν_n))
-zero_tf_neg = @. k1*ζ*sin(Bound_Neg_1)/(CC_A*Bound_Neg_1)
+j_Neg = @. k1*ζ*ν_n*(Bound_Neg_1*(κ_eff_Neg+σ_eff_Neg*cosh(ν_n))*sin(Bound_Neg_1)+(κ_eff_Neg+σ_eff_Neg*cos(Bound_Neg_1))*sinh(ν_n)*ν_n)/(Cell.Const.CC_A*(κ_eff_Neg+σ_eff_Neg)*(Bound_Neg_1^2+ν_n^2)*sinh(ν_n))
+zero_tf_neg = @. k1*ζ*sin(Bound_Neg_1)/(Cell.Const.CC_A*Bound_Neg_1)
 j_Neg[:,findall(s.==0)] .= zero_tf_neg[:,findall(s.==0)]
 
-j_Pos = @. -ζ*ν_p/(CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
-zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(CC_A*Bound_Pos_2)
+j_Pos = @. -ζ*ν_p/(Cell.Const.CC_A*(κ_eff_Pos+σ_eff_Pos)*(Bound_Pos_2^2+ν_p^2)*sinh(ν_p))*(-k6*Bound_Pos_2*cos(Bound_Pos_1)*(σ_eff_Pos+κ_eff_Pos*cosh(ν_p))+Bound_Pos_2*(κ_eff_Pos+σ_eff_Pos*cosh(ν_p))*(k6*cos(Bound_Pos_0)-k5*sin(Bound_Pos_0))+k5*Bound_Pos_2*(σ_eff_Pos+ κ_eff_Pos*cosh(ν_p))*sin(Bound_Pos_1)+sinh(ν_p)*(k5*σ_eff_Pos*cos(Bound_Pos_0)+k5*κ_eff_Pos*cos(Bound_Pos_1)+k6*σ_eff_Pos*sin(Bound_Pos_0)+k6*κ_eff_Pos*sin(Bound_Pos_1))*ν_p)
+zero_tf = @. -ζ*(k6*(cos(Bound_Pos_0)-cos(Bound_Pos_1))+k5*(sin(Bound_Pos_1)-sin(Bound_Pos_0)))/(Cell.Const.CC_A*Bound_Pos_2)
 j_Pos[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-
-C_e =  @. ((j_Neg + j_Pos)/(s+λ))
+ 
 i=Int64(1)
 ψ = fill(0.0,length(z),length(λ))
 for loop in 1:length(λ)
@@ -116,12 +107,9 @@ for loop in 1:length(λ)
     end
 end
 
-C_e = ψ*C_e
-D =  zeros(length(z))
-D_term = "zeros(length($z))"
-res0 = zeros(length(z))
-
-return C_e, D, res0, D_term
+tf .= ψ*((j_Neg .+ j_Pos)./(s.+λ))
+D .=  zeros(length(z))
+res0 .= zeros(length(z))
 end
 
 function flambda(Cell,λ)
@@ -143,5 +131,8 @@ function flambda(Cell,λ)
     k5 = @. k3*(cos(sle2*Lnegsep)*cos(sle3*Lnegsep) + D2*sle2*sin(sle2*Lnegsep)*sin(sle3*Lnegsep)/(D3*sle3))+k4*(sin(sle2*Lnegsep)*cos(sle3*Lnegsep) - D2*sle2*cos(sle2*Lnegsep)*sin(sle3*Lnegsep)/(D3*sle3))
     k6 = @. k3*(cos(sle2*Lnegsep)*sin(sle3*Lnegsep) - D2*sle2*sin(sle2*Lnegsep)*cos(sle3*Lnegsep)/(D3*sle3))+k4*(sin(sle2*Lnegsep)*sin(sle3*Lnegsep) + D2*sle2*cos(sle2*Lnegsep)*cos(sle3*Lnegsep)/(D3*sle3))
     Psiprime = @. -k5*sle3*sin(sle3*Ltot) + k6*sle3*cos(sle3*Ltot)
+    if λ == 0
+        Psiprime = 0
+    end
     return Psiprime
 end

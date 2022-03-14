@@ -1,4 +1,4 @@
-@inline function Phi_s(Cell,s,z,Def)
+@inline function Phi_s(Cell,s,z,Def,ϕ_tf,D,res0)
     """ 
     Solid Potential Transfer Function
 
@@ -7,22 +7,18 @@
     """
 
 
- if Def == "Pos"   
+ if Def == "Pos"
     Electrode = Cell.Pos #Electrode Length
  else
     Electrode = Cell.Neg #Electrode Length
  end
 
-as = 3*Electrode.ϵ_s/Electrode.Rs # Specific interfacial surf. area
 κ_eff = Cell.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
 σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
 comb_cond_eff = κ_eff+σ_eff #combining into single variable
 
 #Defining SOC
 θ = Cell.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
-
-#Beta's
-β = @. Electrode.Rs*sqrt(s/Electrode.Ds)
 
 #Prepare for j0
 cs0 = Electrode.cs_max * θ
@@ -32,30 +28,28 @@ if Cell.Const.CellTyp == "Doyle_94"
    κ = Electrode.k_norm/Electrode.cs_max/Cell.Const.ce0^(1-Electrode.α)
    j0 = κ*(Cell.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
 else
-   j0 = Electrode.k_norm*(Cell.Const.ce0*(cs0/Electrode.cs_max*(1-cs0/Electrode.cs_max)))^(1-Electrode.α)
+   j0 = Electrode.k_norm*(Cell.Const.ce0*cs0*(Electrode.cs_max-cs0))^(1-Electrode.α)
 end
 
 #Resistance
 Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
+#Rtot = R*Cell.Const.T/(j0*Cell.Const.CC_A*F) + Electrode.RFilm
 
 #∂Uocp_Def
 ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max
 
-ν = @. Electrode.L*sqrt((as/σ_eff+as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(β)/(tanh(β)-β)))) #Condensing Variable - eq. 4.13
-ν_∞ = @. Electrode.L*sqrt((as/κ_eff+as/σ_eff)/(Rtot))
+ν = @. Electrode.L*sqrt((Electrode.as/σ_eff+Electrode.as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(Electrode.β)/(tanh(Electrode.β)-Electrode.β)))) #Condensing Variable - eq. 4.13
+ν_∞ = @. Electrode.L*sqrt((Electrode.as/κ_eff+Electrode.as/σ_eff)/(Rtot))
 
-ϕ_tf = @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh((z-1)*ν)))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
-D = @. (-Electrode.L*(κ_eff*(cosh(ν_∞)-cosh((z-1)*ν_∞)))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-D_term = "@. -$(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(Cell.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(Cell.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
+ϕ_tf .= @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh((z-1)*ν)))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
+D .= @. (-Electrode.L*(κ_eff*(cosh(ν_∞)-cosh((z-1)*ν_∞)))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
 zero_tf = @. Electrode.L*(z-2)*z/(2*Cell.Const.CC_A*σ_eff)
 ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-res0 = zeros(length(z))
+res0 .= zeros(length(z))
 
 if Def == "Pos"
-   ϕ_tf = -ϕ_tf
-   D = -D
-   D_term = "@. $(Electrode.L)*($κ_eff*(cosh($ν_∞)-cosh($z-1)*$ν_∞))/($(Cell.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))-$(Electrode.L)*($σ_eff*(1-cosh($z*$ν_∞)+$z*$ν_∞*sinh($ν_∞)))/($(Cell.Const.CC_A)*$σ_eff*($comb_cond_eff)*$ν_∞*sinh($ν_∞))"
+   ϕ_tf .= -ϕ_tf
+   D .= -D
 end
 
-return ϕ_tf, D, res0, D_term
 end

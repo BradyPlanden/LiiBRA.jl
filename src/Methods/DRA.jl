@@ -1,4 +1,4 @@
-@inline function DRA(Cell,s,f)
+@inline function DRA(Cell)
     """ 
     Function for Discrete Realisation Algorithm.
 
@@ -7,91 +7,123 @@
     """
 
     #Additional Pulse Setup
-    tfft = @. (1/Cell.RA.Fs)*f
-    OrgT = @. Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
-    i=Int64(1)
+    tfft = (1/Cell.RA.Fs)*Cell.RA.f
+    OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
+
 
     #Initialise Loop Variables
-    puls = Array{Float64}(undef,0,size(OrgT,1)-1)
-    D = Array{Float64}(undef,0,1)
-    Dtt = Array{String}(undef,0,1)
-    C_Aug = Array{Float64}(undef,0,1)
+    A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
+    B = Vector{Float64}(undef,Cell.RA.M+1)
+    C = Matrix{Float64}(undef,Cell.RA.Outs,Cell.RA.M+1)
+    D = Vector{Float64}(undef,Cell.RA.Outs)
+    puls = Array{Float64}(undef,Cell.RA.Outs,size(OrgT,1)-1)
+    C_Aug = Vector{Float64}(undef,Cell.RA.Outs)
+    i=Int(1)
+    l=Int(1)
+    u=Int(0)
 
-
-    for run in Cell.Transfer.tfs[:,1]
-        if Cell.Transfer.tfs[i,2] == "Pos"
-            tf, Di, res0, Dti = run(Cell,s,Cell.Transfer.tfs[i,3],"Pos") 
-        elseif Cell.Transfer.tfs[i,2] == "Neg"
-            tf, Di, res0, Dti = run(Cell,s,Cell.Transfer.tfs[i,3],"Neg") 
+    for run in Cell.Transfer.tfs
+        tf = Array{ComplexF64}(undef,size(Cell.Transfer.Locs[i],1),size(Cell.RA.s,2))
+        Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
+        res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
+        samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
+        
+        if Cell.Transfer.Elec[i] == "Pos"
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
+        elseif Cell.Transfer.Elec[i] == "Neg"
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Neg",tf,Di,res0) 
         else 
-            tf, Di, res0, Dti = run(Cell,s,Cell.Transfer.tfs[i,3]) 
+            run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],tf,Di,res0) 
+        end
+        
+
+        # if Cell.RA.Fs==(1/Cell.RA.SamplingT)
+        #     f = one(Int)
+        #     λ = Int(Cell.RA.Fs*Cell.RA.SamplingT)
+        #     for i in 1:λ:size(tfft,2), j in 1:λ:size(tfft,1)
+        #         Org[j,f] = tf[j,i]
+        #         f+=1
+        #     end
+        # end
+
+        u += Int(size(Cell.Transfer.Locs[i],1))::Int
+
+        if Cell.RA.Fs==(1/Cell.RA.SamplingT)
+            puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
+        else
+            stpsum = cumsum(real(ifft(tf,2)), dims=2) #cumulative sum of tf response * sample time
+            #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
+            for k in 1:size(stpsum,1)
+                spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
+                samplingtf[k,:] = spl1(OrgT)
+            end
+            puls[l:u,:] .= diff(samplingtf, dims=2)
         end
 
-        jk = Cell.RA.Fs*real(ifft(tf,2)') # inverse fourier transform tranfser function response (Large Compute)
-        stpsum = (cumsum(jk, dims=1).*(1/Cell.RA.Fs))' # cumulative sum of tf response * sample time
-        samplingtf = Array{Float64}(undef,size(stpsum,1),length(OrgT))
-
-        # Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
-        for Output in 1:size(stpsum,1)
-            spl1 = Spline1D(tfft,stpsum[Output,:]; k=3)
-            samplingtf[Output,:]= evaluate(spl1,OrgT)
-        end
-
-        puls = [puls; diff(samplingtf, dims=2)]
-        D = [D; Di]
-        Dtt = [Dtt; Dti]
-        C_Aug = [C_Aug; res0]
-        i += 1
+       
+        #puls[l:u,:] .= diff(stpsum, dims=2)
+        #puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
+        #puls[l:u,:] .= diff(samplingtf, dims=2)
+        D[l:u,:] .= Di
+        C_Aug[l:u,:] .= res0
+        l = u+one(u)::Int
+        i += one(i)
 
     end
 
     #Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
-    puls1 = puls
-    puls = puls./SFactor[:,ones(Int64,size(puls,2))]
+    puls .= puls./SFactor
 
-    #Hankel Formation
+    #Pre-Allocation for Hankel & SVD
     Puls_L = size(puls,1)
-    Hank1 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
-    Hank2 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
+    𝐇 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
+    U,S,V = fh!(𝐇,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
-    for lp1 in 1:length(Cell.RA.H2)
-        for lp2 in 1:length(Cell.RA.H1)
-             Hank1[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,Cell.RA.H2[lp1]+Cell.RA.H1[lp2]+1]
-             Hank2[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] = @view puls[:,Cell.RA.H2[lp1]+Cell.RA.H1[lp2]+2]
-        end
-    end
 
-    #Truncated SVD of Hank1 Matrix
-    #T = svds(Hank1; nsv=Cell.RA.M)[1]
-    U,S,V = tsvd(Hank1, k=Cell.RA.M)
+    # for i in 1:size(puls,1)
+    #     if U[i,1] < 0
+    #         U[i,:] .= -U[i,:]
+    #         V[:,i] .= -V[:,i]
+    #     end
+    # end  
 
     # Create Observibility and Control Matrices -> Create A, B, and C 
-    S_ = sqrt(diagm(S[1:Cell.RA.M]))
-    Observibility = (@view U[:,1:Cell.RA.M])*S_
-    Control = S_*(@view V[:,1:Cell.RA.M])'
+    ʃ = sqrt(Diagonal(S))
+    #Observibility = U*ʃ
+    #Control = ʃ*V'
     
-    A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
-    A[2:end,2:end] = (Observibility\Hank2)/Control
+    U .= U*ʃ
+    V .= ʃ*V
 
-    #Error check
+    #A[2:end,2:end] .= (Observibility\𝐇)/Control
+    A[2:end,2:end] .= (U\𝐇)/V
+
+    #Performance check
     if any(i -> i>1., real(eigvals(A)))
         println("Oscilating System: A has indices of values > 1")
     end
-
+    
     if any(i -> i<0., real(eigvals(A)))
         println("Unstable System: A has indices of negative values")
     end
-    
-    B = [Cell.RA.SamplingT; Control[:,1:Cell.RA.N]]
-    C = [C_Aug SFactor[:,ones(Int64,Cell.RA.M)].*Observibility[1:size(puls,1),:]]
 
+    #B .= [Cell.RA.SamplingT; Control[:,Cell.RA.N]]
+    #C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
+    B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
+    C .= [C_Aug SFactor.*U[1:Puls_L,:]]
+
+    #@infiltrate cond=true
+
+    
     #  Final State-Space Form
-    d, S = eigen(A)
-    A = Diagonal(d)
-    B = S\B
-    C = (C*S).*B'
-    B = ones(size(B))
-        
-return real(A), real(B), real(C), D
+    #d, Sᵘ = eigen(A,sortby=nothing)
+    #d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values
+    #S = mag!(S)
+    #A = Diagonal(d)
+    #C = C*Sᵘ.*(inv(Sᵘ)*B)'
+    #B = ones(size(B))
+
+return mag!(A), mag!(B), mag!(C), D   
+ 
 end

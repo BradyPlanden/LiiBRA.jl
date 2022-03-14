@@ -1,12 +1,12 @@
-function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
+function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0)
     """ 
     Function to simulate generated reduced-order models.
 
-    Sim_Model(Cell,Iapp,Tk,SOC,A,B,C,D)
+    Sim_Model(Cell,Input,Def,Tk,SOC,A,B,C,D)
     
     """
     #Determine time span and allocate arrays
-    tlength = size(Iapp,1)
+    tlength = size(Input,1)
 
     A = Array{Float64}(undef,size(A0[1]))
     B = Array{Float64}(undef,size(B0[1]))
@@ -15,7 +15,7 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
     #Selecting SS Models
     for i in 1:length(SList)
-        if SOC == SList[i]     
+        if SOC == SList[i] # Fix this, round?
             A = A0[i]
             B = B0[i]
             C = C0[i]
@@ -23,13 +23,12 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         end
     end
 
-    Cell.Const.SOC = SOC
     #Capturing Indices
     tfstr = Array{String}(undef,0,1)
-    for i in 1:size(Cell.Transfer.tfs[:,1],1)
+    for i in 1:length(Cell.Transfer.tfs)
         t1 = t2 = Array{String}(undef,0,1)
-        for j in 1:size(Cell.Transfer.tfs[i,3],1)
-            t1 ="$(Cell.Transfer.tfs[i,1])_$(Cell.Transfer.tfs[i,2])"
+        for j in 1:length(Cell.Transfer.Locs[i])
+            t1 ="$(Cell.Transfer.tfs[i])_$(Cell.Transfer.Elec[i])"
             t2 = [t2; t1]
         end
         tfstr = [tfstr; t2]
@@ -46,17 +45,21 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
     FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
 
-    CeNeg = Cell.Transfer.tfs[1,3].<=Cell.Neg.L
-    CeNegOffset = Cell.Transfer.tfs[1,3].<Cell.Neg.L
-    CeSep = Cell.Transfer.tfs[1,3].<=Cell.Neg.L+Cell.Sep.L
-    CeSepOffset = Cell.Transfer.tfs[1,3].<Cell.Neg.L+Cell.Sep.L
-    CePos = Cell.Transfer.tfs[1,3].<=Cell.Const.Ltot
+
+    #@infiltrate cond = true
+
+
+    CeNeg = Cell.Transfer.Locs[1].<=Cell.Neg.L
+    CeNegOffset = Cell.Transfer.Locs[1].<Cell.Neg.L
+    CeSep = Cell.Transfer.Locs[1].<=Cell.Neg.L+Cell.Sep.L
+    CeSepOffset = Cell.Transfer.Locs[1].<Cell.Neg.L+Cell.Sep.L
+    CePos = Cell.Transfer.Locs[1].<=Cell.Const.Ltot
     CeNegInd = findall(CeNeg .== 1)
     CeSepInd = findall(CeSep.-CeNegOffset .== 1)
     CePosInd = findall(CePos.-CeSepOffset .== 1)
 
-    csegain_neg = C[CseNegInd[1][1],end]
-    csegain_pos = C[CsePosInd[1][1],end]
+    csegain_neg = C[CseNegInd[1][1],1] #First Column in C Array (zeros column)
+    csegain_pos = C[CsePosInd[1][1],1] #First Column in C Array (zeros column)
 
     #Memory Allocation
     θ_neg = Array{Float64}(undef,tlength,1) .= 0.
@@ -88,11 +91,12 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     Cell_V = Array{Float64}(undef,tlength,1) .= 0.
     ϕ_e = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.
     Cell_SOC = Array{Float64}(undef,tlength,1) .= 0
+    Iapp = Array{Float64}(undef,tlength+1,1) .= 0
 
 
     #Defining SOC
-    SOC_Neg = Cell.Const.SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0
-    SOC_Pos = Cell.Const.SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
+    SOC_Neg = SOC * (Cell.Neg.θ_100-Cell.Neg.θ_0) + Cell.Neg.θ_0
+    SOC_Pos = SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
     θ_neg[1] = SOC_Neg
     θ_pos[1] = SOC_Pos
     Cell_SOC[1] = (SOC_Neg-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
@@ -100,8 +104,8 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
     #Loop through time
     #Compute dependent variables (voltage, flux, etc.)
     for i in 0:(tlength-1)
-        cs_neg_avg = x[i+1,end] * csegain_neg + SOC_Neg * Cell.Neg.cs_max < 0. ? 0. : x[i+1,end] * csegain_neg + SOC_Neg * Cell.Neg.cs_max #Zero if < 0
-        cs_pos_avg = x[i+1,end] * csegain_pos + SOC_Pos * Cell.Pos.cs_max < 0. ? 0. : x[i+1,end] * csegain_pos + SOC_Pos * Cell.Pos.cs_max #Zero if < 0
+        cs_neg_avg = x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max < 0. ? 0. : x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max #Zero if < 0
+        cs_pos_avg = x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max < 0. ? 0. : x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max #Zero if < 0
 
         if cs_neg_avg > Cell.Neg.cs_max
             cs_neg_avg = Cell.Neg.cs_max
@@ -113,19 +117,22 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Reaction Rates
         if Cell.Const.CellTyp == "Doyle_94"
-            k_neg = Cell.Neg.k_norm/Cell.Neg.cs_max/Cell.Const.ce0^(1-Cell.Neg.α)
-            k_pos = Cell.Pos.k_norm/Cell.Pos.cs_max/Cell.Const.ce0^(1-Cell.Pos.α)
+            k_neg = Cell.Neg.k_norm#/Cell.Neg.cs_max/Cell.Const.ce0^(1-Cell.Neg.α)
+            k_pos = Cell.Pos.k_norm#/Cell.Pos.cs_max/Cell.Const.ce0^(1-Cell.Pos.α)
             jeq_neg[i+1] = k_neg*sqrt(cs_neg_avg*Cell.Const.ce0*(Cell.Neg.cs_max-cs_neg_avg))
             jeq_pos[i+1] = k_pos*sqrt(cs_pos_avg*Cell.Const.ce0*(Cell.Pos.cs_max-cs_pos_avg))
         else
-            jeq_neg = Cell.Neg.k_norm*Cell.Neg.cs_max*(Cell.Const.ce0*(cs_neg_avg/Cell.Neg.cs_max*(1-cs_neg_avg/Cell.Neg.cs_max)))^(1-Cell.Neg.α)
-            jeq_pos = Cell.Pos.k_norm*Cell.Pos.cs_max*(Cell.Const.ce0*(cs_pos_avg/Cell.Pos.cs_max*(1-cs_pos_avg/Cell.Pos.cs_max)))^(1-Cell.Pos.α)
+            #jeq_neg = Cell.Neg.k_norm*Cell.Neg.cs_max*(Cell.Const.ce0*(cs_neg_avg/Cell.Neg.cs_max*(1-cs_neg_avg/Cell.Neg.cs_max)))^(1-Cell.Neg.α)
+            #jeq_pos = Cell.Pos.k_norm*Cell.Pos.cs_max*(Cell.Const.ce0*(cs_pos_avg/Cell.Pos.cs_max*(1-cs_pos_avg/Cell.Pos.cs_max)))^(1-Cell.Pos.α)
+            k_neg = Cell.Neg.k_norm
+            k_pos = Cell.Pos.k_norm
+            jeq_neg[i+1] = Cell.Neg.k_norm*(Cell.Const.ce0*cs_neg_avg*(Cell.Neg.cs_max-cs_neg_avg))^(1-Cell.Neg.α)
+            jeq_pos[i+1] = Cell.Pos.k_norm*(Cell.Const.ce0*cs_pos_avg*(Cell.Pos.cs_max-cs_pos_avg))^(1-Cell.Pos.α)
         end
         
         θ_neg[i+1] = cs_neg_avg/Cell.Neg.cs_max
         θ_pos[i+1] = cs_pos_avg/Cell.Pos.cs_max
         Cell_SOC[i+1] = (θ_neg[i+1]-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
-
 
         javg_neg = Iapp[i+1]/(Cell.Neg.as*F*Cell.Neg.L*Cell.Const.CC_A)
         javg_pos = Iapp[i+1]/(Cell.Pos.as*F*Cell.Pos.L*Cell.Const.CC_A)
@@ -154,10 +161,10 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Relinearise dependent on ν, σ, κ
         D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
-
+        
         #Interpolate C & D Matrices
         C = interp(C0,SList,Cell_SOC[i+1])
-        D = interp(D0,SList,Cell_SOC[i+1])
+        #D = interp(D0,SList,Cell_SOC[i+1])
         #SS Output
         y[i+1,:] = C*x[i+1,:] + D*Iapp[i+1]
 
@@ -181,14 +188,15 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
         jL[i+1] = y[i+1,FluxPosInd[1]]
 
 
-        j0_CC_neg[i+1] = findmax([eps(); (k_neg*(Cell.Neg.cs_max-Cse_Neg[i+1,1])^(1-Cell.Neg.α))*((Cse_Neg[i+1,1]^Cell.Neg.α)*(Ce[i+1,1]^(1-Cell.Neg.α)))])[1]
+        #j0_CC_neg[i+1] = findmax([eps(); (k_neg*(Cell.Neg.cs_max-Cse_Neg[i+1,1])^(1-Cell.Neg.α))*((Cse_Neg[i+1,1]^Cell.Neg.α)*(Ce[i+1,1]^(1-Cell.Neg.α)))])[1]
         j0_neg = findmax([ones(size(Cse_Neg,2))*eps() (k_neg.*(Cse_Neg[i+1,:].^Cell.Neg.α).*(Ce[i+1,1].^(1-Cell.Neg.α))).*(Cell.Neg.cs_max.-Cse_Neg[i+1,:]).^(1-Cell.Neg.α)], dims=2)[1]
-        η0[i+1] = Tk[i+1]*2*R/F*asinh(j0[i+1]/(2*j0_CC_neg[i+1]))
+
+        η0[i+1] = Tk[i+1]*2*R/F*asinh(j0[i+1]/(2*j0_neg[1]))
         η_neg[i+1,:] = @. (Tk[i+1]*2*R)/F*asinh((jNeg[i+1,:])/(2*j0_neg))
 
-        j0_CC_pos[i+1] = findmax([eps(); (k_pos*(Cell.Pos.cs_max-Cse_Pos[i+1,1])^(1-Cell.Pos.α))*((Cse_Pos[i+1,1]^Cell.Pos.α)*(Ce[i+1,end]^(1-Cell.Pos.α)))])[1] 
+        #j0_CC_pos[i+1] = findmax([eps(); (k_pos*(Cell.Pos.cs_max-Cse_Pos[i+1,1])^(1-Cell.Pos.α))*((Cse_Pos[i+1,1]^Cell.Pos.α)*(Ce[i+1,end]^(1-Cell.Pos.α)))])[1] 
         j0_pos = findmax([ones(size(Cse_Pos,2))*eps() (k_pos.*(Cse_Pos[i+1,:].^Cell.Pos.α).*(Ce[i+1,1].^(1-Cell.Pos.α))).*(Cell.Pos.cs_max.-Cse_Pos[i+1,:]).^(1-Cell.Pos.α)], dims=2)[1]
-        ηL[i+1] = (Tk[i+1]*2*R)/F*asinh(jL[i+1]/(2*j0_CC_pos[i+1]))
+        ηL[i+1] = (Tk[i+1]*2*R)/F*asinh(jL[i+1]/(2*j0_pos[1]))
         η_pos[i+1,:] = @. (Tk[i+1]*2*R)/F*asinh(jPos[i+1,:]/(2*j0_pos))
     
 
@@ -201,11 +209,18 @@ function Sim_Model(Cell,Iapp,Tk,SList,SOC,A0,B0,C0,D0,tDra)
 
         #Interpolate A Matrix
         A = interp(A0,SList,Cell_SOC[i+1])
+        B = interp(B0,SList,Cell_SOC[i+1])
 
         #Update States
         x[i+2,:] = A*x[i+1,:] + B*Iapp[i+1]
 
+        if Def =="Power"
+            Iapp[i+2] = Input[i+1,1]/Cell_V[i+1]
+        else
+            Iapp[i+2] = Input[i+1,1]
+        end
+
     end
-    
-return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, tDra, jeq_neg, jeq_pos, j0, jL, y
+
+return Cell_V, Ce, jNeg, jPos, Rtot_neg, Rtot_pos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL
 end
