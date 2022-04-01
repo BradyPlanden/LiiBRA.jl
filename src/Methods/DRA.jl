@@ -6,6 +6,13 @@
     
     """
 
+    # Method Check
+    if Cell.RA.Fs==(1/Cell.RA.SamplingT)
+        println("CI-DRA Utilised")
+    else
+        println("DRA Utilised")
+    end
+
     #Additional Pulse Setup
     tfft = (1/Cell.RA.Fs)*Cell.RA.f
     OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
@@ -112,17 +119,14 @@
     #C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
     B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
     C .= [C_Aug SFactor.*U[1:Puls_L,:]]
-
-    #@infiltrate cond=true
-
     
     #  Final State-Space Form
-    #d, Sᵘ = eigen(A,sortby=nothing)
-    #d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values
-    #S = mag!(S)
-    #A = Diagonal(d)
-    #C = C*Sᵘ.*(inv(Sᵘ)*B)'
-    #B = ones(size(B))
+    # d, Sᵘ = eigen(A,sortby=nothing)
+    # d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values
+    # S = mag!(S)
+    # A = Diagonal(d)
+    # C = C*Sᵘ.*(inv(Sᵘ)*B)'
+    # B = ones(size(B))
 
 return mag!(A), mag!(B), mag!(C), D   
  

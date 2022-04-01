@@ -1,0 +1,30 @@
+cff-version: 1.1.0
+message: "Please cite below if you use LiiBRA.jl"
+authors: 
+- family-names: Planden
+  given-names: Brady
+  orcid: "https://orcid.org/0000-0002-1082-9125"
+- family-names: Lukow
+  given-names: Katie
+  orcid: "https://orcid.org/0000-0002-6752-1439"
+- family-names: Henshall
+  given-names: Paul
+  orcid: "https://orcid.org/0000-0002-6592-2239"
+- family-names: Collier
+  given-names: Gordana
+  orcid: "https://orcid.org/0000-0002-1091-9243"
+- family-names: Morrey
+  given-names: Denise
+  orcid: "https://orcid.org/0000-0002-0105-3425"
+journal: "Arxiv"
+date-released: 2022-03-31
+doi: 10.48550/arXiv.2203.17105
+keywords: 
+  - "lithium-ion battery"
+  - "battery management system"
+  - "reduced-electrochemical model"
+  - "battery modelling" 
+  - "julia"
+version: "0.2.0"
+repository-code: "https://github.com/BradyPlanden/LiiBRA.jl"
+title: "A Computationally Informed Realisation Algorithm for Lithium-Ion Batteries Implemented with LiiBRA.jl"
