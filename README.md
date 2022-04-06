@@ -37,12 +37,12 @@ T = 298.15
 
 Realisation:
 ```julia
-A,B,C,D = Realise(Cell,SList,T)
+A,B,C,D = Realise(Cell,SList,T);
 ```
 
 HPPC Simulation:
 ```julia
-CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL, tDra = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D)
+CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL, tDra = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D);
 ```
 
 Plot Results:
