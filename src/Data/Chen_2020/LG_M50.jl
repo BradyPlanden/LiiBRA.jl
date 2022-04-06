@@ -101,7 +101,7 @@ end
 @with_kw mutable struct Realisation
     Fs::Float64 = 4    # Sampling Frequency of Transfer Functions [Hz]
     SamplingT::Float64 = 0.25     # Final Model Sampling Time [s]
-    M::Int64 = 6    # Model Order
+    M::Int64 = 4    # Model Order
     N::Int64 = 1    # Number of Inputs
     Tlen::Int64 = 16200 #Transfer Function Response Length [s] (Change to min)
     H1::Array{Int64,1} = 1:2500 #4000 #4612     # Hankel Dimensions 1
