@@ -52,7 +52,7 @@ display(plot(tDra,CellV, legend=:topright,color=:blue,bottom_margin=5Plots.mm, l
 ```
 
 <p align="center">
-<img src="examples/Voltage_HPPC.png" width="600" align="center"  />
+<img src="examples/Voltage_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -60,7 +60,7 @@ display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5P
 ```
 
 <p align="center">
-<img src="examples/Electrolyte_HPPC.png" width="600" align="center"  />
+<img src="examples/Electrolyte_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -68,7 +68,7 @@ display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin
 ```
 
 <p align="center">
-<img src="examples/Pos_Electrode_HPPC.png" width="600" align="center"  />
+<img src="examples/Pos_Electrode_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -76,7 +76,7 @@ display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin
 ```
 
 <p align="center">
-<img src="examples/Neg_Electrode_HPPC.png" width="600" align="center"  />
+<img src="examples/Neg_Electrode_HPPC.png" width="1000" align="center"  />
 </p>
 
 
