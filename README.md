@@ -48,11 +48,37 @@ CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_e
 Plot Results:
 ```julia
 plotly()
-display(plot(tDra,CellV, legend=:topright,color=:blue,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Terminal Voltage [V]", xlabel = "Time [s]"))
-display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Electrolyte Concen. [mol/m^3]", xlabel = "Time [s]"))
-display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Pos. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
+display(plot(tDra,CellV, legend=:topright,color=:blue,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Terminal Voltage (V)", xlabel = "Time (s)",title="HPPC Voltage", label="Voltage",size=(1280,720)))
+```
+
+<p align="center">
+<img src="examples/Voltage_HPPC.png" width="600" align="center"  />
+</p>
+
+```julia
+display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Electrolyte Concen. (mol/m³)", xlabel = "Time (s)",title="Spacial Electrolyte Concentration",label=["Neg. Separator Interface" "Neg. Current Collector" "Pos. Current Collector" "Pos. Separator Interface"], size=(1280,720)))
+```
+
+<p align="center">
+<img src="examples/Electrolyte_HPPC.png" width="600" align="center"  />
+</p>
+
+```julia
+display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Concentration (mol/m³)", xlabel = "Time (s)",title="Spacial Positive Electrode Concentration",label=["Separator Interface" "Current Collector"], size=(1280,720)))
+```
+
+<p align="center">
+<img src="examples/Pos_Electrode_HPPC.png" width="600" align="center"  />
+</p>
+
+```julia
 display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
 ```
+
+<p align="center">
+<img src="examples/Neg_Electrode_HPPC.png" width="600" align="center"  />
+</p>
+
 
 ## Bug Tracking
 
