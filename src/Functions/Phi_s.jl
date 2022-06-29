@@ -31,7 +31,7 @@ function Phi_s(Cell,s,z,Def,ϕ_tf,D,res0)
    end
 
    #Resistance
-   Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilms
+   Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
 
    #∂Uocp_Def
    ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max

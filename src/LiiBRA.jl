@@ -6,14 +6,14 @@ export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
 export Realise, HPPC, fh!, mag!
 
-include("Functions/Transfer/C_e.jl")
-include("Functions/Transfer/C_se.jl")
-include("Functions/Transfer/Flux.jl")
-include("Functions/Transfer/Phi_s.jl")
-include("Functions/Transfer/Phi_e.jl")
-include("Functions/Transfer/Phi_se.jl")
-include("Methods/DRA.jl")
+include("Functions/C_e.jl")
+include("Functions/C_se.jl")
+include("Functions/Flux.jl")
+include("Functions/Phi_s.jl")
+include("Functions/Phi_e.jl")
+include("Functions/Phi_se.jl")
 include("Functions/Sim_Model.jl")
+include("Methods/CIDRA.jl")
 
 const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
 
@@ -79,6 +79,7 @@ function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
     return U,S,V'
 end
 
+#---------- D Lineaisation -----------------#
 """
     D_Linear(Cell,ν_neg,ν_pos,σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep) 
 
@@ -138,7 +139,7 @@ function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_e
     return D
 end
 
-
+#---------- Tuple Flatten -----------------#
 """
 
     flatten_(a::Tuple, b...) 
@@ -155,6 +156,8 @@ flatten_(a, b...) = tuple(a, flatten_(b...)...)
 flatten_tuple(x::Tuple) = flatten_(x...)
 
 
+
+#---------- Cell Contstruct -----------------#
 """
     Construct(::String) 
 
@@ -177,7 +180,7 @@ function Construct(CellType::String)
     return Cell
 end
 
-
+#---------- Tuple Length -----------------#
 """
     tuple_len(::NTuple) 
 
@@ -187,7 +190,7 @@ end
 tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
 
 
-
+#---------- Interpolate -----------------#
 """
     interp(MTup::Tuple,SList::Array,SOC) 
 
@@ -206,6 +209,7 @@ function interp(MTup::Tuple,SList::Array,SOC)
     return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])
 end
 
+#---------- Magnitude of an Array -----------------#
 function mag!(γ::AbstractArray)
     ψ = Array{Float64}(undef,size(γ))
     for j in 1:size(γ,2), i in 1:size(γ,1)
@@ -218,6 +222,7 @@ function mag!(γ::AbstractArray)
     return ψ
 end
 
+#---------- Magnitude of a Vector -----------------#
 function mag!(γ::AbstractVector)
     ψ = Vector{Float64}(undef,length(γ))
     for i in 1:length(γ)

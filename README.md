@@ -71,7 +71,7 @@ display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin
 </p>
 
 ```julia
-display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]"))
+display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]", size=(1280,720)))
 ```
 
 <p align="center">
