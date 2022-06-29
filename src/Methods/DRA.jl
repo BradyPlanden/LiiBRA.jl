@@ -17,7 +17,6 @@
     tfft = (1/Cell.RA.Fs)*Cell.RA.f
     OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
 
-
     #Initialise Loop Variables
     A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
     B = Vector{Float64}(undef,Cell.RA.M+1)
@@ -43,7 +42,6 @@
             run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],tf,Di,res0) 
         end
         
-
         # if Cell.RA.Fs==(1/Cell.RA.SamplingT)
         #     f = one(Int)
         #     λ = Int(Cell.RA.Fs*Cell.RA.SamplingT)
@@ -67,10 +65,6 @@
             puls[l:u,:] .= diff(samplingtf, dims=2)
         end
 
-       
-        #puls[l:u,:] .= diff(stpsum, dims=2)
-        #puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
-        #puls[l:u,:] .= diff(samplingtf, dims=2)
         D[l:u,:] .= Di
         C_Aug[l:u,:] .= res0
         l = u+one(u)::Int
@@ -87,24 +81,14 @@
     𝐇 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
     U,S,V = fh!(𝐇,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
 
-
-    # for i in 1:size(puls,1)
-    #     if U[i,1] < 0
-    #         U[i,:] .= -U[i,:]
-    #         V[:,i] .= -V[:,i]
-    #     end
-    # end  
-
     # Create Observibility and Control Matrices -> Create A, B, and C 
     ʃ = sqrt(Diagonal(S))
-    #Observibility = U*ʃ
-    #Control = ʃ*V'
-    
     U .= U*ʃ
     V .= ʃ*V
-
-    #A[2:end,2:end] .= (Observibility\𝐇)/Control
+    
     A[2:end,2:end] .= (U\𝐇)/V
+    B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
+    C .= [C_Aug SFactor.*U[1:Puls_L,:]]
 
     #Performance check
     if any(i -> i>1., real(eigvals(A)))
@@ -115,19 +99,6 @@
         println("Unstable System: A has indices of negative values")
     end
 
-    #B .= [Cell.RA.SamplingT; Control[:,Cell.RA.N]]
-    #C .= [C_Aug SFactor.*Observibility[1:size(puls,1),:]]
-    B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
-    C .= [C_Aug SFactor.*U[1:Puls_L,:]]
-    
-    #  Final State-Space Form
-    # d, Sᵘ = eigen(A,sortby=nothing)
-    # d = mag!(d) # taking the magnitude of S and maintaining the sign of the real values
-    # S = mag!(S)
-    # A = Diagonal(d)
-    # C = C*Sᵘ.*(inv(Sᵘ)*B)'
-    # B = ones(size(B))
-
-return mag!(A), mag!(B), mag!(C), D   
+    return mag!(A), mag!(B), mag!(C), D   
  
 end
