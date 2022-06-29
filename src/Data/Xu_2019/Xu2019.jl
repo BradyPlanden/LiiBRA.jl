@@ -1,7 +1,7 @@
 using Parameters
 
 @with_kw mutable struct Constants
-    CellTyp::String = "LG M50" #"Doyle_94"
+    CellTyp::String = "Xu 2019"
     T::Float64 = 298.15 # Cell Temperature (K)
     T_ref::Float64 = 298.15 # Reference Temperature (K)
     t_plus::Float64 = 0.2594 # Inital Transference Number
@@ -12,14 +12,14 @@ using Parameters
     ce0::Float64 = 1000 # Initial Electrolyte Concentration (mol m⁻³)
     Ea_κ::Float64 = 0.
     Ea_De::Float64 = 0
-    CC_A::Float64 =  0.1027  #Electrode Plate Area 
+    CC_A::Float64 =  1.54e-4 #Electrode Plate Area 
     κ::Float64 = 0.9487
     κf::Function = ce -> 0.1297*(ce/1000)^3-2.51*(ce/1000)^1.5+3.329*(ce/1000) #Requires ce in dm-3
     Uocp::Function = (Electrode, θ) ->
         if Electrode == "Neg"
-            Uocp = @. 1.97938*2.7182818284*exp(-39.3631*θ) + 0.2482 - 0.0909*tanh(29.8538*(θ - 0.1234)) - 0.04478*tanh(14.9159*(θ - 0.2769)) - 0.0205*tanh(30.4444*(θ - 0.6103))
+            Uocp = 0
         else
-            Uocp = @. -0.8090*θ + 4.4875 - 0.0428*tanh(18.5138*(θ - 0.5542)) - 17.7326*tanh(15.7890*(θ - 0.3117)) + 17.5842*tanh(15.9308*(θ - 0.3120))
+            Uocp = 0
         end
     ∂Uocp::Function = (Electrode,θ) -> 
         if Electrode == "Neg"
@@ -38,7 +38,7 @@ using Parameters
 end
 
 @with_kw mutable struct Negative
-    L::Float64 = 85.2e-6    # Negative Electrode Length
+    L::Float64 = 7e-4    # Negative Electrode Length
     Rs::Float64 = 5.86e-6   # Particle Radius [m]
     Ds::Float64 = 3.3e-14   # Solid Diffusivity [m^2/s]
     Ea_σ::Float64 = 0     # Activation Energy Solid Conductivity
@@ -47,13 +47,13 @@ end
     ϵ_e::Float64 = 0.25     # Porosity of Negative Electrode
     De_brug::Float64 = 1.5  # Bruggeman Diffusion Exponent
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Exponent
-    σ::Float64 = 215    # Solid Phase Conductivity
+    σ::Float64 = 1.08e7    # Solid Phase Conductivity
     σ_brug::Float64 = 1.5   # Bruggeman Solid Conductivity Exponent
     θ_100::Float64 = 0.910612 #0.9014 # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.0263473 #0.0279 # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 33133 # Max Electrode Concentration
-    α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 6.716047e-12 #6.48e-7 #2.12e-10#1E-5 #7.226781e-7 # Reaction Rate
+    α::Float64 = 0.3    # Alpha Factor
+    k_norm::Float64 = 3.5e-8 # Reaction Rate
     Ea_κ::Float64 = 35000   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance - Ωm²
     D1::Float64 = 1.   # Init Value
@@ -64,7 +64,7 @@ end
 end
 
 @with_kw mutable struct Positive
-    L::Float64 = 75.6e-6    # Positive Electrode Length
+    L::Float64 = 4.2e-5    # Positive Electrode Length
     Rs::Float64 = 5.22e-6    # Particle radius [m]
     Ds::Float64 = 4e-15   # Solid diffusivity [m^2/s]
     Ea_σ::Float64 = 0
@@ -79,7 +79,7 @@ end
     θ_0::Float64 = 0.853974 #0.9084 # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 63104 # Max Electrode Concentration
     α::Float64 = 0.5    # Alpha Factor
-    k_norm::Float64 = 3.54458e-11 #3.42e-6 #1.12e-9#4E-05 #7.264272e-6 # Reaction Rate
+    k_norm::Float64 = 3.54458e-11 # Reaction Rate
     Ea_κ::Float64 = 17800   # Activation Energy
     RFilm::Float64 = 0 # Film Resistance - Ωm²
     D3::Float64 = 1   # Init Value
@@ -90,7 +90,7 @@ end
 end
 
 @with_kw mutable struct Seperator
-    L::Float64 = 12e-6  # Seperator Length
+    L::Float64 = 2.5e-5  # Seperator Length
     ϵ_e::Float64 = 0.47    # Porosity of separator
     De_brug::Float64 = 1.5  # Bruggeman Diffusivity Factor
     κ_brug::Float64 = 1.5   # Bruggeman Electrolyte Conductivity Factor
