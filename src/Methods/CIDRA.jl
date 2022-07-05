@@ -1,14 +1,14 @@
-@inline function DRA(Cell)
+@inline function CIDRA(Cell)
     """ 
     Function for Discrete Realisation Algorithm.
 
-    DRA(Cell,s,f)
+    CIDRA(Cell,s,f)
     
     """
 
     # Method Check
     if Cell.RA.Fs==(1/Cell.RA.SamplingT)
-        println("CI-DRA Utilised")
+        println("CIDRA Utilised")
     else
         println("DRA Utilised")
     end
@@ -99,6 +99,6 @@
         println("Unstable System: A has indices of negative values")
     end
 
-    return mag!(A), mag!(B), mag!(C), D   
+    return mag!(A), mag!(B), mag!(C), D
  
 end

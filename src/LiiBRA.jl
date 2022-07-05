@@ -2,7 +2,7 @@ module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using TSVD, Roots, Statistics, Interpolations
-export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, DRA
+export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
 export Realise, HPPC, fh!, mag!
 
@@ -36,7 +36,7 @@ function Realise(Cell, SList::Array, T::Float64)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
 
         #Realisation
-        Aϕ, Bϕ, Cϕ, Dϕ = DRA(Cell)
+        Aϕ, Bϕ, Cϕ, Dϕ = CIDRA(Cell)
 
         #Flatten output into Tuples
         A = flatten_(A,Aϕ)
@@ -76,6 +76,14 @@ function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
     @inbounds @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end
+
+    for i ∈ 1:size(U,2)
+        if U[1,i] < 0.
+            U[:,i] = -U[:,i]
+            V[:,i] = -V[:,i]
+        end
+    end
+
     return U,S,V'
 end
 

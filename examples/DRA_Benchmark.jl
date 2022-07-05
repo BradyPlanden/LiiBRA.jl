@@ -3,10 +3,11 @@ using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 50
 Cell = Construct("LG M50")
 #SList = collect(0.725:-0.025:0.625)
-SList = collect(1:-0.25:0.0)
+SList = collect(0.75:-0.05:0.5)
 #SList = collect(0.8)
 SOC = 0.717
 T = 298.15
+Cell.Pos.L = 50e-6
 
 function DRA_Loop(Cell, SList::Array, T::Float64)
     A = B = C = D = Time = x = tuple()
@@ -33,7 +34,7 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         
         for Cell.Const.SOC in SList
             #Realisation
-            A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell)
+            A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
             A = flatten_(A,A_DRA)
             B = flatten_(B,B_DRA)
             C = flatten_(C,C_DRA)
