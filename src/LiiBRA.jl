@@ -4,7 +4,7 @@ using UnitSystems, Parameters, LinearAlgebra, FFTW
 using TSVD, Roots, Statistics, Interpolations
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC, fh!, mag!
+export Realise, HPPC, fh!, mag!, findnearest
 
 include("Functions/C_e.jl")
 include("Functions/C_se.jl")
@@ -16,6 +16,7 @@ include("Functions/Sim_Model.jl")
 include("Methods/CIDRA.jl")
 
 const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
+findnearest(A,x) = argmin(abs.(A .- x)) # Find Nearest for SOC initialisation
 
 
 #---------- Generate Model -----------------#
@@ -206,12 +207,14 @@ tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
 
 """
 function interp(MTup::Tuple,SList::Array,SOC)
-    T1 = 0
-    T2 = 0
+    T1 = 1
+    T2 = 1
     for i in 1:length(SList)-1
         if SList[i] > SOC >= SList[i+1]
             T2 = i
             T1 = i+1
+        elseif SList[i] == SOC
+            return MTup[i]
         end
     end
     return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])

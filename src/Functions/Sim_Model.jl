@@ -14,14 +14,12 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     D = Array{Float64}(undef,size(D0[1]))
 
     #Selecting SS Models
-    for i in 1:length(SList)
-        if SOC == SList[i] # Fix this, round?
-            A = A0[i]
-            B = B0[i]
-            C = C0[i]
-            D = D0[i]
-        end
-    end
+    υ = findnearest(SList,SOC)
+    A = A0[υ]
+    B = B0[υ]
+    C = C0[υ]
+    D = D0[υ]
+
 
     #Capturing Indices
     tfstr = Array{String}(undef,0,1)
@@ -44,9 +42,6 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     ϕ_seNegInd = findall(isequal("Phi_se_Neg"), tfstr)
     FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
     FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
-
-
-    #@infiltrate cond = true
 
 
     CeNeg = Cell.Transfer.Locs[1].<=Cell.Neg.L
@@ -99,10 +94,8 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     SOC_Pos = SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
     θ_neg[1] = SOC_Neg
     θ_pos[1] = SOC_Pos
-    Cell_SOC[1] = (SOC_Neg-Cell.Neg.θ_0)/(Cell.Neg.θ_100-Cell.Neg.θ_0)
 
-    #Loop through time
-    #Compute dependent variables (voltage, flux, etc.)
+    # Loop through time - compute dependent variables (voltage, flux, etc.) #
     for i in 0:(tlength-1)
         cs_neg_avg = x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max < 0. ? 0. : x[i+1,1] * csegain_neg + SOC_Neg * Cell.Neg.cs_max #Zero if < 0
         cs_pos_avg = x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max < 0. ? 0. : x[i+1,1] * csegain_pos + SOC_Pos * Cell.Pos.cs_max #Zero if < 0
@@ -160,11 +153,11 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
         ν_pos = @. Cell.Pos.L*sqrt((Cell.Pos.as*(1/κ_eff_Pos+1/σ_eff_Pos))/Rtot_pos[i+1])
 
         #Relinearise dependent on ν, σ, κ
-        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
-        
+        #D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+
         #Interpolate C & D Matrices
         C = interp(C0,SList,Cell_SOC[i+1])
-        #D = interp(D0,SList,Cell_SOC[i+1])
+        D = interp(D0,SList,Cell_SOC[i+1])
         #SS Output
         y[i+1,:] = C*x[i+1,:] + D*Iapp[i+1]
 
@@ -213,6 +206,7 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
 
         #Update States
         x[i+2,:] = A*x[i+1,:] + B*Iapp[i+1]
+
 
         if Def =="Power"
             Iapp[i+2] = Input[i+1,1]/Cell_V[i+1]
