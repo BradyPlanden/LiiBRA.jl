@@ -1,4 +1,4 @@
-using LiiBRA, UnitSystems, Test, LinearAlgebra
+using LiiBRA, UnitSystems, Test, LinearAlgebra, JLD2
 
 #Construct cell struct
 Cell = Construct("LG M50")
@@ -23,7 +23,7 @@ function TestDRA(Cell)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
 
         #DRA
-        A_DRA, B_DRA, C_DRA, D_DRA = DRA(Cell)
+        A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
 
         #Flatten output into tuples
         A = flatten_(A,A_DRA)
@@ -34,6 +34,8 @@ function TestDRA(Cell)
 return A, B, C, D
 end
 
+#Load Test Data
+Data = load("test/CIDRA_Data.jld2")
 A,B,C,D = TestDRA(Cell)
 
 
@@ -42,6 +44,13 @@ A,B,C,D = TestDRA(Cell)
 @test typeof(B[1]) == Vector{Float64}
 @test typeof(C[1]) == Matrix{Float64}
 @test typeof(D[1]) == Vector{Float64}
+
+@test Data["A0"] == A[1]
+@test Data["B0"] == B[1]
+@test Data["C0"] == C[1]
+@test Data["D0"] == D[1]
+
+#ToDo
 #@test output eigs and compare to diagonal of A 
 #@test sim_model output at multiple SOC?
 
