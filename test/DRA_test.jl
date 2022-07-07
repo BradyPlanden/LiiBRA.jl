@@ -35,7 +35,7 @@ return A, B, C, D
 end
 
 #Load Test Data
-Data = load("test/CIDRA_Data.jld2")
+Data = load("CIDRA_Data.jld2")
 A,B,C,D = TestDRA(Cell)
 
 
