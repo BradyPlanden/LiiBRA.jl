@@ -45,10 +45,10 @@ A,B,C,D = TestDRA(Cell)
 @test typeof(C[1]) == Matrix{Float64}
 @test typeof(D[1]) == Vector{Float64}
 
-@test Data["A0"] == A[1]
-@test Data["B0"] == B[1]
-@test Data["C0"] == C[1]
-@test Data["D0"] == D[1]
+@test Data["A0"] ≈ A[1]
+@test Data["B0"] ≈ B[1]
+@test Data["C0"] ≈ C[1]
+@test Data["D0"] ≈ D[1]
 
 #ToDo
 #@test output eigs and compare to diagonal of A 
