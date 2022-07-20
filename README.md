@@ -3,13 +3,14 @@
 [![Build Status](https://github.com/BradyPlanden/LiiBRA.jl/workflows/CI/badge.svg)](https://github.com/BradyPlanden/LiiBRA.jl/actions)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
+[![DOI:10.48550/arXiv.2203.17105](http://img.shields.io/badge/DOI-10.48550/arXiv.2203.17105-B31B1B.svg)](https://doi.org/10.48550/arXiv.2203.17105)
 
 <p align="center">
 <img src="LiiBRA.png" width="600" align="center"  />
 </p>
 
 ## Create and Simulate Reduced Order Lithium-Ion Battery Models
-LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to [[1]](https://arxiv.org/abs/2203.17105)
+LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the preprint above.
 
 Install (Julia 1.7 and later)
 -----------------------------
