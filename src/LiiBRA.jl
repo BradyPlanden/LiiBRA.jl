@@ -65,7 +65,7 @@ end
 
 #---------- Hankel Formation & SVD -----------------#
 function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
-    @inbounds @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+    @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
             H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]]
     end
 
@@ -74,7 +74,7 @@ function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
     U,S,V = tsvd(H, M; initvec=Init, maxiter=1e4)
     println("---")  
 
-    @inbounds @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+    @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
     end
 

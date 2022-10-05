@@ -16,7 +16,7 @@
     #Additional Pulse Setup
     tfft = (1/Cell.RA.Fs)*Cell.RA.f
     OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
-
+    
     #Initialise Loop Variables
     A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
     B = Vector{Float64}(undef,Cell.RA.M+1)
