@@ -1,26 +1,35 @@
-using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots
+using BenchmarkTools, LiiBRA, MAT, StatsBase#, Plots
 
-BenchmarkTools.DEFAULT_PARAMETERS.seconds = 50
+BenchmarkTools.DEFAULT_PARAMETERS.seconds = 40
 Cell = Construct("LG M50")
-#SList = collect(0.725:-0.025:0.625)
-SList = collect(1.0:-0.1:0.7)
-#SList = collect(0.8)
-SOC = 1.0
+#SList = collect(1.0:-0.25:0.)
+SList = collect(0.8)
+SOC = 0.717
 T = 298.15
+
+Rng = 1:1496
+function Hankel_Rng(Rng)
+    for i ∈ 2000:1000:5000
+    Rng = [Rng;i+500:i+750]
+    end
+    return Rng
+end
+Rng = Hankel_Rng(Rng)
+
 
 function DRA_Loop(Cell, SList::Array, T::Float64)
     A = B = C = D = Time = x = tuple()
-    for i in 2500:2500:2500
+    for i in 2:4:2
         
         #Arrhenius
         Cell.Const.T = T
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
         
-        Cell.RA.H1 = 1:i
-        Cell.RA.H2 = 1:i
-        Cell.RA.Tlen = 16200
+        Cell.RA.H1 = Rng #1:3500
+        Cell.RA.H2 = Rng #1:3500
         Cell.RA.Fs = 4
-        Cell.RA.M = 6
+        Cell.RA.Tlen = 16200 #(1+size(Cell.RA.H1,1)/Cell.RA.Fs)*17
+        Cell.RA.M = 4
         Cell.RA.SamplingT = 1/4
         
         #Set Cell Constants
@@ -31,16 +40,16 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         Cell.Neg.β = Cell.Neg.β!(Cell.RA.s)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
         
-        for Cell.Const.SOC in SList
-            #Realisation
-            A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
-            A = flatten_(A,A_DRA)
-            B = flatten_(B,B_DRA)
-            C = flatten_(C,C_DRA)
-            D = flatten_(D,D_DRA)
-        end
-        # x = @benchmark DRA(Cell)
-        # Time = flatten_(Time,x)
+        # for Cell.Const.SOC in SList
+        #     #Realisation
+        #     A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
+        #     A = flatten_(A,A_DRA)
+        #     B = flatten_(B,B_DRA)
+        #     C = flatten_(C,C_DRA)
+        #     D = flatten_(D,D_DRA)
+        # end
+        x = @benchmark CIDRA(Cell)
+        Time = flatten_(Time,x)
     
     end
     return Time, A, B, C, D
@@ -75,7 +84,7 @@ function Sim_loop(Cell, Input, SList, SOC, A, B, C, D)
            # @time Sim_Model(Cell,Input,"Power",Tk,SList,SOC,A,B,C,D)
            #end
        end
-       return CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra, Cell_SOC, SimTime
+       return CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra, Cell_SOC
    end
    
    function Stats()
@@ -93,7 +102,6 @@ function Sim_loop(Cell, Input, SList, SOC, A, B, C, D)
    return Rms_Cn, Max_Cn, Rms_Cp, Max_Cp, Rms_V, Max_V
    end
    
-
 
 function Sensitivity(Rng,SList,WLTP_P,SOC)
     k=1
@@ -114,7 +122,9 @@ end
 
 WLTP_File = matopen("test/WLTP/WLTP_M50_M3.mat")
 WLTP_P = read(WLTP_File,"P_Models")
-Output = Sensitivity(20e-6:10e-6:100e-6,SList,WLTP_P,SOC)
+Time, A, B, C, D = DRA_Loop(Cell, SList, T)
+# CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, tDra, Cell_SOC = Sim_loop(Cell, WLTP_P, SList, SOC, A, B, C, D)
+#Output = Sensitivity(20e-6:10e-6:100e-6,SList,WLTP_P,SOC)
 
 #    Pyb_File = matopen("test/WLTP/sol_data.mat")#
 #    Pyb_Cn = read(Pyb_File,"c_n")
@@ -128,4 +138,4 @@ Output = Sensitivity(20e-6:10e-6:100e-6,SList,WLTP_P,SOC)
 #    Rms_V = Array{Float64}(undef,tuple_len(CellV),1)
 #    Max_V = Array{Float64}(undef,tuple_len(CellV),1)
    
-   #Rms_Cn, Max_Cn, Rms_Cp, Max_Cp, Rms_V = Stats()
+#    Rms_Cn, Max_Cn, Rms_Cp, Max_Cp, Rms_V = Stats()

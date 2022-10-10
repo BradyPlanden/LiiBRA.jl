@@ -4,6 +4,7 @@ using LiiBRA, UnitSystems, Test, LinearAlgebra, JLD2
 Cell = Construct("LG M50")
 Cell.RA.Tlen = 128
 Cell.RA.Fs = 1
+Cell.RA.M = 4
 Cell.RA.H1 = 1:Cell.RA.Tlen
 Cell.RA.H2 = 1:Cell.RA.Tlen
 
@@ -37,7 +38,6 @@ end
 #Load Test Data
 Data = load("CIDRA_Data.jld2")
 A,B,C,D = TestDRA(Cell)
-
 
 @test size(A[1],1) == Cell.RA.M+1
 @test typeof(A[1]) == Matrix{Float64}
