@@ -55,7 +55,7 @@ function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B:
 
     #Set Experiment
     i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
-    Input = [ones(1)*0.; ones(10*i)*λ; ones(40*i)*0.; ones(10*i)*ϕ; ones(40*i)*0.] #1C HPPC Experiment Current Profile
+    Input = [zero(i); ones(10*i)*λ; zeros(40*i); ones(10*i)*ϕ; zeros(40*i)] #1C HPPC Experiment Current Profile
     Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
     t = 0:(1.0/i):((length(Input)-1)/i)
     
@@ -65,14 +65,18 @@ end
 
 #---------- Hankel Formation & SVD -----------------#
 function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
-    @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
+    """
+
+    Inplace mutation of H, returns U,S,V'
+
+    """
+   @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
             H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]]
     end
 
-    #Init = abs.(convert(Vector{float(eltype(H))}, randn(size(H,1))))
     Init = convert(Vector{float(eltype(H))}, ones(size(H,1)))
-    U,S,V = tsvd(H, M; initvec=Init, maxiter=1e4)
-    println("---")  
+    U,S,V = tsvd(H, M; initvec=Init)
+    println("---")
 
     @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
@@ -93,7 +97,7 @@ end
 
     flatten_(a::Tuple, b...) 
 
-Flattens input Tuple "a" and inserts "b" 
+    Flattens input Tuple "a" and inserts "b" 
 
 """
 function flatten_ end
@@ -161,7 +165,7 @@ function interp(MTup::Tuple,SList::Array,SOC)
 end
 
 #---------- Magnitude of an Array -----------------#
-function mag!(γ::AbstractArray)
+function mag(γ::AbstractArray)
     ψ = Array{Float64}(undef,size(γ))
     for j in 1:size(γ,2), i in 1:size(γ,1)
         if real(γ[i,j]) < 0
@@ -174,7 +178,7 @@ function mag!(γ::AbstractArray)
 end
 
 #---------- Magnitude of a Vector -----------------#
-function mag!(γ::AbstractVector)
+function mag(γ::AbstractVector)
     ψ = Vector{Float64}(undef,length(γ))
     for i in 1:length(γ)
         if real(γ[i]) < 0

@@ -1,4 +1,4 @@
-@inline function CIDRA(Cell)
+function CIDRA(Cell)
     """ 
     Function for Discrete Realisation Algorithm.
 
@@ -33,7 +33,8 @@
         Di = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
         res0 = Vector{Float64}(undef,size(Cell.Transfer.Locs[i],1))::Vector{Float64}
         samplingtf = Array{Float64}(undef,size(Cell.Transfer.Locs[i],1),length(OrgT))
-        
+        u += Int(size(Cell.Transfer.Locs[i],1))
+
         if Cell.Transfer.Elec[i] == "Pos"
             run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],"Pos",tf,Di,res0) 
         elseif Cell.Transfer.Elec[i] == "Neg"
@@ -42,21 +43,11 @@
             run(Cell,Cell.RA.s,Cell.Transfer.Locs[i],tf,Di,res0) 
         end
         
-        # if Cell.RA.Fs==(1/Cell.RA.SamplingT)
-        #     f = one(Int)
-        #     λ = Int(Cell.RA.Fs*Cell.RA.SamplingT)
-        #     for i in 1:λ:size(tfft,2), j in 1:λ:size(tfft,1)
-        #         Org[j,f] = tf[j,i]
-        #         f+=1
-        #     end
-        # end
-
-        u += Int(size(Cell.Transfer.Locs[i],1))::Int
-
         if Cell.RA.Fs==(1/Cell.RA.SamplingT)
             puls[l:u,:] .= real(ifft(tf,2))[:,2:end]
         else
             stpsum = cumsum(real(ifft(tf,2)), dims=2) #cumulative sum of tf response * sample time
+            
             #Interpolate H(s) to obtain h_s(s) to obtain discrete-time impulse response
             for k in 1:size(stpsum,1)
                 spl1 = CubicSplineInterpolation(tfft, stpsum[k,:]; bc=Line(OnGrid()), extrapolation_bc=Throw())
@@ -67,7 +58,7 @@
 
         D[l:u,:] .= Di
         C_Aug[l:u,:] .= res0
-        l = u+one(u)::Int
+        l = u+one(u)
         i += one(i)
 
     end
@@ -99,6 +90,6 @@
         println("Unstable System: A has indices of negative values")
     end
 
-    return mag!(A), mag!(B), mag!(C), D
+    return mag(A), mag(B), mag(C), D
  
 end

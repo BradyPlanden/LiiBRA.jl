@@ -1,9 +1,9 @@
-using BenchmarkTools, LiiBRA, MAT, StatsBase, Plots
+using BenchmarkTools, LiiBRA, MAT, StatsBase#, Plots
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 40
 Cell = Construct("LG M50")
-SList = collect(1.0:-0.25:0.)
-#SList = collect(0.8)
+#SList = collect(1.0:-0.25:0.)
+SList = collect(0.8)
 SOC = 0.717
 T = 298.15
 
@@ -40,16 +40,16 @@ function DRA_Loop(Cell, SList::Array, T::Float64)
         Cell.Neg.β = Cell.Neg.β!(Cell.RA.s)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
         
-        for Cell.Const.SOC in SList
-            #Realisation
-            A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
-            A = flatten_(A,A_DRA)
-            B = flatten_(B,B_DRA)
-            C = flatten_(C,C_DRA)
-            D = flatten_(D,D_DRA)
-        end
-        # x = @benchmark CIDRA(Cell)
-        # Time = flatten_(Time,x)
+        # for Cell.Const.SOC in SList
+        #     #Realisation
+        #     A_DRA, B_DRA, C_DRA, D_DRA = CIDRA(Cell)
+        #     A = flatten_(A,A_DRA)
+        #     B = flatten_(B,B_DRA)
+        #     C = flatten_(C,C_DRA)
+        #     D = flatten_(D,D_DRA)
+        # end
+        x = @benchmark CIDRA(Cell)
+        Time = flatten_(Time,x)
     
     end
     return Time, A, B, C, D
