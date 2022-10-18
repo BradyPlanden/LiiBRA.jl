@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/BradyPlanden/LiiBRA.jl/workflows/CI/badge.svg)](https://github.com/BradyPlanden/LiiBRA.jl/actions)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
-[![DOI:10.48550/arXiv.2203.17105](http://img.shields.io/badge/DOI-10.48550/arXiv.2203.17105-B31B1B.svg)](https://doi.org/10.48550/arXiv.2203.17105)
+[![DOI:10.1016/j.est.2022.105637](http://img.shields.io/badge/DOI-10.1016/j.est.2022.105637-B31B1B.svg)](https://doi.org/10.1016/j.est.2022.105637)
 
 <p align="center">
 <img src="LiiBRA.png" width="600" align="center"  />
