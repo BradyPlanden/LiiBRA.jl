@@ -3,14 +3,14 @@
 [![Build Status](https://github.com/BradyPlanden/LiiBRA.jl/workflows/CI/badge.svg)](https://github.com/BradyPlanden/LiiBRA.jl/actions)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
-[![DOI:10.1016/j.est.2022.105637](http://img.shields.io/badge/DOI-10.1016/j.est.2022.105637-B31B1B.svg)](https://doi.org/10.1016/j.est.2022.105637)
+[![DOI:10.1016/j.est.2022.105637](http://img.shields.io/badge/DOI-10.1016/j.est.2022.105637-blue.svg)](https://doi.org/10.1016/j.est.2022.105637)
 
 <p align="center">
 <img src="LiiBRA.png" width="600" align="center"  />
 </p>
 
 ## Create and Simulate Reduced Order Lithium-Ion Battery Models
-LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the preprint above.
+LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics-informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the preprint above.
 
 Install (Julia 1.7 and later)
 -----------------------------
@@ -45,10 +45,21 @@ HPPC Simulation:
 CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL, tDra = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D);
 ```
 
-Plot Results:
+Plotting Results:
 ```julia
 plotly()
-display(plot(tDra,CellV, legend=:topright,color=:blue,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Terminal Voltage (V)", xlabel = "Time (s)",title="HPPC Voltage", label="Voltage",size=(1280,720)))
+plot(tDra,CellV;
+     legend=:topright,
+     color=:blue,
+     bottom_margin=5Plots.mm,
+     left_margin = 5Plots.mm,
+     right_margin = 15Plots.mm,
+     ylabel = "Terminal Voltage (V)",
+     xlabel = "Time (s)",
+     title="HPPC Voltage",
+     label="Voltage",
+     size=(1280,720)
+    )
 ```
 
 <p align="center">
@@ -56,7 +67,17 @@ display(plot(tDra,CellV, legend=:topright,color=:blue,bottom_margin=5Plots.mm, l
 </p>
 
 ```julia
-display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Electrolyte Concen. (mol/m³)", xlabel = "Time (s)",title="Spacial Electrolyte Concentration",label=["Neg. Separator Interface" "Neg. Current Collector" "Pos. Current Collector" "Pos. Separator Interface"], size=(1280,720)))
+plot(tDra,Ce;
+     legend=:topright,
+     bottom_margin=5Plots.mm, 
+     left_margin = 5Plots.mm, 
+     right_margin = 15Plots.mm, 
+     ylabel = "Electrolyte Concen. (mol/m³)", 
+     xlabel = "Time (s)",
+     title="Spacial Electrolyte Concentration",
+     label=["Neg. Separator Interface" "Neg. Current Collector" "Pos. Current Collector" "Pos. Separator Interface"], 
+     size=(1280,720)
+    )
 ```
 
 <p align="center">
@@ -64,7 +85,17 @@ display(plot(tDra,Ce, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5P
 </p>
 
 ```julia
-display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Concentration (mol/m³)", xlabel = "Time (s)",title="Spacial Positive Electrode Concentration",label=["Separator Interface" "Current Collector"], size=(1280,720)))
+plot(tDra,Cse_Pos;
+     legend=:topright,
+     bottom_margin=5Plots.mm, 
+     left_margin = 5Plots.mm, 
+     right_margin = 15Plots.mm, 
+     ylabel = "Concentration (mol/m³)", 
+     xlabel = "Time (s)",
+     title="Spacial Positive Electrode Concentration",
+     label=["Current Collector" "Separator Interface"], 
+     size=(1280,720)
+    )
 ```
 
 <p align="center">
@@ -72,7 +103,17 @@ display(plot(tDra,Cse_Pos, legend=:topright,bottom_margin=5Plots.mm, left_margin
 </p>
 
 ```julia
-display(plot(tDra,Cse_Neg, legend=:topright,bottom_margin=5Plots.mm, left_margin = 5Plots.mm, right_margin = 15Plots.mm, ylabel = "Neg. Electrode Concen. [mol/m^3]", xlabel = "Time [s]", size=(1280,720)))
+plot(tDra,Cse_Neg;
+     legend=:topright,
+     bottom_margin=5Plots.mm, 
+     left_margin = 5Plots.mm, 
+     right_margin = 15Plots.mm, 
+     ylabel = "Concentration (mol/m³)", 
+     xlabel = "Time [s]", 
+     title="Spacial Negative Electrode Concentration",
+     label=["Current Collector" "Separator Interface"],
+     size=(1280,720)
+    )
 ```
 
 <p align="center">
