@@ -10,7 +10,7 @@
 </p>
 
 ## Create and Simulate Reduced Order Lithium-Ion Battery Models
-LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics-informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the preprint above.
+LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics-informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the publication above.
 
 Install (Julia 1.7 and later)
 -----------------------------
@@ -42,13 +42,13 @@ A,B,C,D = Realise(Cell,SList,T);
 
 HPPC Simulation:
 ```julia
-CellV, Ce, jNeg, jPos, RtotNeg, RtotPos, η0, ηL, η_neg, η_pos, ϕ_ẽ1, ϕ_ẽ2, Uocp_Neg, Uocp_Pos, ϕ_e, Cse_Neg, Cse_Pos, Cell_SOC, jeq_neg, jeq_pos, j0, jL, tDra = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D);
+Results = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D);
 ```
 
 Plotting Results:
 ```julia
 plotly()
-plot(tDra,CellV;
+plot(Results.t, Results.Cell_V;
      legend=:topright,
      color=:blue,
      bottom_margin=5Plots.mm,
@@ -67,7 +67,7 @@ plot(tDra,CellV;
 </p>
 
 ```julia
-plot(tDra,Ce;
+plot(Results.t, Results.Ce;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
@@ -85,7 +85,7 @@ plot(tDra,Ce;
 </p>
 
 ```julia
-plot(tDra,Cse_Pos;
+plot(Results.t, Results.Cse_Pos;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
@@ -103,7 +103,7 @@ plot(tDra,Cse_Pos;
 </p>
 
 ```julia
-plot(tDra,Cse_Neg;
+plot(Results.t, Results.Cse_Neg;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
