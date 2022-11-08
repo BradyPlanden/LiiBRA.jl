@@ -149,11 +149,11 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
         ν_pos = @. Cell.Pos.L*sqrt((Cell.Pos.as*(1/κ_eff_Pos+1/σ_eff_Pos))/Results.Rtot_pos[i+1])
 
         # Relinearise dependent on ν, σ, κ
-        #D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
 
         # Interpolate C & D Matrices
         C = interp(C0,SList,Results.Cell_SOC[i+1])
-        D = interp(D0,SList,Results.Cell_SOC[i+1])
+        # D = interp(D0,SList,Results.Cell_SOC[i+1])
 
         # SS Output
         Results.y[i+1,:] = C*Results.x[i+1,:] + D*Results.Iapp[i+1]
@@ -168,6 +168,7 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
         Results.Uocp_Pos[i+1] = Cell.Const.Uocp("Pos",Results.Cse_Pos[i+1,1]/Cell.Pos.cs_max)
         Results.ϕ_se_neg_0[i+1] = Results.y[i+1, ϕ_seNegInd[1]] + Results.Uocp_Neg[i+1] #Location 0
         Results.ϕ_ẽ1[i+1,:] = Results.y[i+1,ϕ_ẽInd]
+
         Results.ϕ_ẽ2[i+1,:] = @. ((Tk[i+1]*2*R*(1-Cell.Const.tpf(Results.Ce[i+1,:])))/F)*(log(Results.Ce[i+1,:]/Results.Ce[i+1,1]))
         Results.ϕ_e[i+1,:] = @. [0; Results.ϕ_ẽ1[i+1,:]]+Results.ϕ_ẽ2[i+1,:]-Results.ϕ_se_neg_0[i+1]
 

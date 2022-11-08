@@ -3,21 +3,22 @@ function CIDRA(Cell)
     Function for Discrete Realisation Algorithm.
 
     CIDRA(Cell,s,f)
-    
     """
 
     # Method Check
-    if Cell.RA.Fs==(1/Cell.RA.SamplingT)
-        println("CIDRA Utilised")
-    else
-        println("DRA Utilised")
+    if Cell.Const.Debug == true
+        if Cell.RA.Fs==(1/Cell.RA.SamplingT)
+            println("CIDRA Utilised")
+        else
+            println("DRA Utilised")
+        end
     end
 
-    #Additional Pulse Setup
+    # Additional Pulse Setup
     tfft = (1/Cell.RA.Fs)*Cell.RA.f
     OrgT = Cell.RA.SamplingT*(0:floor(tfft[end]/Cell.RA.SamplingT))
     
-    #Initialise Loop Variables
+    # Initialise Loop Variables
     A = Matrix{Float64}(I,Cell.RA.M+1,Cell.RA.M+1)
     B = Vector{Float64}(undef,Cell.RA.M+1)
     C = Matrix{Float64}(undef,Cell.RA.Outs,Cell.RA.M+1)
@@ -63,11 +64,11 @@ function CIDRA(Cell)
 
     end
 
-    #Scale Transfer Functions in Pulse Response
+    # Scale Transfer Functions in Pulse Response
     SFactor = sqrt.(sum(puls.^2,dims=2))
     puls .= puls./SFactor
 
-    #Pre-Allocation for Hankel & SVD
+    # Pre-Allocation for Hankel & SVD
     Puls_L = size(puls,1)
     𝐇 = Array{Float64}(undef,length(Cell.RA.H1)*Puls_L,length(Cell.RA.H2))
     U,S,V = fh!(𝐇,Cell.RA.H1,Cell.RA.H2,puls,Cell.RA.M,Puls_L)
@@ -81,7 +82,7 @@ function CIDRA(Cell)
     B .= [Cell.RA.SamplingT; V[:,1:Cell.RA.N]]
     C .= [C_Aug SFactor.*U[1:Puls_L,:]]
 
-    #Performance check
+    # Performance check
     if any(i -> i>1., real(eigvals(A)))
         println("Oscilating System: A has indices of values > 1")
     end
@@ -89,6 +90,13 @@ function CIDRA(Cell)
     if any(i -> i<0., real(eigvals(A)))
         println("Unstable System: A has indices of negative values")
     end
+
+    # Transform the SS system for interpolation
+    # d, Sᵘ = eigen(A,sortby=nothing)
+    # A = inv(Sᵘ)*A*Sᵘ
+    # B = inv(Sᵘ)*B
+    # C = C*Sᵘ#*Diagonal(B)
+    #B = ones(length(B))
 
     return mag(A), mag(B), mag(C), D
  
