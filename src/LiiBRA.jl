@@ -1,10 +1,10 @@
 module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
-using TSVD, Roots, Statistics, Interpolations, JLD2
+using TSVD, Roots, Statistics, Interpolations#, JLD2
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
 export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC, fh!, mag!, findnearest
+export Realise, HPPC, fh!, mag!, findnearest, CC
 
 include("Functions/C_e.jl")
 include("Functions/C_se.jl")
@@ -50,12 +50,25 @@ end
 
 
 
-#---------- Simulate Model -----------------#
+#---------- HPPC Simulation -----------------#
 function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B::Tuple,C::Tuple,D::Tuple)
 
     #Set Experiment
     i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
     Input = [zero(i); ones(10*i)*λ; zeros(40*i); ones(10*i)*ϕ; zeros(40*i)] #1C HPPC Experiment Current Profile
+    Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
+    t = 0:(1.0/i):((length(Input)-1)/i)
+    
+    #Simulate Model
+    return Sim_Model(Cell,Input,"Current",Tk,SList,SOC,A,B,C,D,t)
+end
+
+#---------- Constant Current Simulation -----------------#
+function CC(Cell, SList::Array, SOC::Float64, λ::Float64, γ, A::Tuple, B::Tuple, C::Tuple, D::Tuple)
+
+    #Set Experiment
+    i = 1/Cell.RA.SamplingT # Sampling Frequency
+    Input = ones(Int64(γ*i))*λ #CC Profile
     Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
     t = 0:(1.0/i):((length(Input)-1)/i)
     
@@ -76,7 +89,6 @@ function fh!(H,Hlen1,Hlen2,puls,M,Puls_L)
 
     Init = convert(Vector{float(eltype(H))}, ones(size(H,1)))
     U,S,V = tsvd(H, M; initvec=Init)
-    println("---")
 
     @views for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
            H[Puls_L*(lp2-1)+1:Puls_L*lp2,lp1] .= puls[:,Hlen2[lp1]+Hlen1[lp2]+1]
@@ -123,7 +135,7 @@ flatten_tuple(x::Tuple) = flatten_(x...)
 
 """
 function Construct(CellType::String)
-    if CellType == "Doyle 94"
+    if CellType == "Doyle_94"
         CellType = string(CellType,".jl")
         include(joinpath(dirname(pathof(LiiBRA)), "Data/Doyle_94", CellType))
     elseif CellType == "LG M50"
@@ -155,13 +167,13 @@ function interp(MTup::Tuple,SList::Array,SOC)
     T2 = 1
     for i in 1:length(SList)-1
         if SList[i] > SOC >= SList[i+1]
-            T2 = i
-            T1 = i+1
+            T1 = i
+            T2 = i+1
         elseif SList[i] == SOC
             return MTup[i]
         end
     end
-    return M =  @. MTup[T1]+(MTup[T2]-MTup[T1])*(SOC-SList[T1])/(SList[T2]-SList[T1])
+    return M =  @. MTup[T2]+(MTup[T1]-MTup[T2])*(SOC-SList[T2])/(SList[T1]-SList[T2])
 end
 
 #---------- Magnitude of an Array -----------------#

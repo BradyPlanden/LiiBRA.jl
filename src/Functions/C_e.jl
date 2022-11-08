@@ -43,7 +43,7 @@ function C_e(Cell,s,z,tf,D,res0)
     ν_n =  @. Cell.Neg.L*sqrt((Cell.Neg.as/σ_eff_Neg+Cell.Neg.as/κ_eff_Neg)/(Rtot_neg+∂Uocp_neg*(Cell.Neg.Rs/(F*Cell.Neg.Ds))*(tanh(Cell.Neg.β)/(tanh(Cell.Neg.β)-Cell.Neg.β))))
     ν_p =  @. Cell.Pos.L*sqrt((Cell.Pos.as/σ_eff_Pos+Cell.Pos.as/κ_eff_Pos)/(Rtot_pos+∂Uocp_pos*(Cell.Pos.Rs/(F*Cell.Pos.Ds))*(tanh(Cell.Pos.β)/(tanh(Cell.Pos.β)-Cell.Pos.β))))
 
-    R_ce = find_zeros(x->flambda(Cell,x),0.00,Cell.Const.CeRootRange)
+    R_ce = find_zeros(x->flambda(Cell,x),0.0,Cell.Const.CeRootRange)
     if size(R_ce,1) >= Cell.Const.Ce_M+1
         λ = R_ce[2:Cell.Const.Ce_M+1]
     else
@@ -89,15 +89,15 @@ function C_e(Cell,s,z,tf,D,res0)
     
     #i=Int64(1)
     ψ = fill(0.0,length(z),length(λ))
-    for loop in 1:length(λ)
-        i=Int64(1)
+    for lp in 1:length(λ)
+        i = Int64(1)
         for x in z #Eigen Weighting
             if x < Cell.Neg.L+eps()
-                ψ[i,loop] = k1[loop]*cos(in1[loop]*x) #negative electrode
+                ψ[i,lp] = k1[lp]*cos(in1[lp]*x) #negative electrode
             elseif x > (Cell.Neg.L+Cell.Sep.L)-eps()
-                ψ[i,loop] = k5[loop]*cos(in3[loop]*x)+k6[loop]*sin(in3[loop]*x) # postive electrode
+                ψ[i,lp] = k5[lp]*cos(in3[lp]*x)+k6[lp]*sin(in3[lp]*x) # postive electrode
             else
-                ψ[i,loop] = k3[loop]*cos(in2[loop]*x)+k4[loop]*sin(in2[loop]*x) # separator
+                ψ[i,lp] = k3[lp]*cos(in2[lp]*x)+k4[lp]*sin(in2[lp]*x) # separator
             end
             i = i+1
         end
