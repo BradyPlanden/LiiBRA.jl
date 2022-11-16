@@ -1,19 +1,19 @@
-using LiiBRA, Plots
+using LiiBRA, MAT, Plots
 plotly()
 default(show = true)
 
 #---------- Cell Definition -----------------#
 Cell = Construct("LG M50")
-Cell.RA.Fs = 4.0 # Modify transfer function sampling frequency
-Cell.RA.SamplingT = 0.25 # Modify final system sampling period
-Cell.Neg.Ds = 2.0e-14 # Modify negative electrode diffusion constant
-Cell.Const.T = 298.15 # Modify cell temperature
-Ŝ = collect(1.0:-1:0) # List of SOC points for model generation
-SOC = 1. # Starting SOC
+Ŝ = collect(1.0:-1:0.)
+SOC = 0.717
+WLTP_File = matopen("examples/WLTP/WLTP_M50_M3.mat")
+WLTP_P = read(WLTP_File,"P_Models")
 
 #---------- Generate & Simulate Model -----------------#
+Cell.RA.H1 = Cell.RA.H2 = [1:2000; 3000:3500; 4000:4250]
 A, B, C, D = Realise(Cell, Ŝ)
-Results = HPPC(Cell,Ŝ,SOC,4.0,-3.0,A,B,C,D);
+Results = WLTP(Cell, Ŝ, SOC, WLTP_P, A, B, C, D)
+
 
 #----------- Plotting ---------------------------#
 plot(Results.t, Results.Cell_V;
@@ -24,7 +24,7 @@ plot(Results.t, Results.Cell_V;
      right_margin = 15Plots.mm,
      ylabel = "Terminal Voltage (V)",
      xlabel = "Time (s)",
-     title="HPPC Voltage",
+     title="WLTP Voltage",
      label="Voltage",
      size=(1280,720)
     )
@@ -64,3 +64,4 @@ plot(Results.t, Results.Cse_Neg;
    label=["Current Collector" "Separator Interface"],
    size=(1280,720)
   )
+

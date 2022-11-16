@@ -16,15 +16,15 @@ authors:
 - family-names: Morrey
   given-names: Denise
   orcid: "https://orcid.org/0000-0002-0105-3425"
-journal: "Arxiv"
-date-released: 2022-03-31
-doi: 10.48550/arXiv.2203.17105
+journal: "Journal of Energy Storage"
+date-released: 2022-11-01
+doi: 10.1016/j.est.2022.105637
 keywords: 
   - "lithium-ion battery"
   - "battery management system"
   - "reduced-electrochemical model"
   - "battery modelling" 
   - "julia"
-version: "0.2.0"
+version: "0.3.2"
 repository-code: "https://github.com/BradyPlanden/LiiBRA.jl"
 title: "A Computationally Informed Realisation Algorithm for Lithium-Ion Batteries Implemented with LiiBRA.jl"

@@ -6,11 +6,13 @@
 [![DOI:10.1016/j.est.2022.105637](http://img.shields.io/badge/DOI-10.1016/j.est.2022.105637-blue.svg)](https://doi.org/10.1016/j.est.2022.105637)
 
 <p align="center">
-<img src="LiiBRA.png" width="600" align="center"  />
+<img src="examples/figures/LiiBRA.png" width="600" align="center"  />
 </p>
 
 ## Create and Simulate Reduced Order Lithium-Ion Battery Models
 LiBRA provides an open-source implementation of realisation algorithms used for generating reduced-order state-space models. This work aims to develop real-time capable physics-informed models for deployment onto embedded hardware. LiiBRA provides capabilities in offline and online model creation, as well as a framework for lithium-ion degradation predictions. For more information on LiiBRA, and the computationally-informed discrete realisation algorithm (CI-DRA), please refer to the publication above.
+
+Further examples are located in the "examples" directory. Please open an [issue] if you have requests or ideas for additional examples.
 
 Install (Julia 1.7 and later)
 -----------------------------
@@ -30,19 +32,19 @@ using LiiBRA, Plots
 Setup:
 ```julia
 Cell = Construct("LG M50")
-SList = collect(1.0:-0.25:0.0)
+Ŝ = collect(1.0:-0.25:0.0)
 SOC = 0.75
-T = 298.15
+Cell.Const.T = 298.15
 ```
 
 Realisation:
 ```julia
-A,B,C,D = Realise(Cell,SList,T);
+A,B,C,D = Realise(Cell,Ŝ);
 ```
 
 HPPC Simulation:
 ```julia
-Results = HPPC(Cell,SList,SOC,4.0,-3.0,A,B,C,D);
+Results = HPPC(Cell,Ŝ,SOC,4.0,-3.0,A,B,C,D);
 ```
 
 Plotting Results:
@@ -63,7 +65,7 @@ plot(Results.t, Results.Cell_V;
 ```
 
 <p align="center">
-<img src="examples/Voltage_HPPC.png" width="1000" align="center"  />
+<img src="examples/figures/Voltage_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -74,14 +76,14 @@ plot(Results.t, Results.Ce;
      right_margin = 15Plots.mm, 
      ylabel = "Electrolyte Concen. (mol/m³)", 
      xlabel = "Time (s)",
-     title="Spacial Electrolyte Concentration",
+     title="Electrolyte Concentration",
      label=["Neg. Separator Interface" "Neg. Current Collector" "Pos. Current Collector" "Pos. Separator Interface"], 
      size=(1280,720)
     )
 ```
 
 <p align="center">
-<img src="examples/Electrolyte_HPPC.png" width="1000" align="center"  />
+<img src="examples/figures/Electrolyte_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -92,14 +94,14 @@ plot(Results.t, Results.Cse_Pos;
      right_margin = 15Plots.mm, 
      ylabel = "Concentration (mol/m³)", 
      xlabel = "Time (s)",
-     title="Spacial Positive Electrode Concentration",
+     title="Positive Electrode Concentration",
      label=["Current Collector" "Separator Interface"], 
      size=(1280,720)
     )
 ```
 
 <p align="center">
-<img src="examples/Pos_Electrode_HPPC.png" width="1000" align="center"  />
+<img src="examples/figures/Pos_Electrode_HPPC.png" width="1000" align="center"  />
 </p>
 
 ```julia
@@ -110,14 +112,14 @@ plot(Results.t, Results.Cse_Neg;
      right_margin = 15Plots.mm, 
      ylabel = "Concentration (mol/m³)", 
      xlabel = "Time [s]", 
-     title="Spacial Negative Electrode Concentration",
+     title="Negative Electrode Concentration",
      label=["Current Collector" "Separator Interface"],
      size=(1280,720)
     )
 ```
 
 <p align="center">
-<img src="examples/Neg_Electrode_HPPC.png" width="1000" align="center"  />
+<img src="examples/figures/Neg_Electrode_HPPC.png" width="1000" align="center"  />
 </p>
 
 
@@ -126,3 +128,4 @@ plot(Results.t, Results.Cse_Neg;
 Please report any issues using the Github [issue tracker]. All feedback is welcome.
 
 [issue tracker]: https://github.com/BradyPlanden/LiiBRA/issues
+[issue]: https://github.com/BradyPlanden/LiiBRA/issues
