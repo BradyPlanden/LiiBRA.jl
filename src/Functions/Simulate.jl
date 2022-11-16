@@ -1,4 +1,4 @@
-function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
+function Simulate(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     """ 
     Function to simulate generated reduced-order models.
 
@@ -205,7 +205,7 @@ function Sim_Model(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
 
 
         if Def == "Power"
-            Results.Iapp[i+2] = Input[i+1,1]/Cell_V[i+1]
+            Results.Iapp[i+2] = Input[i+1,1]/Results.Cell_V[i+1]
         else
             Results.Iapp[i+2] = Input[i+1,1]
         end

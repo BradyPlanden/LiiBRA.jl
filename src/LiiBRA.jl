@@ -3,8 +3,8 @@ module LiiBRA
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using TSVD, Roots, Statistics, Interpolations#, JLD2
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
-export flatten_, R, F, Sim_Model, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC, fh!, mag!, findnearest, CC
+export flatten_, R, F, Simulate, D_Linear, Construct, tuple_len, interp
+export Realise, HPPC, fh!, mag!, findnearest, CC, WLTP
 
 include("Functions/C_e.jl")
 include("Functions/C_se.jl")
@@ -12,7 +12,7 @@ include("Functions/Flux.jl")
 include("Functions/Phi_s.jl")
 include("Functions/Phi_e.jl")
 include("Functions/Phi_se.jl")
-include("Functions/Sim_Model.jl")
+include("Functions/Simulate.jl")
 include("Methods/CIDRA.jl")
 
 const F,R = faraday(Metric), universal(SI2019) #Faraday Constant / Universal Gas Constant 
@@ -20,14 +20,13 @@ findnearest(A,x) = argmin(abs.(A .- x)) # Find Nearest for SOC initialisation
 
 
 #---------- Generate Model -----------------#
-function Realise(Cell, SList::Array, T::Float64)
+function Realise(Cell, Ŝ::Array)
     A = B = C = D = tuple()
-    for i in SList
-        #Arrhenius
-        Cell.Const.T = T
+    for i in Ŝ
+        # Arrhenius
         Arr_Factor = (1/Cell.Const.T_ref-1/Cell.Const.T)/R
 
-        #Set Cell Constants
+        # Set Cell Constants
         Cell.Const.SOC = i
         Cell.Const.κ = Cell.Const.κf(Cell.Const.ce0)*exp(Cell.Const.Ea_κ*Arr_Factor)
         Cell.RA.Nfft = Cell.RA.Nfft!(Cell.RA.Fs, Cell.RA.Tlen)
@@ -36,10 +35,10 @@ function Realise(Cell, SList::Array, T::Float64)
         Cell.Neg.β = Cell.Neg.β!(Cell.RA.s)
         Cell.Pos.β = Cell.Pos.β!(Cell.RA.s)
 
-        #Realisation
+        # Realisation
         Aϕ, Bϕ, Cϕ, Dϕ = CIDRA(Cell)
 
-        #Flatten output into Tuples
+        # Flatten output into Tuples
         A = flatten_(A,Aϕ)
         B = flatten_(B,Bϕ)
         C = flatten_(C,Cϕ)
@@ -51,29 +50,41 @@ end
 
 
 #---------- HPPC Simulation -----------------#
-function HPPC(Cell,SList::Array,SOC::Float64,λ::Float64,ϕ::Float64,A::Tuple,B::Tuple,C::Tuple,D::Tuple)
+function HPPC(Cell, Ŝ::Array, SOC::Float64, λ::Float64, ϕ::Float64, A::Tuple, B::Tuple, C::Tuple, D::Tuple)
 
-    #Set Experiment
+    # Set Experiment
     i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
     Input = [zero(i); ones(10*i)*λ; zeros(40*i); ones(10*i)*ϕ; zeros(40*i)] #1C HPPC Experiment Current Profile
     Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
     t = 0:(1.0/i):((length(Input)-1)/i)
     
-    #Simulate Model
-    return Sim_Model(Cell,Input,"Current",Tk,SList,SOC,A,B,C,D,t)
+    # Simulate Model
+    return Simulate(Cell,Input,"Current",Tk,Ŝ,SOC,A,B,C,D,t)
 end
 
 #---------- Constant Current Simulation -----------------#
-function CC(Cell, SList::Array, SOC::Float64, λ::Float64, γ, A::Tuple, B::Tuple, C::Tuple, D::Tuple)
+function CC(Cell, Ŝ::Array, SOC::Float64, λ::Float64, γ, A::Tuple, B::Tuple, C::Tuple, D::Tuple)
 
-    #Set Experiment
+    # Set Experiment
     i = 1/Cell.RA.SamplingT # Sampling Frequency
     Input = ones(Int64(γ*i))*λ #CC Profile
     Tk = ones(size(Input))*Cell.Const.T #Cell Temperature
     t = 0:(1.0/i):((length(Input)-1)/i)
     
-    #Simulate Model
-    return Sim_Model(Cell,Input,"Current",Tk,SList,SOC,A,B,C,D,t)
+    # Simulate Model
+    return Simulate(Cell,Input,"Current",Tk,Ŝ,SOC,A,B,C,D,t)
+end
+
+#---------- WLTP Simulation -----------------#
+function WLTP(Cell, Ŝ::Array, SOC::Float64, Cycle::Array, A::Tuple, B::Tuple, C::Tuple, D::Tuple)
+
+    # Set Experiment
+    i = Int64(1/Cell.RA.SamplingT) #Sampling Frequency
+    Tk = ones(size(Cycle))*Cell.Const.T #Cell Temperature
+    t = 0:(1.0/i):((length(Cycle)-1)/i)
+    
+    # Simulate Model
+    return Simulate(Cell,Cycle,"Power",Tk,Ŝ,SOC,A,B,C,D,t)
 end
 
 #---------- Hankel Formation & SVD -----------------#
@@ -157,23 +168,23 @@ tuple_len(::NTuple{N, Any}) where {N} = N #Tuple Size
 
 #---------- Interpolate -----------------#
 """
-    interp(MTup::Tuple,SList::Array,SOC) 
+    interp(MTup::Tuple,Ŝ::Array,SOC) 
 
     Function to interpolate Tuple indices
 
 """
-function interp(MTup::Tuple,SList::Array,SOC)
+function interp(MTup::Tuple,Ŝ::Array,SOC)
     T1 = 1
     T2 = 1
-    for i in 1:length(SList)-1
-        if SList[i] > SOC >= SList[i+1]
+    for i in 1:length(Ŝ)-1
+        if Ŝ[i] > SOC >= Ŝ[i+1]
             T1 = i
             T2 = i+1
-        elseif SList[i] == SOC
+        elseif Ŝ[i] == SOC
             return MTup[i]
         end
     end
-    return M =  @. MTup[T2]+(MTup[T1]-MTup[T2])*(SOC-SList[T2])/(SList[T1]-SList[T2])
+    return M =  @. MTup[T2]+(MTup[T1]-MTup[T2])*(SOC-Ŝ[T2])/(Ŝ[T1]-Ŝ[T2])
 end
 
 #---------- Magnitude of an Array -----------------#
