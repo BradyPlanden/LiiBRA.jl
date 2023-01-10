@@ -92,11 +92,11 @@ function CIDRA(Cell)
     end
 
     # Transform the SS system for interpolation
-    # d, Sᵘ = eigen(A,sortby=nothing)
-    # A = inv(Sᵘ)*A*Sᵘ
-    # B = inv(Sᵘ)*B
-    # C = C*Sᵘ#*Diagonal(B)
-    #B = ones(length(B))
+    d, Sᵘ = eigen(A,sortby=nothing)
+    A = inv(Sᵘ)*A*Sᵘ
+    B = inv(Sᵘ)*B
+    C = C*Sᵘ*Diagonal(B)
+    B = ones(length(B))
 
     return mag(A), mag(B), mag(C), D
  

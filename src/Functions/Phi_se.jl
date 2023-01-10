@@ -42,7 +42,7 @@ function Phi_se(Cell,s,z,Def,ϕ_tf,D,res0)
    ϕ_tf .= @. Electrode.L/(Cell.Const.CC_A*ν*sinh(ν))*((1/κ_eff)*cosh(ν*z)+(1/σ_eff)*cosh(ν*(z-1)))-res0/s #Transfer Function - eq. 4.14
 
    zero_tf = @. (6*(5*Electrode.Ds*F*Rtot-∂Uocp_elc*Electrode.Rs)*σ_eff)/(30*Cell.Const.CC_A*Electrode.as*Electrode.Ds*F*σ_eff*Electrode.L) + (5*Electrode.as*Electrode.Ds*F*Electrode.L^2*(σ_eff*(-1+3*z^2)+κ_eff*(2-6*z+3*z^2)))/(30*Cell.Const.CC_A*Electrode.as*Electrode.Ds*F*σ_eff*κ_eff*Electrode.L)
-   D .= @. Electrode.L/(Cell.Const.CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G->∞
+   D .= @. Electrode.L/(Cell.Const.CC_A*ν_∞*sinh(ν_∞))*((1/κ_eff)*cosh(ν_∞*z)+(1/σ_eff)*cosh(ν_∞*(z-1))) # Contribution to D as G(s)->∞
    ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
    res0 .= zeros(length(z))
 
