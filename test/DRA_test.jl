@@ -1,4 +1,4 @@
-using LiiBRA, UnitSystems, Test, LinearAlgebra#, JLD2
+using LiiBRA, UnitSystems, Test, LinearAlgebra, JLD2
 
 #Construct cell struct
 Cell = Construct("LG M50")
@@ -37,7 +37,7 @@ return A, B, C, D
 end
 
 #Load Test Data
-#Data = load("CIDRA_Data.jld2")
+Data = load("CIDRA_Data.jld2")
 A,B,C,D = TestDRA(Cell)
 
 @test size(A[1],1) == Cell.RA.M+1

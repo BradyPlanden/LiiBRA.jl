@@ -85,7 +85,8 @@ function Simulate(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
                 ϕ_e = Array{Float64}(undef,tlength,size(CeInd,1)) .= 0.,
                 Cell_SOC = Array{Float64}(undef,tlength,1) .= 0,
                 Iapp = Array{Float64}(undef,tlength+1,1) .= 0,
-                t = t
+                t = t,
+                tₑ = Int64(1)
                 )
 
 
@@ -94,6 +95,7 @@ function Simulate(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
     SOC_Pos = SOC * (Cell.Pos.θ_100-Cell.Pos.θ_0) + Cell.Pos.θ_0
     Results.θ_neg[1] = SOC_Neg
     Results.θ_pos[1] = SOC_Pos
+    tₑ = Int64(1)
 
     # Loop through time - compute dependent variables (voltage, flux, etc.) #
     for i in 0:(tlength-1)
@@ -210,7 +212,12 @@ function Simulate(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
             Results.Iapp[i+2] = Input[i+1,1]
         end
 
-    end
+        if Results.Cell_V[i+1] <= 3.0
+            break
+        end
 
-return Results
+        tₑ = i
+    end
+    
+return Results, tₑ
 end
