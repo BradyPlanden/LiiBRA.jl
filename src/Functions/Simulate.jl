@@ -212,7 +212,7 @@ function Simulate(Cell,Input,Def,Tk,SList,SOC,A0,B0,C0,D0,t)
             Results.Iapp[i+2] = Input[i+1,1]
         end
 
-        if Results.Cell_V[i+1] <= 3.0
+        if Results.Cell_V[i+1] <= Cell.Const.Vmin
             break
         end
 

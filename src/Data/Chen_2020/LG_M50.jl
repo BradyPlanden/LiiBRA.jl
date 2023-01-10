@@ -10,6 +10,7 @@ using Parameters
     Def::Function = ce -> 8.794e-11*(ce/1000)^2-3.972e-10*(ce/1000)+4.862e-10 # Electrolyte Diffusivity Function - Requires ce in dm-3
     SOC::Float64 = 1. # Initial State of Charge
     ce0::Float64 = 1000 # Initial Electrolyte Concentration (mol m⁻³)
+    Vmin::Float64 = 3.0 # Min Cell Voltage
     Ea_κ::Float64 = 0.
     Ea_De::Float64 = 0
     CC_A::Float64 =  0.1027  # Electrode Plate Area 
