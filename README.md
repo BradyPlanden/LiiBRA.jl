@@ -87,7 +87,7 @@ plot(Results.t, Results.Ce;
 </p>
 
 ```julia
-plot(Results.t, Results.Cse_Pos;
+plot(Results.t, Results.Cseₚ;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
@@ -105,7 +105,7 @@ plot(Results.t, Results.Cse_Pos;
 </p>
 
 ```julia
-plot(Results.t, Results.Cse_Neg;
+plot(Results.t, Results.Cseₙ;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
