@@ -1,53 +1,57 @@
-function Phi_s(Cell,s,z,Def,ϕ_tf,D,res0)
-   """ 
-   Solid Potential Transfer Function
+function Phi_s(Cell, s, z, ElecDef, Φₜ, D, res₀)
+    """ 
+    Solid Potential Transfer Function
 
-   Phi_s(Cell,s,z,Def)
+    Phi_s(Cell, s, z, ElecDef, Φₜ, D, res₀)
 
-   """
+    """
 
-   if Def == "Pos"
-      Electrode = Cell.Pos #Electrode Length
-   else
-      Electrode = Cell.Neg #Electrode Length
-   end
+    if ElecDef == "Pos"
+        Elec = Cell.Pos
+    else
+        Elec = Cell.Neg
+    end
 
-   κ_eff = Cell.Const.κ*Electrode.ϵ_e^Electrode.κ_brug #Effective Electrolyte Conductivity 
-   σ_eff = Electrode.σ*Electrode.ϵ_s^Electrode.σ_brug #Effective Electrode Conductivity 
-   comb_cond_eff = κ_eff+σ_eff #combining into single variable
+    #Effective Conductivities
+    κᵉᶠᶠ = Cell.Const.κ * Elec.ϵ_e^(Elec.κ_brug)
+    σᵉᶠᶠ = Elec.σ * Elec.ϵ_s^(Elec.σ_brug)
 
-   #Defining SOC
-   θ = Cell.Const.SOC * (Electrode.θ_100-Electrode.θ_0) + Electrode.θ_0
+    #Defining SOC
+    θ = Cell.Const.SOC * (Elec.θ_100 - Elec.θ_0) + Elec.θ_0
 
-   #Prepare for j0
-   cs0 = Electrode.cs_max * θ
+    #Prepare for j₀
+    cs₀ = Elec.cs_max * θ
 
-   #Current Flux Density
-   if Cell.Const.CellTyp == "Doyle_94"
-      κ = Electrode.k_norm/Electrode.cs_max/Cell.Const.ce0^(1-Electrode.α)
-      j0 = κ*(Cell.Const.ce0*(Electrode.cs_max-cs0))^(1-Electrode.α)*cs0^Electrode.α
-   else
-      j0 = Electrode.k_norm*(Cell.Const.ce0*cs0*(Electrode.cs_max-cs0))^(1-Electrode.α)
-   end
+    #Current Flux Density
+    if Cell.Const.CellTyp == "Doyle_94"
+        κ = Elec.k_norm / Elec.cs_max / Cell.Const.ce0^(1 - Elec.α)
+        j₀ = κ * (Cell.Const.ce0 * (Elec.cs_max - cs₀))^(1 - Elec.α) * cs₀^Elec.α
+    else
+        j₀ = Elec.k_norm * (Cell.Const.ce0 * cs₀ * (Elec.cs_max - cs₀))^(1 - Elec.α)
+    end
 
-   #Resistance
-   Rtot = R*Cell.Const.T/(j0*F^2) + Electrode.RFilm
+    #Resistance + OCP
+    Rₜ = R * Cell.Const.T / (j₀ * F^2) + Elec.RFilm
+    ∂Uocp = Cell.Const.∂Uocp(ElecDef, θ) / Elec.cs_max
 
-   #∂Uocp_Def
-   ∂Uocp_elc = Cell.Const.∂Uocp(Def,θ)/Electrode.cs_max
+    #Condensing Variable
+    ν = @. Elec.L * sqrt((Elec.as / σᵉᶠᶠ + Elec.as / κᵉᶠᶠ) / (Rₜ +
+                 ∂Uocp * (Elec.Rs / (F * Elec.Ds)) *
+                 (tanh(Elec.β) / (tanh(Elec.β) - Elec.β)))) 
+    ν_∞ = @. Elec.L * sqrt((Elec.as / κᵉᶠᶠ + Elec.as / σᵉᶠᶠ) / (Rₜ))
 
-   ν = @. Electrode.L*sqrt((Electrode.as/σ_eff+Electrode.as/κ_eff)/(Rtot+∂Uocp_elc*(Electrode.Rs/(F*Electrode.Ds))*(tanh(Electrode.β)/(tanh(Electrode.β)-Electrode.β)))) #Condensing Variable - eq. 4.13
-   ν_∞ = @. Electrode.L*sqrt((Electrode.as/κ_eff+Electrode.as/σ_eff)/(Rtot))
+    Φₜ .= @. (-Elec.L * (κᵉᶠᶠ * (cosh(ν) - cosh((z - 1) * ν))) -
+              Elec.L * (σᵉᶠᶠ * (1 - cosh(z * ν) + z * ν * sinh(ν)))) /
+             (Cell.Const.CC_A * σᵉᶠᶠ * (κᵉᶠᶠ + σᵉᶠᶠ) * ν * sinh(ν))
+    D .= @. (-Elec.L * (κᵉᶠᶠ * (cosh(ν_∞) - cosh((z - 1) * ν_∞))) -
+             Elec.L * (σᵉᶠᶠ * (1 - cosh(z * ν_∞) + z * ν_∞ * sinh(ν_∞)))) /
+            (Cell.Const.CC_A * σᵉᶠᶠ * (κᵉᶠᶠ + σᵉᶠᶠ) * ν_∞ * sinh(ν_∞)) #D as G->∞
+    tf₀ = @. Elec.L * (z - 2) * z / (2 * Cell.Const.CC_A * σᵉᶠᶠ)
+    Φₜ[:, findall(s .== 0)] .= tf₀[:, findall(s .== 0)]
+    res₀ .= zeros(length(z))
 
-   ϕ_tf .= @. (-Electrode.L*(κ_eff*(cosh(ν)-cosh((z-1)*ν)))-Electrode.L*(σ_eff*(1-cosh(z*ν)+z*ν*sinh(ν))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν*sinh(ν)) #Transfer Function - eq. 4.19
-   D .= @. (-Electrode.L*(κ_eff*(cosh(ν_∞)-cosh((z-1)*ν_∞)))-Electrode.L*(σ_eff*(1-cosh(z*ν_∞)+z*ν_∞*sinh(ν_∞))))/(Cell.Const.CC_A*σ_eff*(comb_cond_eff)*ν_∞*sinh(ν_∞)) # Contribution to D as G->∞
-   zero_tf = @. Electrode.L*(z-2)*z/(2*Cell.Const.CC_A*σ_eff)
-   ϕ_tf[:,findall(s.==0)] .= zero_tf[:,findall(s.==0)]
-   res0 .= zeros(length(z))
-
-   if Def == "Pos"
-      ϕ_tf .= -ϕ_tf
-      D .= -D
-   end
-
+    if ElecDef == "Pos"
+        Φₜ .= -Φₜ
+        D .= -D
+    end
 end
