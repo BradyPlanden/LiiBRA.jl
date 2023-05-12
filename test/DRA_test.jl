@@ -1,7 +1,10 @@
 using LiiBRA, UnitSystems, Test, LinearAlgebra, JLD2
 
 #Construct cell struct
+Sₑ = 4 # Spatial points in electrolyte
+Sₛ = 2 # Spatial point in solid
 Cell = Construct("LG M50")
+Spatial!(Cell, Sₑ, Sₛ)
 Cell.RA.Tlen = 128
 Cell.RA.Fs = 1
 Cell.RA.SamplingT = 0.25
