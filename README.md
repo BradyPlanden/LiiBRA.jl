@@ -32,7 +32,7 @@ using LiiBRA, Plots
 Setup:
 ```julia
 Sₑ = 4
-Sₛ = 4
+Sₛ = 2
 Cell = Construct("LG M50")
 Spatial!(Cell, Sₑ, Sₛ)
 Ŝ = collect(1.0:-0.25:0.0)
