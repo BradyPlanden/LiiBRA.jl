@@ -3,8 +3,9 @@ module LiiBRA
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using TSVD, Roots, Statistics, Interpolations, JLD2
 export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
-export flatten_, R, F, Simulate, D_Linear, Construct, tuple_len, interp
-export Realise, HPPC, fh!, mag!, findnearest, CC, WLTP
+export flatten_, R, F, Simulate, D_Linear, Construct
+export tuple_len, interp, Spatial!, Realise, HPPC, fh!
+export mag!, findnearest, CC, WLTP
 
 include("Functions/C_e.jl")
 include("Functions/C_se.jl")
@@ -146,12 +147,32 @@ flatten_tuple(x::Tuple) = flatten_(x...)
 function Construct(CellType::String)
     if CellType == "Doyle_94"
         CellType = string(CellType, ".jl")
-        include(joinpath(dirname(pathof(LiiBRA)), "Data/Doyle_94", CellType))
+        return include(joinpath(dirname(pathof(LiiBRA)), "Data/Doyle_94", CellType))
     elseif CellType == "LG M50"
         CellType = string("LG_M50.jl")
-        include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
+        return include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
     end
-    return Cell
+end
+
+#---------- Cell Update -----------------#
+"""
+    Spatial!(::String) 
+
+    Function to update the cell dictionary
+
+"""
+function Spatial!(Cell, Sₑ, Sₛ)
+    Cell.Transfer.Sₑ = Sₑ
+    Cell.Transfer.Sₛ = Sₛ
+    Cell.Const.Lnegsep, Cell.Const.Ltot = Cell.Neg.L + Cell.Sep.L,
+                                          Cell.Neg.L + Cell.Sep.L + Cell.Pos.L
+    Cell.Const.D1 = Cell.Const.De * Cell.Neg.ϵ_e^Cell.Neg.De_brug
+    Cell.Const.D2 = Cell.Const.De * Cell.Sep.ϵ_e^Cell.Sep.De_brug
+    Cell.Const.D3 = Cell.Const.De * Cell.Pos.ϵ_e^Cell.Pos.De_brug
+    Cell.Const.Ce_M = size(Cell.Transfer.Locs(Sₑ, Sₛ)[1], 1)
+    Cell.RA.Outs = sum([size(Cell.Transfer.Locs(Sₑ, Sₛ)[i],
+                             1)
+                        for i in 1:length(Cell.Transfer.tfs)])
 end
 
 #---------- Tuple Length -----------------#
@@ -218,13 +239,18 @@ end
 
 """
 function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos, κ_eff_Sep)
+    # Spatial Domain
+    Sₑ = Cell.Transfer.Sₑ
+    Sₛ = Cell.Transfer.Sₛ
+
+    #Initial
     D = Array{Float64}(undef, 0, 1)
     Dt = Array{Float64}(undef, 0, 1)
-    D_ = Array{Float64}(undef, size(Cell.Transfer.Locs[2], 1), 1)
+    D_ = Array{Float64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[2], 1), 1)
     q = Int64(1)
     tfs = Cell.Transfer.tfs
     Elec = Cell.Transfer.Elec
-    Locs = Cell.Transfer.Locs
+    Locs = Cell.Transfer.Locs(Sₑ, Sₛ)
     for i in 1:size(tfs, 1)
         if tfs[i] == C_e
             Dt = zeros(length(Locs[i]))

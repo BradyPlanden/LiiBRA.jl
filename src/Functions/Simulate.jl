@@ -20,11 +20,15 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
     C = C₀[υ]
     D = D₀[υ]
 
+    # Spatial Domain
+    Sₑ = Cell.Transfer.Sₑ
+    Sₛ = Cell.Transfer.Sₛ
+
     # Capturing Indices
     tfstr = Array{String}(undef, 0, 1)
     for i in 1:length(Cell.Transfer.tfs)
         t1 = t2 = Array{String}(undef, 0, 1)
-        for j in 1:length(Cell.Transfer.Locs[i])
+        for j in 1:length(Cell.Transfer.Locs(Sₑ, Sₛ)[i])
             t1 = "$(Cell.Transfer.tfs[i])_$(Cell.Transfer.Elec[i])"
             t2 = [t2; t1]
         end
@@ -42,11 +46,11 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
     FluxNegInd = findall(isequal("Flux_Neg"), tfstr)
     FluxPosInd = findall(isequal("Flux_Pos"), tfstr)
 
-    CeNeg = Cell.Transfer.Locs[1] .<= Cell.Neg.L
-    CeNegOffset = Cell.Transfer.Locs[1] .< Cell.Neg.L
-    CeSep = Cell.Transfer.Locs[1] .<= Cell.Neg.L + Cell.Sep.L
-    CeSepOffset = Cell.Transfer.Locs[1] .< Cell.Neg.L + Cell.Sep.L
-    CePos = Cell.Transfer.Locs[1] .<= Cell.Const.Ltot
+    CeNeg = Cell.Transfer.Locs(Sₑ, Sₛ)[1] .<= Cell.Neg.L
+    CeNegOffset = Cell.Transfer.Locs(Sₑ, Sₛ)[1] .< Cell.Neg.L
+    CeSep = Cell.Transfer.Locs(Sₑ, Sₛ)[1] .<= Cell.Neg.L + Cell.Sep.L
+    CeSepOffset = Cell.Transfer.Locs(Sₑ, Sₛ)[1] .< Cell.Neg.L + Cell.Sep.L
+    CePos = Cell.Transfer.Locs(Sₑ, Sₛ)[1] .<= Cell.Const.Ltot
     CeNegInd = findall(CeNeg .== 1)
     CeSepInd = findall(CeSep .- CeNegOffset .== 1)
     CePosInd = findall(CePos .- CeSepOffset .== 1)

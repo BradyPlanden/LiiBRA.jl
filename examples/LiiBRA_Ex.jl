@@ -1,9 +1,12 @@
 using LiiBRA, Plots
-# plotly()
-# default(show = true)
+#plotly()
+#default(show = true)
 
 #---------- Cell Definition -----------------#
+Sₑ = 4 # Spatial points in electrolyte
+Sₛ = 4 # Spatial point in solid
 Cell = Construct("LG M50")
+Spatial!(Cell, Sₑ, Sₛ)
 Cell.RA.Fs = 4.0 # Modify transfer function sampling frequency
 Cell.RA.SamplingT = 0.25 # Modify final system sampling period
 Cell.Neg.Ds = 2.0e-14 # Modify negative electrode diffusion constant

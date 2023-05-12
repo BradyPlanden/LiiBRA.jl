@@ -28,20 +28,25 @@ function CIDRA(Cell)
     i = Int(1)
     l = Int(1)
     u = Int(0)
+    Sₑ = Cell.Transfer.Sₑ
+    Sₛ = Cell.Transfer.Sₛ
 
     for run in Cell.Transfer.tfs
-        tf = Array{ComplexF64}(undef, size(Cell.Transfer.Locs[i], 1), size(Cell.RA.s, 2))
-        Di = Vector{Float64}(undef, size(Cell.Transfer.Locs[i], 1))::Vector{Float64}
-        res₀ = Vector{Float64}(undef, size(Cell.Transfer.Locs[i], 1))::Vector{Float64}
-        samplingtf = Array{Float64}(undef, size(Cell.Transfer.Locs[i], 1), length(OrgT))
-        u += Int(size(Cell.Transfer.Locs[i], 1))
+        tf = Array{ComplexF64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1),
+                               size(Cell.RA.s, 2))
+        Di = Vector{Float64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))::Vector{Float64}
+        res₀ = Vector{Float64}(undef,
+                               size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))::Vector{Float64}
+        samplingtf = Array{Float64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1),
+                                    length(OrgT))
+        u += Int(size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))
 
         if Cell.Transfer.Elec[i] == "Pos"
-            run(Cell, Cell.RA.s, Cell.Transfer.Locs[i], "Pos", tf, Di, res₀)
+            run(Cell, Cell.RA.s, Cell.Transfer.Locs(Sₑ, Sₛ)[i], "Pos", tf, Di, res₀)
         elseif Cell.Transfer.Elec[i] == "Neg"
-            run(Cell, Cell.RA.s, Cell.Transfer.Locs[i], "Neg", tf, Di, res₀)
+            run(Cell, Cell.RA.s, Cell.Transfer.Locs(Sₑ, Sₛ)[i], "Neg", tf, Di, res₀)
         else
-            run(Cell, Cell.RA.s, Cell.Transfer.Locs[i], tf, Di, res₀)
+            run(Cell, Cell.RA.s, Cell.Transfer.Locs(Sₑ, Sₛ)[i], tf, Di, res₀)
         end
 
         if Cell.RA.Fs == (1 / Cell.RA.SamplingT)
