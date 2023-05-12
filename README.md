@@ -1,7 +1,7 @@
 # Lithium-ion Battery Realisation Algorithms (LiiBRA)
 
 [![Build Status](https://github.com/BradyPlanden/LiiBRA.jl/workflows/CI/badge.svg)](https://github.com/BradyPlanden/LiiBRA.jl/actions)
-[![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
+[![SciML Code Style](https://img.shields.io/static/v1?label=code%20style&message=SciML&color=9558b2&labelColor=389826)](https://github.com/SciML/SciMLStyle)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 [![DOI:10.1016/j.est.2022.105637](http://img.shields.io/badge/DOI-10.1016/j.est.2022.105637-blue.svg)](https://doi.org/10.1016/j.est.2022.105637)
 
@@ -31,7 +31,10 @@ using LiiBRA, Plots
 
 Setup:
 ```julia
+Sₑ = 4
+Sₛ = 2
 Cell = Construct("LG M50")
+Spatial!(Cell, Sₑ, Sₛ)
 Ŝ = collect(1.0:-0.25:0.0)
 SOC = 0.75
 Cell.Const.T = 298.15
@@ -87,7 +90,7 @@ plot(Results.t, Results.Ce;
 </p>
 
 ```julia
-plot(Results.t, Results.Cse_Pos;
+plot(Results.t, Results.Cseₚ;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
@@ -105,7 +108,7 @@ plot(Results.t, Results.Cse_Pos;
 </p>
 
 ```julia
-plot(Results.t, Results.Cse_Neg;
+plot(Results.t, Results.Cseₙ;
      legend=:topright,
      bottom_margin=5Plots.mm, 
      left_margin = 5Plots.mm, 
