@@ -114,7 +114,7 @@ end
     SamplingT::Float64 = 1                      # Final Model Sampling Time [s]
     M::Int64 = 4                                # Model Order
     N::Int64 = 1                                # Number of Inputs
-    Tlen::Int64 = 16200                         #Transfer Function Response Length [s]
+    Tlen::Int64 = 16200                         # Transfer Function Response Length [s]
     H1::Array{Int64, 1} = [1:2500; 3000:3500]   # Hankel Dimensions 1
     H2::Array{Int64, 1} = [1:2500; 3000:3500]   # Hankel Dimensions 2
     Outs::Int64 = 1                             # Number of Outputs (Rewritten)

@@ -1,6 +1,6 @@
 using LiiBRA, Plots
-#plotly()
-#default(show = true)
+plotly()
+default(show = true)
 
 #---------- Cell Definition -----------------#
 Sₑ = 4 # Spatial points in electrolyte
