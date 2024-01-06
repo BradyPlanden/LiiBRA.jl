@@ -55,40 +55,40 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
     CeSepInd = findall(CeSep .- CeNegOffset .== 1)
     CePosInd = findall(CePos .- CeSepOffset .== 1)
 
-    csegain_neg = C[CseNegInd[1][1], 1] #First Column in C Array (zeros column)
-    csegain_pos = C[CsePosInd[1][1], 1] #First Column in C Array (zeros column)
+    csegain_neg = C[CseNegInd[1][1], end] #End Column in C Array (zeros column)
+    csegain_pos = C[CsePosInd[1][1], end] #End Column in C Array (zeros column)
 
     # Memory Allocation
     Results = (θₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               θₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               jeqₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               jeqₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               x = Array{Float64}(undef, tlength + 1, size(A, 1)) .= 0.0,
-               y = Array{Float64}(undef, tlength, size(C, 1)) .= 0.0,
-               Cseₙ = Array{Float64}(undef, tlength, size(CseNegInd, 1)) .= 0.0,
-               Cseₚ = Array{Float64}(undef, tlength, size(CsePosInd, 1)) .= 0.0,
-               Ce = Array{Float64}(undef, tlength, size(CeInd, 1)) .= Cell.Const.ce0,
-               η₀ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               ηₙ = Array{Float64}(undef, tlength, size(FluxNegInd, 1)) .= 0.0,
-               ηL = Array{Float64}(undef, tlength, 1) .= 0.0,
-               ηₚ = Array{Float64}(undef, tlength, size(FluxPosInd, 1)) .= 0.0,
-               ϕ_ẽ1 = Array{Float64}(undef, tlength, size(ϕ_ẽInd, 1)) .= 0.0,
-               ϕ_ẽ2 = Array{Float64}(undef, tlength, size(CeInd, 1)) .= 0.0,
-               ϕse₀ⁿ = Array{Float64}(undef, tlength, 1) .= 0.0, #Replace with length of ϕ_seNegInd @ zero
-               jₙ = Array{Float64}(undef, tlength, size(FluxNegInd, 1)) .= 0.0,
-               j₀ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               jₚ = Array{Float64}(undef, tlength, size(FluxPosInd, 1)) .= 0.0,
-               jL = Array{Float64}(undef, tlength, 1) .= 0.0,
-               Rₜⁿ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               Rₜᵖ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               Uocpⁿ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               Uocpᵖ = Array{Float64}(undef, tlength, 1) .= 0.0,
-               Cell_V = Array{Float64}(undef, tlength, 1) .= 0.0,
-               ϕ_e = Array{Float64}(undef, tlength, size(CeInd, 1)) .= 0.0,
-               Cell_SOC = Array{Float64}(undef, tlength, 1) .= 0,
-               Iapp = Array{Float64}(undef, tlength + 1, 1) .= 0,
-               t = t,
-               tₑ = Int64(1))
+        θₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        jeqₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        jeqₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        x = Array{Float64}(undef, tlength + 1, size(A, 1)) .= 0.0,
+        y = Array{Float64}(undef, tlength, size(C, 1)) .= 0.0,
+        Cseₙ = Array{Float64}(undef, tlength, size(CseNegInd, 1)) .= 0.0,
+        Cseₚ = Array{Float64}(undef, tlength, size(CsePosInd, 1)) .= 0.0,
+        Ce = Array{Float64}(undef, tlength, size(CeInd, 1)) .= Cell.Const.ce0,
+        η₀ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        ηₙ = Array{Float64}(undef, tlength, size(FluxNegInd, 1)) .= 0.0,
+        ηL = Array{Float64}(undef, tlength, 1) .= 0.0,
+        ηₚ = Array{Float64}(undef, tlength, size(FluxPosInd, 1)) .= 0.0,
+        ϕ_ẽ1 = Array{Float64}(undef, tlength, size(ϕ_ẽInd, 1)) .= 0.0,
+        ϕ_ẽ2 = Array{Float64}(undef, tlength, size(CeInd, 1)) .= 0.0,
+        ϕse₀ⁿ = Array{Float64}(undef, tlength, 1) .= 0.0, #Replace with length of ϕ_seNegInd @ zero
+        jₙ = Array{Float64}(undef, tlength, size(FluxNegInd, 1)) .= 0.0,
+        j₀ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        jₚ = Array{Float64}(undef, tlength, size(FluxPosInd, 1)) .= 0.0,
+        jL = Array{Float64}(undef, tlength, 1) .= 0.0,
+        Rₜⁿ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        Rₜᵖ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        Uocpⁿ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        Uocpᵖ = Array{Float64}(undef, tlength, 1) .= 0.0,
+        Cell_V = Array{Float64}(undef, tlength, 1) .= 0.0,
+        ϕ_e = Array{Float64}(undef, tlength, size(CeInd, 1)) .= 0.0,
+        Cell_SOC = Array{Float64}(undef, tlength, 1) .= 0,
+        Iapp = Array{Float64}(undef, tlength + 1, 1) .= 0,
+        t = t,
+        tₑ = Int64(1))
 
     # Defining SOC
     SOCₙ = SOC * (Cell.Neg.θ_100 - Cell.Neg.θ_0) + Cell.Neg.θ_0
@@ -99,10 +99,10 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
 
     # Loop through time - compute dependent variables (voltage, flux, etc.) #
     for i in 0:(tlength - 1)
-        cs_neg_avg = Results.x[i + 1, 1] * csegain_neg + SOCₙ * Cell.Neg.cs_max < 0.0 ?
-                     0.0 : Results.x[i + 1, 1] * csegain_neg + SOCₙ * Cell.Neg.cs_max #Zero if < 0
-        cs_pos_avg = Results.x[i + 1, 1] * csegain_pos + SOCₚ * Cell.Pos.cs_max < 0.0 ?
-                     0.0 : Results.x[i + 1, 1] * csegain_pos + SOCₚ * Cell.Pos.cs_max #Zero if < 0
+        cs_neg_avg = Results.x[i + 1, end] * csegain_neg + SOCₙ * Cell.Neg.cs_max < 0.0 ?
+                     0.0 : Results.x[i + 1, end] * csegain_neg + SOCₙ * Cell.Neg.cs_max #Zero if < 0
+        cs_pos_avg = Results.x[i + 1, end] * csegain_pos + SOCₚ * Cell.Pos.cs_max < 0.0 ?
+                     0.0 : Results.x[i + 1, end] * csegain_pos + SOCₚ * Cell.Pos.cs_max #Zero if < 0
 
         if cs_neg_avg > Cell.Neg.cs_max
             cs_neg_avg = Cell.Neg.cs_max
@@ -170,7 +170,7 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
 
         # Relinearise dependent on ν, σ, κ
         D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos,
-                     κ_eff_Sep)
+            κ_eff_Sep)
 
         # Interpolate C & D Matrices
         C = interp(C₀, SList, Results.Cell_SOC[i + 1])
@@ -196,11 +196,11 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
 
         # Potentials
         Results.Uocpⁿ[i + 1] = Cell.Const.Uocp("Neg",
-                                               Results.Cseₙ[i + 1, 1] /
-                                               Cell.Neg.cs_max)
+            Results.Cseₙ[i + 1, 1] /
+            Cell.Neg.cs_max)
         Results.Uocpᵖ[i + 1] = Cell.Const.Uocp("Pos",
-                                               Results.Cseₚ[i + 1, 1] /
-                                               Cell.Pos.cs_max)
+            Results.Cseₚ[i + 1, 1] /
+            Cell.Pos.cs_max)
         Results.ϕse₀ⁿ[i + 1] = Results.y[i + 1, ϕ_seNegInd[1]] + Results.Uocpⁿ[i + 1] #Location 0
         Results.ϕ_ẽ1[i + 1, :] = Results.y[i + 1, ϕ_ẽInd]
 
@@ -219,7 +219,7 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         # Neg
         j₀ⁿ = findmax([ones(size(Results.Cseₙ, 2)) * eps() (kₙ .*
                                                             (Results.Cseₙ[i + 1,
-                                                                          :] .^
+                :] .^
                                                              Cell.Neg.α) .*
                                                             (Results.Ce[i + 1, 1] .^
                                                              (1 - Cell.Neg.α))) .*
@@ -234,7 +234,7 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         # Pos
         j₀ᵖ = findmax([ones(size(Results.Cseₚ, 2)) * eps() (kₚ .*
                                                             (Results.Cseₚ[i + 1,
-                                                                          :] .^
+                :] .^
                                                              Cell.Pos.α) .*
                                                             (Results.Ce[i + 1, 1] .^
                                                              (1 - Cell.Pos.α))) .*
