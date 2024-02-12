@@ -59,7 +59,8 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
     csegain_pos = C[CsePosInd[1][1], end] #End Column in C Array (zeros column)
 
     # Memory Allocation
-    Results = (θₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
+    Results = (
+        θₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
         θₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
         jeqₙ = Array{Float64}(undef, tlength, 1) .= 0.0,
         jeqₚ = Array{Float64}(undef, tlength, 1) .= 0.0,
@@ -87,6 +88,8 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         ϕ_e = Array{Float64}(undef, tlength, size(CeInd, 1)) .= 0.0,
         Cell_SOC = Array{Float64}(undef, tlength, 1) .= 0,
         Iapp = Array{Float64}(undef, tlength + 1, 1) .= 0,
+        ϕ_s_neg = Array{Float64}(undef, tlength + 1, size(ϕ_sNegInd, 1)) .= 0,
+        ϕ_s_pos = Array{Float64}(undef, tlength + 1, size(ϕ_sPosInd, 1)) .= 0,
         t = t,
         tₑ = Int64(1))
 
@@ -217,30 +220,34 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         Results.jL[i + 1] = Results.y[i + 1, FluxPosInd[1]]
 
         # Neg
-        j₀ⁿ = findmax([ones(size(Results.Cseₙ, 2)) * eps() (kₙ .*
-                                                            (Results.Cseₙ[i + 1,
+        j₀ⁿ = findmax(
+            [ones(size(Results.Cseₙ, 2)) * eps() (kₙ .*
+                                                  (Results.Cseₙ[i + 1,
                 :] .^
-                                                             Cell.Neg.α) .*
-                                                            (Results.Ce[i + 1, 1] .^
-                                                             (1 - Cell.Neg.α))) .*
-                                                           (Cell.Neg.cs_max .-
-                                                            Results.Cseₙ[i + 1, :]) .^
-                                                           (1 - Cell.Neg.α)], dims = 2)[1]
+                                                   Cell.Neg.α) .*
+                                                  (Results.Ce[i + 1, 1] .^
+                                                   (1 - Cell.Neg.α))) .*
+                                                 (Cell.Neg.cs_max .-
+                                                  Results.Cseₙ[i + 1, :]) .^
+                                                 (1 - Cell.Neg.α)],
+            dims = 2)[1]
         Results.η₀[i + 1] = Tk[i + 1] * 2 * R / F *
                             asinh(Results.j₀[i + 1] / (2 * j₀ⁿ[1]))
         Results.ηₙ[i + 1, :] = @. (Tk[i + 1] * 2 * R) / F *
                                   asinh((Results.jₙ[i + 1, :]) / (2 * j₀ⁿ))
 
         # Pos
-        j₀ᵖ = findmax([ones(size(Results.Cseₚ, 2)) * eps() (kₚ .*
-                                                            (Results.Cseₚ[i + 1,
+        j₀ᵖ = findmax(
+            [ones(size(Results.Cseₚ, 2)) * eps() (kₚ .*
+                                                  (Results.Cseₚ[i + 1,
                 :] .^
-                                                             Cell.Pos.α) .*
-                                                            (Results.Ce[i + 1, 1] .^
-                                                             (1 - Cell.Pos.α))) .*
-                                                           (Cell.Pos.cs_max .-
-                                                            Results.Cseₚ[i + 1, :]) .^
-                                                           (1 - Cell.Pos.α)], dims = 2)[1]
+                                                   Cell.Pos.α) .*
+                                                  (Results.Ce[i + 1, 1] .^
+                                                   (1 - Cell.Pos.α))) .*
+                                                 (Cell.Pos.cs_max .-
+                                                  Results.Cseₚ[i + 1, :]) .^
+                                                 (1 - Cell.Pos.α)],
+            dims = 2)[1]
         Results.ηL[i + 1] = (Tk[i + 1] * 2 * R) / F *
                             asinh(Results.jL[i + 1] / (2 * j₀ᵖ[1]))
         Results.ηₚ[i + 1, :] = @. (Tk[i + 1] * 2 * R) / F *
@@ -254,8 +261,8 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
                                     Cell.Neg.RFilm * Results.j₀[i + 1]) * F
 
         # ϕ_s
-        ϕ_s_neg = Results.y[i + 1, ϕ_sNegInd]
-        ϕ_s_pos = @. Results.y[i + 1, ϕ_sPosInd] + Results.Cell_V[i + 1]
+        Results.ϕ_s_neg[i + 1, :] = Results.y[i + 1, ϕ_sNegInd]
+        Results.ϕ_s_pos[i + 1, :] = Results.y[i + 1, ϕ_sPosInd]
 
         # Interpolate A Matrix
         A = interp(A₀, SList, Results.Cell_SOC[i + 1])

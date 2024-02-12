@@ -13,7 +13,7 @@ function SVD!(Hank, puls, Hlen1, Hlen2)
     Puls_L = size(puls, 1)
     for lp1 in 1:length(Hlen2), lp2 in 1:length(Hlen1)
         Hank[(Puls_L * (lp2 - 1) + 1):(Puls_L * lp2), lp1] .= @view puls[:,
-                                                                         Hlen2[lp1] + Hlen1[lp2] + 1]
+            Hlen2[lp1] + Hlen1[lp2] + 1]
     end
 
     A = @benchmark svds(Hank; nsv = 6)[1]

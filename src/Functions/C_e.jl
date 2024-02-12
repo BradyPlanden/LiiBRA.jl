@@ -58,7 +58,7 @@ function C_e(Cell, s, z, tf, D, res₀)
         λ = R_ce[2:(Cell.Const.Ce_M + 1)]
     else
         throw(DomainError(R_ce,
-                          "Ce roots 'R_ce' doesn't contain enough values, increase Cell.Const.CeRootRange"))
+            "Ce roots 'R_ce' doesn't contain enough values, increase Cell.Const.CeRootRange"))
     end
 
     #Create all k's

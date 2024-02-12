@@ -77,7 +77,7 @@ end
 
 #---------- HPPC Simulation -----------------#
 function HPPC(Cell, Ŝ::Array, SOC::Float64, λ::Float64, ϕ::Float64, A::Tuple, B::Tuple,
-              C::Tuple, D::Tuple)
+        C::Tuple, D::Tuple)
 
     # Set Experiment
     i = Int64(1 / Cell.RA.SamplingT) #Sampling Frequency
@@ -91,7 +91,7 @@ end
 
 #---------- Constant Current Simulation -----------------#
 function CC(Cell, Ŝ::Array, SOC::Float64, λ::Float64, γ, A::Tuple, B::Tuple, C::Tuple,
-            D::Tuple)
+        D::Tuple)
 
     # Set Experiment
     i = 1 / Cell.RA.SamplingT
@@ -105,7 +105,7 @@ end
 
 #---------- WLTP Simulation -----------------#
 function WLTP(Cell, Ŝ::Array, SOC::Float64, Cycle::Array, A::Tuple, B::Tuple, C::Tuple,
-              D::Tuple)
+        D::Tuple)
 
     # Set Experiment
     i = Int64(1 / Cell.RA.SamplingT)
@@ -165,13 +165,13 @@ function Spatial!(Cell, Sₑ, Sₛ)
     Cell.Transfer.Sₑ = Sₑ
     Cell.Transfer.Sₛ = Sₛ
     Cell.Const.Lnegsep, Cell.Const.Ltot = Cell.Neg.L + Cell.Sep.L,
-                                          Cell.Neg.L + Cell.Sep.L + Cell.Pos.L
+    Cell.Neg.L + Cell.Sep.L + Cell.Pos.L
     Cell.Const.D1 = Cell.Const.De * Cell.Neg.ϵ_e^Cell.Neg.De_brug
     Cell.Const.D2 = Cell.Const.De * Cell.Sep.ϵ_e^Cell.Sep.De_brug
     Cell.Const.D3 = Cell.Const.De * Cell.Pos.ϵ_e^Cell.Pos.De_brug
     Cell.Const.Ce_M = size(Cell.Transfer.Locs(Sₑ, Sₛ)[1], 1)
     Cell.RA.Outs = sum([size(Cell.Transfer.Locs(Sₑ, Sₛ)[i],
-                             1)
+                            1)
                         for i in 1:length(Cell.Transfer.tfs)])
 end
 
@@ -262,7 +262,8 @@ function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_e
                                 (1 - cosh(ν_neg * pt / Cell.Neg.L)) -
                                 pt * ν_neg * sinh(ν_neg) +
                                 Cell.Neg.L *
-                                (cosh(ν_neg) - cosh(ν_neg * (Cell.Neg.L - pt) / Cell.Neg.L))) /
+                                (cosh(ν_neg) -
+                                 cosh(ν_neg * (Cell.Neg.L - pt) / Cell.Neg.L))) /
                                (Cell.Const.CC_A * (κ_eff_Neg + σ_eff_Neg) * sinh(ν_neg) *
                                 ν_neg)
                 elseif pt <= Cell.Neg.L + Cell.Sep.L + eps()
@@ -279,7 +280,8 @@ function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_e
                                  σ_eff_Pos *
                                  cosh((Cell.Const.Ltot - pt) * ν_pos / Cell.Pos.L) +
                                  κ_eff_Pos *
-                                 (cosh((pt - Cell.Neg.L - Cell.Sep.L) * ν_pos / Cell.Pos.L) -
+                                 (cosh((pt - Cell.Neg.L - Cell.Sep.L) * ν_pos /
+                                       Cell.Pos.L) -
                                   1)) -
                                 (pt - Cell.Neg.L - Cell.Sep.L) * κ_eff_Pos * sinh(ν_pos) *
                                 ν_pos) /

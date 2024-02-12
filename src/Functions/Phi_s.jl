@@ -37,7 +37,7 @@ function Phi_s(Cell, s, z, ElecDef, Φₜ, D, res₀)
     #Condensing Variable
     ν = @. Elec.L * sqrt((Elec.as / σᵉᶠᶠ + Elec.as / κᵉᶠᶠ) / (Rₜ +
                  ∂Uocp * (Elec.Rs / (F * Elec.Ds)) *
-                 (tanh(Elec.β) / (tanh(Elec.β) - Elec.β)))) 
+                 (tanh(Elec.β) / (tanh(Elec.β) - Elec.β))))
     ν_∞ = @. Elec.L * sqrt((Elec.as / κᵉᶠᶠ + Elec.as / σᵉᶠᶠ) / (Rₜ))
 
     Φₜ .= @. (-Elec.L * (κᵉᶠᶠ * (cosh(ν) - cosh((z - 1) * ν))) -

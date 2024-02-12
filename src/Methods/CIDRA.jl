@@ -33,12 +33,12 @@ function CIDRA(Cell)
 
     for run in Cell.Transfer.tfs
         tf = Array{ComplexF64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1),
-                               size(Cell.RA.s, 2))
+            size(Cell.RA.s, 2))
         Dᵢ = Vector{Float64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))::Vector{Float64}
         res₀ = Vector{Float64}(undef,
-                               size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))::Vector{Float64}
+            size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))::Vector{Float64}
         smptf = Array{Float64}(undef, size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1),
-                               length(OrgT))
+            length(OrgT))
         u += Int(size(Cell.Transfer.Locs(Sₑ, Sₛ)[i], 1))
 
         if Cell.Transfer.Elec[i] == "Pos"
@@ -56,7 +56,7 @@ function CIDRA(Cell)
             stpsum = cumsum(real(ifft(tf, 2)), dims = 2)
             for k in 1:size(stpsum, 1)
                 spl₁ = CubicSplineInterpolation(tfft, stpsum[k, :]; bc = Line(OnGrid()),
-                                                extrapolation_bc = Throw())
+                    extrapolation_bc = Throw())
                 smptf[k, :] = spl₁(OrgT)
             end
             puls[l:u, :] .= diff(smptf, dims = 2)

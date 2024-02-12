@@ -18,7 +18,7 @@ using Parameters
     CC_A::Float64 = 0.1027                                                      # Electrode Plate Area 
     κ::Float64 = 0.9487
     κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
-                         3.329 * (ce / 1000) 
+                         3.329 * (ce / 1000)
     Uocp::Function = (Electrode, θ) -> if Electrode == "Neg"
         Uocp = @. 1.97938 * 2.7182818284 * exp(-39.3631 * θ) + 0.2482 -
                   0.0909 * tanh(29.8538 * (θ - 0.1234)) -
@@ -141,7 +141,7 @@ end
         C_se,
         Phi_s,
         Flux,
-        Phi_se,
+        Phi_se
     ]
 
     Elec::Vector{String} = [
@@ -154,7 +154,7 @@ end
         "Neg",
         "Neg",
         "Neg",
-        "Neg",
+        "Neg"
     ]
 
     Locs::Function = (Sₑ, Sₛ) -> if Sₑ == 6 && Sₛ == 4
@@ -168,7 +168,7 @@ end
             Float64[0, 1 / 3, 2 / 3, 1],
             Float64[1],
             Float64[0, 1 / 3, 2 / 3, 1],
-            Float64[0, 1 / 3, 2 / 3, 1],
+            Float64[0, 1 / 3, 2 / 3, 1]
         ]
     elseif Sₑ == 4 && Sₛ == 4
         return [
@@ -181,7 +181,7 @@ end
             Float64[0, 1 / 3, 2 / 3, 1],
             Float64[1],
             Float64[0, 1 / 3, 2 / 3, 1],
-            Float64[0, 1 / 3, 2 / 3, 1],
+            Float64[0, 1 / 3, 2 / 3, 1]
         ]
     elseif Sₑ == 8 && Sₛ == 4
         return [
@@ -194,14 +194,14 @@ end
             Float64[0, 1 / 3, 2 / 3, 1],
             Float64[1],
             Float64[0, 1 / 3, 2 / 3, 1],
-            Float64[0, 1 / 3, 2 / 3, 1],
+            Float64[0, 1 / 3, 2 / 3, 1]
         ]
     elseif Sₑ == 9 && Sₛ == 6
         return [
             Float64[0, 2.84e-5, 5.68e-5, 8.52e-5, 9.12e-5, 9.72e-5, 0.0001224, 0.0001476,
-                    1.728e-4],
+                1.728e-4],
             Float64[2.84e-5, 5.68e-5, 8.52e-5, 9.12e-5, 9.72e-5, 0.0001224, 0.0001476,
-                    1.728e-4],
+                1.728e-4],
             Float64[0, 1 / 3, 2 / 3, 1],
             Float64[1],
             Float64[0, 1 / 3, 2 / 3, 1],
@@ -209,7 +209,7 @@ end
             Float64[0, 1 / 3, 2 / 3, 1],
             Float64[1],
             Float64[0, 1 / 3, 2 / 3, 1],
-            Float64[0, 1 / 3, 2 / 3, 1],
+            Float64[0, 1 / 3, 2 / 3, 1]
         ]
     elseif Sₑ == 4 && Sₛ == 2
         [
@@ -222,7 +222,7 @@ end
             Float64[0, 1],
             Float64[1],
             Float64[0, 1],
-            Float64[0, 1],
+            Float64[0, 1]
         ]
     elseif Sₑ == 4 && Sₛ == 6
         return [
@@ -235,7 +235,7 @@ end
             Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
             Float64[1],
             Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
-            Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
+            Float64[0, 0.2, 0.4, 0.6, 0.8, 1]
         ]
     elseif Sₑ == 6 && Sₛ == 2
         return [
@@ -248,7 +248,7 @@ end
             Float64[0, 1],
             Float64[1],
             Float64[0, 1],
-            Float64[0, 1],
+            Float64[0, 1]
         ]
     elseif Sₑ == 6 && Sₛ == 6
         return [
@@ -261,7 +261,7 @@ end
             Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
             Float64[1],
             Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
-            Float64[0, 0.2, 0.4, 0.6, 0.8, 1],
+            Float64[0, 0.2, 0.4, 0.6, 0.8, 1]
         ]
     end
 end
@@ -276,4 +276,4 @@ end
 end
 
 return Params(Constants(), Negative(), Positive(), Separator(), Realisation(),
-              TransferFun())
+    TransferFun())
