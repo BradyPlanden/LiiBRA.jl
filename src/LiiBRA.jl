@@ -151,6 +151,9 @@ function Construct(CellType::String)
     elseif CellType == "LG M50"
         CellType = string("LG_M50.jl")
         return include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
+    elseif CellType == "A123"
+        CellType = string("A123.jl")
+        return include(joinpath(dirname(pathof(LiiBRA)), "Data/Prada_2013", CellType))
     end
 end
 
