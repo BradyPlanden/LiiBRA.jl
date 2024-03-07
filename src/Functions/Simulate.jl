@@ -175,8 +175,8 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         # Interpolate C & D Matrices
         C = interp(C₀, SList, Results.Cell_SOC[i + 1])
         D = interp(D₀,SList,Results.Cell_SOC[i+1])
-        println("C: ", C)
-        println("D: ", D)
+        # println("C: ", C)
+        # println("D: ", D)
         
         # SS Output
         Results.y[i + 1, :] = C * Results.x[i + 1, :] + D * Results.Iapp[i + 1]
