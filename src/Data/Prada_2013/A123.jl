@@ -60,12 +60,17 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 215                            # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
+<<<<<<< HEAD
     θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration
+=======
+    θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration CHECK
+    θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration CHECK
+>>>>>>> origin/Prada2013
     cs_max::Float64 = 30555                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
-    k_norm::Float64 = 6.716047e-12              # Reaction Rate
-    Ea_κ::Float64 = 35000                       # Activation Energy
+    k_norm::Float64 = 6.716047e-12              # check Reaction Rate
+    Ea_κ::Float64 = 35000                       # check Activation Energy
     RFilm::Float64 = 0                          # Film Resistance - Ωm²
     D1::Float64 = 1.0                           # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug      # Effective Diffusivity
@@ -87,12 +92,17 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 0.33795074                     # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
+<<<<<<< HEAD
     θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration
+=======
+    θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration CHECK
+    θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration CHECK
+>>>>>>> origin/Prada2013
     cs_max::Float64 = 22806                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
-    k_norm::Float64 = 3.54458e-11               # Reaction Rate CHECK
-    Ea_κ::Float64 = 17800                       # Activation Energy CHECK
+    k_norm::Float64 = 3.54458e-11               # check Reaction Rate CHECK
+    Ea_κ::Float64 = 17800                       # check Activation Energy CHECK
     RFilm::Float64 = 0                          # Film Resistance - Ωm²
     D3::Float64 = 1                             # Init Value CHECK
     D3f::Function = De -> De * ϵ_e^De_brug      # Effective Diffusivity
