@@ -169,14 +169,15 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
                         Results.Rₜᵖ[i + 1])
 
         # Relinearise dependent on ν, σ, κ
-        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos,
-            κ_eff_Sep)
-        println("D: ", D)
+        # D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos,
+        #     κ_eff_Sep)
+        
         # Interpolate C & D Matrices
         C = interp(C₀, SList, Results.Cell_SOC[i + 1])
-        # D = interp(D₀,SList,Results.Cell_SOC[i+1])
+        D = interp(D₀,SList,Results.Cell_SOC[i+1])
         println("C: ", C)
-
+        println("D: ", D)
+        
         # SS Output
         Results.y[i + 1, :] = C * Results.x[i + 1, :] + D * Results.Iapp[i + 1]
 
