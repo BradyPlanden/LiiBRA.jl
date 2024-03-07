@@ -8,7 +8,7 @@ Parameters for an LFP cell, from the paper :footcite:t:`Prada2013`
     T::Float64 = 298.15                                                         # Cell Temperature (K)
     T_ref::Float64 = 298.15                                                     # Reference Temperature (K)
     t_plus::Float64 = 0.36                                                      # Inital Transference Number
-    tpf::Function = ce -> -0.1287 * (ce / 1000)^3 + 0.4106 * (ce / 1000)^2 -
+    tpf::Function = ce -> -0.1287 * (ce / 1000)^3 + 0.4106 * (ce / 1000)^2 
                           0.4717 * (ce / 1000) + 0.4492                         # Transference Number Function 
     De::Float64 = 2.0e-10                                                       # Inital Electrolyte Diffusivity (J mol⁻¹)
     Def::Function = ce -> 8.794e-11 * (ce / 1000)^2 - 3.972e-10 *
@@ -18,10 +18,13 @@ Parameters for an LFP cell, from the paper :footcite:t:`Prada2013`
     Vmin::Float64 = 2.0                                                         # Min Cell Voltage
     Ea_κ::Float64 = 0.0 # check
     Ea_De::Float64 = 0 # check
-    CC_A::Float64 = 0.6*0.3                                                     # Electrode Plate Area 
-    κ::Float64 = 0.9487 # check
-    κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
-                         3.329 * (ce / 1000) # check
+    CC_A::Float64 = 0.6*0.3                                                     # Electrode Plate Area (m²)                                           
+    # κ::Float64 = 0.9487 # Electrolyte Conductivity
+    # κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
+    #                      3.329 * (ce / 1000) 
+    κ::Float64 = 0.9487                                                         # Electrolyte Conductivity
+    κf::Function = ce -> (4.1253e-4 + 5.007 * ce/1e6 - 4721.2 * (ce/1e6)^2 +
+                         1.5094e6 * (ce/1e6)^3 - 1.6018e8 * (ce/1e6)^4)*1e3     # Electrolyte Conductivity Function(S/m)
     Uocp::Function = (Electrode, θ) -> if Electrode == "Neg"
         Uocp = @. 1.97938 * 2.7182818284 * exp(-39.3631 * θ) + 0.2482 -
                   0.0909 * tanh(29.8538 * (θ - 0.1234)) -
@@ -60,12 +63,12 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 215                            # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-    θ_100::Float64 = 0.910612                   # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.0263473                    # Theta @ 0% Lithium Concentration CHECK
+    θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration CHECK
+    θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration CHECK
     cs_max::Float64 = 30555                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
-    k_norm::Float64 = 6.716047e-12              # Reaction Rate
-    Ea_κ::Float64 = 35000                       # Activation Energy
+    k_norm::Float64 = 6.716047e-12              # check Reaction Rate
+    Ea_κ::Float64 = 35000                       # check Activation Energy
     RFilm::Float64 = 0                          # Film Resistance - Ωm²
     D1::Float64 = 1.0                           # Init Value
     D1f::Function = De -> De * ϵ_e^De_brug      # Effective Diffusivity
@@ -87,12 +90,12 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 0.33795074                     # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-    θ_100::Float64 = 0.263849                   # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.853974                     # Theta @ 0% Lithium Concentration CHECK
+    θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration CHECK
+    θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration CHECK
     cs_max::Float64 = 22806                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
-    k_norm::Float64 = 3.54458e-11               # Reaction Rate CHECK
-    Ea_κ::Float64 = 17800                       # Activation Energy CHECK
+    k_norm::Float64 = 3.54458e-11               # check Reaction Rate CHECK
+    Ea_κ::Float64 = 17800                       # check Activation Energy CHECK
     RFilm::Float64 = 0                          # Film Resistance - Ωm²
     D3::Float64 = 1                             # Init Value CHECK
     D3f::Function = De -> De * ϵ_e^De_brug      # Effective Diffusivity
