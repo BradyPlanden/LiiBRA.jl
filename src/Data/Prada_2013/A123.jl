@@ -16,26 +16,30 @@ Parameters for an LFP cell, from the paper :footcite:t:`Prada2013`
     SOC::Float64 = 1.0                                                          # Initial State of Charge
     ce0::Float64 = 1200                                                         # Initial Electrolyte Concentration (mol m⁻³)
     Vmin::Float64 = 2.0                                                         # Min Cell Voltage
-    Ea_κ::Float64 = 0.0 # check
+    Ea_κ::Float64 = 0.0 # check 
     Ea_De::Float64 = 0 # check
-    CC_A::Float64 = 0.6*0.3                                                     # Electrode Plate Area 
-    κ::Float64 = 0.9487 # check
-    κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
-                         3.329 * (ce / 1000) # check
+    CC_A::Float64 = 0.6*0.3                                                     # Electrode Plate Area (m²)                                           
+    κ::Float64 = 0.9487                                                         # Electrolyte Conductivity
+    # κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
+    #                      3.329 * (ce / 1000) 
+    κf::Function = ce -> (4.1253e-4 + 5.007 * (ce / 1e6) -
+                          4721.2 * (ce / 1e6)^2 +
+                          1.5094e6 * (ce / 1e6)^3 -
+                          1.6018e8 * (ce / 1e6)^4) * 1e3     # Electrolyte Conductivity Function(S/m)
     Uocp::Function = (Electrode, θ) -> if Electrode == "Neg"
         Uocp = @. 1.97938 * 2.7182818284 * exp(-39.3631 * θ) + 0.2482 -
                   0.0909 * tanh(29.8538 * (θ - 0.1234)) -
                   0.04478 * tanh(14.9159 * (θ - 0.2769)) -
                   0.0205 * tanh(30.4444 * (θ - 0.6103))
     else
-        Uocp = @. 3.4077 - 0.020269 * θ + 0.5 * ℯ^(-150*θ) - 0.9 * ℯ^(-30*(1-θ))
+        Uocp = @. 3.4077 - 0.020269 * θ + 0.5 * exp(-150*θ) - 0.9 * exp(-30*(1-θ))
     end
     ∂Uocp::Function = (Electrode, θ) -> if Electrode == "Neg"
         ∂Uocp = @. -0.62411 * ((sech(18.5802 - 30.4444 * θ))^2 +
                     4.34813 * (sech(3.68396 - 29.8538 * θ))^2 +
                     1.07022 * (sech(4.13021 - 14.9159 * θ))^2) - 211.794 * exp(-39.3631 * θ)
     else
-        ∂Uocp = @. - 0.020269 - 75 * ℯ^(-150 * θ) - 2.52656e-12 * ℯ^(30 * θ)
+        ∂Uocp = @. - 0.020269 - 75 * exp(-150 * θ) - 2.52656e-12 * exp(30 * θ)
     end
     Ce_M::Int64 = 1                             # Over-written
     D1::Float64 = 1.0
@@ -60,13 +64,8 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 215                            # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-<<<<<<< HEAD
     θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration
-=======
-    θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration CHECK
->>>>>>> origin/Prada2013
     cs_max::Float64 = 30555                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
     k_norm::Float64 = 6.716047e-12              # check Reaction Rate
@@ -92,13 +91,8 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 0.33795074                     # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-<<<<<<< HEAD
     θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration
     θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration
-=======
-    θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration CHECK
->>>>>>> origin/Prada2013
     cs_max::Float64 = 22806                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
     k_norm::Float64 = 3.54458e-11               # check Reaction Rate CHECK
