@@ -60,8 +60,8 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 215                            # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-    θ_100::Float64 = 0.910612                   # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.0263473                    # Theta @ 0% Lithium Concentration CHECK
+    θ_100::Float64 = 0.8100363695199028         # Theta @ 100% Lithium Concentration
+    θ_0::Float64 = 0.017619411644243348         # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 30555                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
     k_norm::Float64 = 6.716047e-12              # Reaction Rate
@@ -87,8 +87,8 @@ end
     κ_brug::Float64 = 1.5                       # Bruggeman Electrolyte Conductivity Exponent
     σ::Float64 = 0.33795074                     # Solid Phase Conductivity
     σ_brug::Float64 = 1.5                       # Bruggeman Solid Conductivity Exponent
-    θ_100::Float64 = 0.263849                   # Theta @ 100% Lithium Concentration CHECK
-    θ_0::Float64 = 0.853974                     # Theta @ 0% Lithium Concentration CHECK
+    θ_100::Float64 = 0.003767884398705004       # Theta @ 100% Lithium Concentration
+    θ_0::Float64 = 0.703500714165226            # Theta @ 0% Lithium Concentration
     cs_max::Float64 = 22806                     # Max Electrode Concentration
     α::Float64 = 0.5                            # Alpha Factor
     k_norm::Float64 = 3.54458e-11               # Reaction Rate CHECK
