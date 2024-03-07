@@ -20,13 +20,13 @@ Parameters for an LFP cell, from the paper :footcite:t:`Prada2013`
     Ea_De::Float64 = 0 # check
     CC_A::Float64 = 0.6*0.3                                                     # Electrode Plate Area (m²)                                           
     # κ::Float64 = 0.9487 # Electrolyte Conductivity
-    # κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
-    #                      3.329 * (ce / 1000) 
+    κf::Function = ce -> 0.1297 * (ce / 1000)^3 - 2.51 * (ce / 1000)^1.5 +
+                         3.329 * (ce / 1000) 
     κ::Float64 = 0.9487                                                         # Electrolyte Conductivity
-    κf::Function = ce -> (4.1253e-4 + 5.007 * (ce / 1e6) -
-                          4721.2 * (ce / 1e6)^2 +
-                          1.5094e6 * (ce / 1e6)^3 -
-                          1.6018e8 * (ce / 1e6)^4) * 1e3     # Electrolyte Conductivity Function(S/m)
+    # κf::Function = ce -> (4.1253e-4 + 5.007 * (ce / 1e6) -
+    #                       4721.2 * (ce / 1e6)^2 +
+    #                       1.5094e6 * (ce / 1e6)^3 -
+    #                       1.6018e8 * (ce / 1e6)^4) * 1e3     # Electrolyte Conductivity Function(S/m)
     Uocp::Function = (Electrode, θ) -> if Electrode == "Neg"
         Uocp = @. 1.97938 * 2.7182818284 * exp(-39.3631 * θ) + 0.2482 -
                   0.0909 * tanh(29.8538 * (θ - 0.1234)) -
