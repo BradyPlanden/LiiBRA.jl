@@ -2,10 +2,10 @@ module LiiBRA
 
 using UnitSystems, Parameters, LinearAlgebra, FFTW
 using TSVD, Roots, Statistics, Interpolations, JLD2
-export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
-export flatten_, R, F, Simulate, D_Linear, Construct
-export tuple_len, interp, Spatial!, Realise, HPPC, fh!
-export mag!, findnearest, CC, WLTP
+# export C_e, Flux, C_se, Phi_s, Phi_e, Phi_se, CIDRA
+# export flatten_, R, F, Simulate, D_Linear, Construct
+# export tuple_len, interp, Spatial!, Realise, HPPC, fh!
+# export mag!, findnearest, CC, WLTP
 
 include("Functions/C_e.jl")
 include("Functions/C_se.jl")
@@ -84,7 +84,9 @@ function HPPC(Cell, Ŝ::Array, SOC::Float64, λ::Float64, ϕ::Float64, A::Tuple
     Input = [zero(i); ones(10 * i) * λ; zeros(40 * i); ones(10 * i) * ϕ; zeros(40 * i)]
     Tk = ones(size(Input)) * Cell.Const.T #Cell Temperature
     t = 0:(1.0 / i):((length(Input) - 1) / i)
-
+    println(typeof(A))
+    println(typeof(SOC))
+    println(typeof(Ŝ))
     # Simulate Model
     return Simulate(Cell, Input, "Current", Tk, Ŝ, SOC, A, B, C, D, t)
 end
@@ -151,6 +153,9 @@ function Construct(CellType::String)
     elseif CellType == "LG M50"
         CellType = string("LG_M50.jl")
         return include(joinpath(dirname(pathof(LiiBRA)), "Data/Chen_2020", CellType))
+    elseif CellType == "A123"
+        CellType = string("A123.jl")
+        return include(joinpath(dirname(pathof(LiiBRA)), "Data/Prada_2013", CellType))
     end
 end
 
@@ -334,6 +339,13 @@ function D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_e
         D = [D; Dt]
     end
     return D
+end
+# automatically export all functions and types
+# export all
+for n in names(@__MODULE__; all=true)
+    if Base.isidentifier(n) && n ∉ (Symbol(@__MODULE__), :eval, :include)
+        @eval export $n
+    end
 end
 
 end # module

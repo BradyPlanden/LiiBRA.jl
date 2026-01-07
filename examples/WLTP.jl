@@ -1,3 +1,4 @@
+cd(@__DIR__)
 using LiiBRA, MAT, Plots
 plotly()
 default(show = true)
@@ -6,10 +7,11 @@ default(show = true)
 Sₑ = 4 # Spatial points in electrolyte
 Sₛ = 4 # Spatial point in solid
 Cell = Construct("LG M50")
+# Cell = Construct("A123")
 Spatial!(Cell, Sₑ, Sₛ)
 Ŝ = collect(1.0:-1:0.0)
 SOC = 0.717
-WLTP_File = matopen("examples/WLTP/WLTP_M50_M3.mat")
+WLTP_File = matopen("../examples/WLTP/WLTP_M50_M3.mat")
 WLTP_P = read(WLTP_File, "P_Models")
 
 #---------- Generate & Simulate Model -----------------#

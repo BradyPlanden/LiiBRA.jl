@@ -135,6 +135,8 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         Results.θₚ[i + 1] = cs_pos_avg / Cell.Pos.cs_max
         Results.Cell_SOC[i + 1] = (Results.θₙ[i + 1] - Cell.Neg.θ_0) /
                                   (Cell.Neg.θ_100 - Cell.Neg.θ_0)
+        Results.Cell_SOC[Results.Cell_SOC .> 1.0] .= 1.0  # Ensure SOC is within bounds   
+        Results.Cell_SOC[Results.Cell_SOC .< 0.0] .= 0.0  # Ensure SOC is within bounds
 
         javg_neg = Results.Iapp[i + 1] / (Cell.Neg.as * F * Cell.Neg.L * Cell.Const.CC_A)
         javg_pos = Results.Iapp[i + 1] / (Cell.Pos.as * F * Cell.Pos.L * Cell.Const.CC_A)
@@ -168,30 +170,47 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         ν_pos = @. Cell.Pos.L * sqrt((Cell.Pos.as * (1 / κ_eff_Pos + 1 / σ_eff_Pos)) /
                         Results.Rₜᵖ[i + 1])
 
-        # Relinearise dependent on ν, σ, κ
-        D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos,
-            κ_eff_Sep)
-
+        # # Relinearise dependent on ν, σ, κ
+        # D = D_Linear(Cell, ν_neg, ν_pos, σ_eff_Neg, κ_eff_Neg, σ_eff_Pos, κ_eff_Pos,
+        #     κ_eff_Sep)
+        
         # Interpolate C & D Matrices
         C = interp(C₀, SList, Results.Cell_SOC[i + 1])
-        # D = interp(D₀,SList,Results.Cell_SOC[i+1])
-
+        D = interp(D₀,SList,Results.Cell_SOC[i+1])
+        # println("C: ", C)
+        # println("D: ", D)
+        
         # SS Output
         Results.y[i + 1, :] = C * Results.x[i + 1, :] + D * Results.Iapp[i + 1]
 
         # Concentrations & Force electrode concentration maximum
-        Results.Cseₙ[i + 1, :] = (SOCₙ .* Cell.Neg.cs_max .+
-                                  Results.y[i + 1, CseNegInd]) >
-                                 ones(size(Results.Cseₙ, 2)) * Cell.Neg.cs_max ?
-                                 ones(size(Results.Cseₙ, 2)) * Cell.Neg.cs_max :
-                                 (SOCₙ .* Cell.Neg.cs_max .+
-                                  Results.y[i + 1, CseNegInd])
-        Results.Cseₚ[i + 1, :] = (SOCₚ .* Cell.Pos.cs_max .+
-                                  Results.y[i + 1, CsePosInd]) >
-                                 ones(size(Results.Cseₚ, 2)) * Cell.Pos.cs_max ?
-                                 ones(size(Results.Cseₚ, 2)) * Cell.Pos.cs_max :
-                                 (SOCₚ .* Cell.Pos.cs_max .+
-                                  Results.y[i + 1, CsePosInd])
+
+        # Results.Cseₙ[i + 1, :] = any((SOCₙ .* Cell.Neg.cs_max .+
+        #                           Results.y[i + 1, CseNegInd]) .> Cell.Neg.cs_max) ?
+        #                          ones(size(Results.Cseₙ, 2)) * Cell.Neg.cs_max :
+        #                          (SOCₙ .* Cell.Neg.cs_max .+
+        #                           Results.y[i + 1, CseNegInd])
+        # Define the concentration of the negative electrode
+        Results.Cseₙ[i + 1, :] = SOCₙ .* Cell.Neg.cs_max .+ Results.y[i + 1, CseNegInd]
+        # Check if any of the concentrations is greater than the maximum concentration
+        any(Results.Cseₙ[i + 1, :] .> Cell.Neg.cs_max) ?
+             Results.Cseₙ[i+1, Results.Cseₙ[i + 1, :] .> Cell.Neg.cs_max] .= Cell.Neg.cs_max :
+             nothing
+
+        # Results.Cseₚ[i + 1, :] = (SOCₚ .* Cell.Pos.cs_max .+
+        #                           Results.y[i + 1, CsePosInd]) >
+        #                          ones(size(Results.Cseₚ, 2)) * Cell.Pos.cs_max ?
+        #                          ones(size(Results.Cseₚ, 2)) * Cell.Pos.cs_max :
+        #                          (SOCₚ .* Cell.Pos.cs_max .+
+        #                           Results.y[i + 1, CsePosInd])
+        Results.Cseₚ[i + 1, :] = SOCₚ .* Cell.Pos.cs_max .+ Results.y[i + 1, CsePosInd]
+        any(Results.Cseₚ[i + 1, :] .> Cell.Pos.cs_max) ?
+             Results.Cseₚ[i+1, Results.Cseₚ[i + 1, :] .> Cell.Pos.cs_max] .= Cell.Pos.cs_max :
+             nothing
+        any(Results.Cseₚ[i + 1, :] .< 1.0) ?
+             Results.Cseₚ[i+1, Results.Cseₚ[i + 1, :] .< 1.0] .= 1.0 :
+             nothing
+
         Results.Ce[i + 1, :] = @. Cell.Const.ce0 + Results.y[i + 1, CeInd]
 
         # Potentials
@@ -217,9 +236,18 @@ function Simulate(Cell, Input, Def, Tk, SList, SOC, A₀, B₀, C₀, D₀, t)
         Results.jL[i + 1] = Results.y[i + 1, FluxPosInd[1]]
 
         # Neg
+        # check if any of the concentrations is negative
+        if any(Results.Cseₙ[i + 1, :] .< 0.0) || Results.Ce[i + 1, 1] .< 0.0 || any((Cell.Neg.cs_max .- Results.Cseₙ[i + 1, :]) .< 0.0)
+            println("Negative Concentration in Negative Electrode")
+            println("Time is: ", i)
+            println("Results.Cseₙ: ", Results.Cseₙ[i+1,:])
+            println("Results.Ce: ", Results.Ce[i+1,1])
+            println("Cell.Neg.cs_max - Results.Cseₙ: ", (Cell.Neg.cs_max .- Results.Cseₙ[i + 1, :]))
+            break
+        end
+        
         j₀ⁿ = findmax([ones(size(Results.Cseₙ, 2)) * eps() (kₙ .*
-                                                            (Results.Cseₙ[i + 1,
-                :] .^
+                                                            (Results.Cseₙ[i + 1,:] .^
                                                              Cell.Neg.α) .*
                                                             (Results.Ce[i + 1, 1] .^
                                                              (1 - Cell.Neg.α))) .*
